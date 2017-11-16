@@ -41,3 +41,15 @@ CREATE TABLE mystreet2.sample_projects (
 
 ALTER TABLE mystreet2.sample_projects ADD COLUMN id SERIAL PRIMARY KEY;
 
+-- View: api.mystreet2_sample ---------------------------------
+-- DROP VIEW api.mystreet2_sample;
+
+CREATE OR REPLACE VIEW api.mystreet2_sample AS
+ SELECT *
+   FROM mystreet2.sample_projects
+  ORDER BY sample_projects.id;
+
+ALTER TABLE api.mystreet2_sample
+  OWNER TO postgres;
+GRANT ALL ON TABLE api.mystreet2_sample TO postgres;
+GRANT SELECT ON TABLE api.mystreet2_sample TO anon;

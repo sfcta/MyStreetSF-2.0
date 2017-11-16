@@ -1,0 +1,24 @@
+# --- Setup
+title:            MyStreet 2
+tagline:          '(c) 2018 SFCTA'
+description:      'Project explorer'
+url:              'http://mystreet.sfcta.org'
+baseurl:          /
+version:          0.0.1
+
+author:
+  name:           'SFCTA Staff'
+  url:            http://www.sfcta.org
+
+# --- Permalinks
+permalink:        pretty
+relative_permalinks: false
+
+github:
+  repo:           https://github.com/sfcta/mystreet2
+
+# --- Build settings
+source: src
+destination: build
+exclude: ['node_modules']
+plugins: []

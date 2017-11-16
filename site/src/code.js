@@ -15,129 +15,32 @@ let mymap = maplib.sfmap;
 mymap.setView([37.768890, -122.440997], 13);
 
 // some important global variables.
-const API_SERVER = 'https://api.sfcta.org/api/';
+const API_SERVER = 'http://api/api/';
 const GEO_VIEW = 'mystreet2_sample';
-const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
-const VIZ_INFO = {
-  'ALOS':{  'TXT': 'Auto Level-of-Service (LOS)',
-            'VIEW': 'cmp_autotransit',
-            'METRIC': 'los_hcm85',
-            'METRIC_DESC': 'Level-of-Service HCM 1985',
-            'COLOR_BY_BINS': false,
-            'COLORVALS': ['A', 'B', 'C', 'D', 'E', 'F'],
-            'COLORS': ['#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
-            'CHARTINFO': 'AUTO SPEED TREND (MPH):',
-            'CHART_PREC': 1,
-  },
-
-  'TSPD':{  'TXT': 'Transit Speed',
-            'VIEW': 'cmp_autotransit',
-            'METRIC': 'transit_speed',
-            'METRIC_DESC': 'Transit Speed (mph)',
-            'COLOR_BY_BINS': true,
-            'COLORVALS': [0, 5, 7.5, 10, 12.5, 15],
-            'COLORS': ['#ccc', '#c00', '#f60', '#f90', '#ff3', '#9f0', '#060'],
-            'CHARTINFO': 'TRANSIT SPEED TREND (MPH):',
-            'CHART_PREC': 1,
-  },
-
-  'TRLB':{  'TXT': 'Transit Reliability',
-            'VIEW': 'cmp_autotransit',
-            'METRIC': 'transit_cv',
-            'METRIC_DESC': 'Transit Speed Coeff. Variation',
-            'COLOR_BY_BINS': true,
-            'COLORVALS': [0, .05, .1, .2, .3, .4],
-            'COLORS': ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
-            'CHARTINFO': 'TRANSIT RELIABILITY TREND (CV):',
-            'CHART_PREC': 2,
-  },
-
-  'ATRAT':{ 'TXT': 'Auto-Transit Speed Ratio',
-            'VIEW': 'cmp_autotransit',
-            'METRIC': 'atspd_ratio',
-            'METRIC_DESC': 'Auto-to-Transit Speed Ratio',
-            'COLOR_BY_BINS': true,
-            'COLORVALS': [0, 1, 1.5, 2, 2.5, 3],
-            'COLORS': ['#ccc', '#060', '#9f0', '#ff3', '#f90', '#f60', '#c00'],
-            'CHARTINFO': 'AUTO-to-TRASIT SPEED RATIO TREND:',
-            'CHART_PREC': 1,
-  },
-
-};
 const MISSING_COLOR = '#ccc';
 
-let init_selectedViz = 'ALOS';
-let data_view = VIZ_INFO[init_selectedViz]['VIEW'];
-let selviz_metric = VIZ_INFO[init_selectedViz]['METRIC'];
-let selPeriod = 'AM';
-let aggdata_view = 'cmp_aggregate';
+const VIZ_LIST = {};
+const VIZ_INFO = {};
+let data_view;
+let selPeriod, selviz_metric;
 let selGeoId;
 
 let geoLayer, mapLegend;
-let selMetricData;
 let yearData = {};
 let longDataCache = {};
 let popHoverSegment, popSelSegment;
 let selectedSegment, prevselectedSegment;
 
 function queryServer() {
-  let url = API_SERVER + data_view + '?';
-  let params = 'year=eq.'+app.sliderValue +
-               '&period=eq.'+selPeriod +
-               '&select=cmp_segid,' + selviz_metric;
-  let data_url = url + params;
-
   const geo_url = API_SERVER + GEO_VIEW;
-    //   + '?' + 'select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
 
-  selMetricData = {};
-  // Fetch segments
   fetch(geo_url)
     .then((resp) => resp.json())
     .then(function(jsonData) {
       mapSegments(jsonData);
     }).catch(function(error) {
       console.log("map error: "+error);
-    });
-  // Fetch aggregate longitudinal cmp data
-  /*
-  if(!longDataCache[app.selectedViz]) {
-    longDataCache[app.selectedViz] = {};
-    fetch(API_SERVER + aggdata_view + '?viz=eq.' + app.selectedViz +
-                                    '&select=fac_typ,period,year,metric')
-    .then((resp) => resp.json()).then(function(jsonData) {
-      let byYearAM = {};
-      let byYearPM = {};
-      for (let entry of jsonData) {
-        let val = Number(entry.metric).toFixed(VIZ_INFO[app.selectedViz]['CHART_PREC']);
-        if (val === 'NaN') continue;
-        if (entry.period=='AM'){
-          if (!byYearAM[entry.year]) byYearAM[entry.year] = {};
-          byYearAM[entry.year][entry.fac_typ] = val;
-        } else {
-          if (!byYearPM[entry.year]) byYearPM[entry.year] = {};
-          byYearPM[entry.year][entry.fac_typ] = val;
-        }
-      }
-      let data = [];
-      for (let year in byYearAM) {
-        data.push({year:year, art: byYearAM[year]['Arterial'], fwy: byYearAM[year]['Freeway']});
-      }
-      longDataCache[app.selectedViz]['AM'] = data;
-      data = [];
-      for (let year in byYearPM) {
-        data.push({year:year, art: byYearPM[year]['Arterial'], fwy: byYearPM[year]['Freeway']});
-      }
-      longDataCache[app.selectedViz]['PM'] = data;
-    })
-    .then(function(){
-      buildChartHtmlFromCmpData();
-    }).catch(function(error) {
-      console.log("longdata fetch error: "+error);
-    });
-  } else buildChartHtmlFromCmpData();
-  document.getElementById("chartinfo").innerHTML = "<h5>" + VIZ_INFO[app.selectedViz]['CHARTINFO'] + "</h5>";
-  */
+  });
 }
 
 function mapSegments(cmpsegJson) {
@@ -147,33 +50,33 @@ function mapSegments(cmpsegJson) {
   if (popSelSegment) popSelSegment.remove();
 
   // add segments to the map by using metric data to color
-  // TODO: figure out why PostGIS geojson isn't in exactly the right format.
   for (let segment of cmpsegJson) {
 
-    let kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Placemark>' +
-               segment['geometry'] +
-               '</Placemark></kml>';
-    console.log(kml);
+    let kml = '<kml xmlns="http://www.opengis.net/kml/2.2"><Placemark>'
+               + segment['geometry']
+               + '</Placemark></kml>';
+
     //update segment json with metric data (to be used to assign color)
     //segment["metric"] = selMetricData[segment.cmp_segid]
 
     if (segment['geometry'] == null) continue;
 
     geoLayer = L.geoJSON(null, {
-      //style: styleByMetricColor,
+      style: styleByMetricColor(segment['icon_name']),
       onEachFeature: function(feature, layer) {
         layer.on({ mouseover: highlightFeature,
                    mouseout: resetHighlight,
                    click : clickedOnFeature,
         });
       },
+      pointToLayer: function(feature,latlng) {  // this turns 'points' into circles
+        return L.circleMarker(latlng, {});
+      },
     });
 
-    var zz = omnivore.kml.parse(kml, null, geoLayer);
-    zz.addTo(mymap);
-    console.log(zz);
-
+    omnivore.kml.parse(kml, null, geoLayer).addTo(mymap);
   }
+
 /*
   mapLegend = L.control({position: 'bottomright'});
   mapLegend.onAdd = function (map) {
@@ -188,18 +91,37 @@ function mapSegments(cmpsegJson) {
 */
 }
 
-function styleByMetricColor(segment) {
-  let cmp_id = segment['cmp_segid'];
-  let color = getColorFromVal(segment['metric'],
-                              VIZ_INFO[app.selectedViz]['COLORVALS'],
-                              VIZ_INFO[app.selectedViz]['COLORS'],
-                              VIZ_INFO[app.selectedViz]['COLOR_BY_BINS']);
-  if (!color) color = MISSING_COLOR;
-  return {color: color, weight: 4, opacity: 1.0};
+function styleByMetricColor(icon_name) {
+  let xcolor = generateColorFromDb(icon_name);
+  return {color: xcolor, weight: 4, opacity: 1.0, radius: 3};
 }
+
+function generateColorFromDb(icon_name) {
+  let defaultColor = '#44c';
+
+  // no color? use blue.
+  if (!icon_name) return defaultColor;
+
+  // color code in db? use it.
+  if (icon_name.startsWith('#')) return icon_name;
+
+  // icon name in db? convert to a color code.
+  switch (icon_name) {
+    case 'small_blue': return '#44f';
+    case 'small_green': return '#4f4';
+    case 'small_purple': return '#63c';
+    case 'small_red': return '#f44';
+    case 'small_yellow': return '#dd3';
+    case 'measle_turquoise': return '#369';
+    default: return defaultColor;
+  }
+  return defaultColor;
+}
+
 function highlightFeature(e) {
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
+
   if(highlightedGeo.feature.cmp_segid != selGeoId){
     highlightedGeo.setStyle(styles.selected);
     let geo = e.target.feature;
@@ -211,11 +133,15 @@ function highlightFeature(e) {
                     .openOn(mymap);
   }
 }
+
 function resetHighlight(e) {
   popHoverSegment.remove();
   if (e.target.feature.cmp_segid != selGeoId) geoLayer.resetStyle(e.target);
 }
+
 function clickedOnFeature(e) {
+  console.log(e.target);
+
   e.target.setStyle(styles.popup);
 
   let geo = e.target.feature;
@@ -454,6 +380,5 @@ let helpPanel = new Vue({
   }}
 );
 
-// this to get the year list directly from the database
-// so if database view get updated with new data, the slider data will reflect it too
+// ready to go!
 queryServer();

@@ -128,6 +128,49 @@ function resetHighlight(e) {
   geoLayer.resetStyle(e.target);
 }
 
+
+function showPopup(id, latlng) {
+    let prj = _cache[id];
+
+    let district = '';
+    if (prj['district1']) district += '1, ';
+    if (prj['district2']) district += '2, ';
+    if (prj['district3']) district += '3, ';
+    if (prj['district4']) district += '4, ';
+    if (prj['district5']) district += '5, ';
+    if (prj['district6']) district += '6, ';
+    if (prj['district7']) district += '7, ';
+    if (prj['district8']) district += '8, ';
+    if (prj['district9']) district += '9, ';
+    if (prj['district10']) district += '10, ';
+    if (prj['district11']) district += '11, ';
+    if (district) {
+      district = 'District ' + district.slice(0,-2);
+    } else {
+      district = 'Citywide';
+    }
+
+    let cost = prj['project_cost_estimate'].trim();
+    if (cost.endsWith('.00')) cost = cost.slice(0,-3);
+
+    let details = prj['project_details_page'];
+    if (details) details = '<br/><a target="_blank" href="' + details + '">&raquo; Go to Project Page</a>';
+
+    let popupText = '<b>' + prj['project_name'] + '</b><hr/>'
+                    + prj['new_project_type'] + '<br/>'
+                    + district + '<br/>'
+                    + cost + '<hr/>'
+                    + prj['description'] + '<br/>'
+                    + details
+                    + '<hr/>'
+
+    popHoverSegment = L.popup()
+                    .setLatLng(latlng)
+                    .setContent(popupText)
+                    .openOn(mymap);
+}
+
+
 function clickedOnFeature(e) {
   console.log(e);
   let id = e.target.options.id;
@@ -146,9 +189,12 @@ function clickedOnFeature(e) {
     _selectedProject = e.target;
   }
 
+  showPopup(id, e.latlng);
+  /*
   let tmptxt = geo.cmp_name+" "+geo.direction+"-bound";
   document.getElementById("geoinfo").innerHTML = "<h5>" + tmptxt + " [" +
                                     geo.cmp_from + " to " + geo.cmp_to + "]</h5>";
+  */
 
 }
 

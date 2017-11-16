@@ -16,7 +16,7 @@ mymap.setView([37.768890, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'cmp_segments_master';
+const GEO_VIEW = 'mystreet2_sample';
 const VIZ_LIST = ['ALOS', 'TSPD', 'TRLB', 'ATRAT'];
 const VIZ_INFO = {
   'ALOS':{  'TXT': 'Auto Level-of-Service (LOS)',
@@ -29,7 +29,7 @@ const VIZ_INFO = {
             'CHARTINFO': 'AUTO SPEED TREND (MPH):',
             'CHART_PREC': 1,
   },
-  
+
   'TSPD':{  'TXT': 'Transit Speed',
             'VIEW': 'cmp_autotransit',
             'METRIC': 'transit_speed',
@@ -40,7 +40,7 @@ const VIZ_INFO = {
             'CHARTINFO': 'TRANSIT SPEED TREND (MPH):',
             'CHART_PREC': 1,
   },
-  
+
   'TRLB':{  'TXT': 'Transit Reliability',
             'VIEW': 'cmp_autotransit',
             'METRIC': 'transit_cv',
@@ -51,7 +51,7 @@ const VIZ_INFO = {
             'CHARTINFO': 'TRANSIT RELIABILITY TREND (CV):',
             'CHART_PREC': 2,
   },
-  
+
   'ATRAT':{ 'TXT': 'Auto-Transit Speed Ratio',
             'VIEW': 'cmp_autotransit',
             'METRIC': 'atspd_ratio',
@@ -62,7 +62,7 @@ const VIZ_INFO = {
             'CHARTINFO': 'AUTO-to-TRASIT SPEED RATIO TREND:',
             'CHART_PREC': 1,
   },
-  
+
 };
 const MISSING_COLOR = '#ccc';
 
@@ -86,18 +86,11 @@ function queryServer() {
                '&period=eq.'+selPeriod +
                '&select=cmp_segid,' + selviz_metric;
   let data_url = url + params;
-  
-  const geo_url = API_SERVER + GEO_VIEW + '?' + 'select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
-  
+
+  const geo_url = API_SERVER + GEO_VIEW;
+    //   + '?' + 'select=geometry,cmp_segid,cmp_name,cmp_from,cmp_to,direction,length';
+
   selMetricData = {};
-  // Fetch map data
-  fetch(data_url).then((resp) => resp.json()).then(function(mapdata) {
-      for (let seg in mapdata) {
-        selMetricData[mapdata[seg]['cmp_segid']] = mapdata[seg][selviz_metric];
-      }
-    }).catch(function(error) {
-      console.log("mapdata fetch error: "+error);
-    });
   // Fetch segments
   fetch(geo_url)
     .then((resp) => resp.json())
@@ -107,9 +100,10 @@ function queryServer() {
       console.log("map error: "+error);
     });
   // Fetch aggregate longitudinal cmp data
+  /*
   if(!longDataCache[app.selectedViz]) {
     longDataCache[app.selectedViz] = {};
-    fetch(API_SERVER + aggdata_view + '?viz=eq.' + app.selectedViz + 
+    fetch(API_SERVER + aggdata_view + '?viz=eq.' + app.selectedViz +
                                     '&select=fac_typ,period,year,metric')
     .then((resp) => resp.json()).then(function(jsonData) {
       let byYearAM = {};
@@ -119,11 +113,11 @@ function queryServer() {
         if (val === 'NaN') continue;
         if (entry.period=='AM'){
           if (!byYearAM[entry.year]) byYearAM[entry.year] = {};
-          byYearAM[entry.year][entry.fac_typ] = val; 
+          byYearAM[entry.year][entry.fac_typ] = val;
         } else {
           if (!byYearPM[entry.year]) byYearPM[entry.year] = {};
-          byYearPM[entry.year][entry.fac_typ] = val; 
-        }  
+          byYearPM[entry.year][entry.fac_typ] = val;
+        }
       }
       let data = [];
       for (let year in byYearAM) {
@@ -143,44 +137,55 @@ function queryServer() {
     });
   } else buildChartHtmlFromCmpData();
   document.getElementById("chartinfo").innerHTML = "<h5>" + VIZ_INFO[app.selectedViz]['CHARTINFO'] + "</h5>";
+  */
 }
 
 function mapSegments(cmpsegJson) {
 
-  // add segments to the map by using metric data to color
-  // TODO: figure out why PostGIS geojson isn't in exactly the right format.
-  for (let segment of cmpsegJson) {
-    segment["type"] = "Feature";
-    segment["geometry"] = JSON.parse(segment.geometry);
-    //update segment json with metric data (to be used to assign color)
-    segment["metric"] = selMetricData[segment.cmp_segid]
-  }
-
   if (geoLayer) mymap.removeLayer(geoLayer);
   if (mapLegend) mymap.removeControl(mapLegend);
   if (popSelSegment) popSelSegment.remove();
-  
-  geoLayer = L.geoJSON(cmpsegJson, {
-    style: styleByMetricColor,
-    onEachFeature: function(feature, layer) {
-      layer.on({ mouseover: highlightFeature,
-                 mouseout: resetHighlight,
-                 click : clickedOnFeature,
-      });
-    },
-  });
-  geoLayer.addTo(mymap);
-  
+
+  // add segments to the map by using metric data to color
+  // TODO: figure out why PostGIS geojson isn't in exactly the right format.
+  for (let segment of cmpsegJson) {
+
+    let kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Placemark>' +
+               segment['geometry'] +
+               '</Placemark></kml>';
+    console.log(kml);
+    //update segment json with metric data (to be used to assign color)
+    //segment["metric"] = selMetricData[segment.cmp_segid]
+
+    if (segment['geometry'] == null) continue;
+
+    geoLayer = L.geoJSON(null, {
+      //style: styleByMetricColor,
+      onEachFeature: function(feature, layer) {
+        layer.on({ mouseover: highlightFeature,
+                   mouseout: resetHighlight,
+                   click : clickedOnFeature,
+        });
+      },
+    });
+
+    var zz = omnivore.kml.parse(kml, null, geoLayer);
+    zz.addTo(mymap);
+    console.log(zz);
+
+  }
+/*
   mapLegend = L.control({position: 'bottomright'});
   mapLegend.onAdd = function (map) {
     let div = L.DomUtil.create('div', 'info legend')
-    div.innerHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' + 
-                    getLegHTML(VIZ_INFO[app.selectedViz]['COLORVALS'], 
+    div.innerHTML = '<h4>' + VIZ_INFO[app.selectedViz]['METRIC_DESC'] + '</h4>' +
+                    getLegHTML(VIZ_INFO[app.selectedViz]['COLORVALS'],
                     VIZ_INFO[app.selectedViz]['COLORS'],
                     VIZ_INFO[app.selectedViz]['COLOR_BY_BINS']);
     return div;
   };
   mapLegend.addTo(mymap);
+*/
 }
 
 function styleByMetricColor(segment) {
@@ -212,7 +217,7 @@ function resetHighlight(e) {
 }
 function clickedOnFeature(e) {
   e.target.setStyle(styles.popup);
-  
+
   let geo = e.target.feature;
   selGeoId = geo.cmp_segid;
   if(selectedSegment){
@@ -220,15 +225,15 @@ function clickedOnFeature(e) {
       prevselectedSegment = selectedSegment;
       geoLayer.resetStyle(prevselectedSegment);
       selectedSegment = e.target;
-    }  
+    }
   } else {
     selectedSegment = e.target;
   }
-  
+
   let tmptxt = geo.cmp_name+" "+geo.direction+"-bound";
-  document.getElementById("geoinfo").innerHTML = "<h5>" + tmptxt + " [" + 
+  document.getElementById("geoinfo").innerHTML = "<h5>" + tmptxt + " [" +
                                     geo.cmp_from + " to " + geo.cmp_to + "]</h5>";
-  
+
   // fetch longitudinal data for selected cmp segment
   let url = API_SERVER + data_view + '?';
   let metric_col = selviz_metric;
@@ -237,9 +242,9 @@ function clickedOnFeature(e) {
                '&select=period,year,' + metric_col;
   let data_url = url + params;
   fetch(data_url).then((resp) => resp.json()).then(function(jsonData) {
-    
+
     let popupText = "<b>"+geo.cmp_name+" "+geo.direction+"-bound</b><br/>" +
-                  geo.cmp_from + " to " + geo.cmp_to; 
+                  geo.cmp_from + " to " + geo.cmp_to;
     popSelSegment = L.popup()
                   .setLatLng(e.latlng)
                   .setContent(popupText)
@@ -249,9 +254,9 @@ function clickedOnFeature(e) {
     document.getElementById("geoinfo").innerHTML = "<h5>All Segments Combined</h5>";
     prevselectedSegment = selectedSegment = selGeoId = null;
     buildChartHtmlFromCmpData();
-    }); 
-    
-    buildChartHtmlFromCmpData(jsonData);   
+    });
+
+    buildChartHtmlFromCmpData(jsonData);
   }).catch(function(error) {
       console.log("longitudinal data err: "+error);
   });
@@ -259,7 +264,7 @@ function clickedOnFeature(e) {
 
 function buildChartHtmlFromCmpData(json=null) {
   document.getElementById("longchart").innerHTML = "";
-  
+
   if(json) {
     let byYear = {};
     let data = [];
@@ -292,7 +297,7 @@ function buildChartHtmlFromCmpData(json=null) {
       xLabels: "year",
       xLabelAngle: 45,
     });
-    
+
   } else {
     new Morris.Line({
       // ID of the element in which to draw the chart.
@@ -311,7 +316,7 @@ function buildChartHtmlFromCmpData(json=null) {
       xLabels: "year",
       xLabelAngle: 45,
     });
-  } 
+  }
 }
 
 function pickAM(thing) {
@@ -345,7 +350,7 @@ function updateSliderData() {
   fetch(API_SERVER + data_view + '?select=year')
   .then((resp) => resp.json()).then(function(jsonData) {
     for (let entry of jsonData) {
-      if (!yearlist.includes(entry.year)) yearlist.push(entry.year); 
+      if (!yearlist.includes(entry.year)) yearlist.push(entry.year);
     }
     yearlist = yearlist.sort();
     app.timeSlider.data = yearlist;
@@ -451,5 +456,4 @@ let helpPanel = new Vue({
 
 // this to get the year list directly from the database
 // so if database view get updated with new data, the slider data will reflect it too
-updateSliderData();
-
+queryServer();

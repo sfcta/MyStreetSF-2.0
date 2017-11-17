@@ -76,7 +76,7 @@ function mapSegments(cmpsegJson) {
 
 function styleByMetricColor(icon_name) {
   let xcolor = generateColorFromDb(icon_name);
-  return {color: xcolor, weight: 4, opacity: 1.0, radius: 4};
+  return {color: xcolor, weight: 4, fillOpacity:0.4, opacity: 1.0, radius: icon_name.startsWith('measle')? 8:4};
 }
 
 function generateColorFromDb(icon_name) {
@@ -169,6 +169,8 @@ function showPopup(id, latlng) {
 function clickedOnFeature(e) {
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
+  console.log(e);
+
   let id = e.target.options.id;
   if (!id) id = e.layer.options.id;
 
@@ -181,8 +183,14 @@ function clickedOnFeature(e) {
 
   // Add highlight to current selection
   _selectedStyle = e.target.options.style;
-  if (!_selectedStyle) _selectedStyle = e.layer.options.style;
-  if (!_selectedStyle) _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
+  try {
+    if (!_selectedStyle) _selectedStyle = e.layer.options.style;
+    if (!_selectedStyle) _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
+  } catch(err) {
+    // hmm
+    let z = e.target.options;
+    _selectedStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight};
+  }
 
   _selectedProject = e.target;
 

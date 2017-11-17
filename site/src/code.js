@@ -21,7 +21,7 @@ const MISSING_COLOR = '#ccc';
 
 let _cache = {};
 let _layers = {};
-let _selectedProject;
+let _selectedProject, _selectedStyle;
 let _prevselectedSegment;
 
 function queryServer() {
@@ -147,8 +147,8 @@ function showPopup(id, latlng) {
       district = 'Citywide';
     }
 
-    let cost = prj['project_cost_estimate'].trim();
-    if (cost.endsWith('.00')) cost = cost.slice(0,-3);
+    let cost = prj['project_cost_estimate']
+    if (cost && cost.trim().endsWith('.00')) cost = cost.trim().slice(0,-3);
 
     let details = prj['project_details_page'];
     if (details) details = '<br/><a target="_blank" href="' + details + '">&raquo; Go to Project Page</a>';
@@ -161,34 +161,32 @@ function showPopup(id, latlng) {
                     + details
                     + '<hr/>'
 
-//    popHoverSegment = L.popup()
-    L.popup()
-                    .setLatLng(latlng)
-                    .setContent(popupText)
-                    .openOn(mymap);
+    L.popup().setLatLng(latlng)
+             .setContent(popupText)
+             .openOn(mymap);
 }
 
 function clickedOnFeature(e) {
   // For some reason, Leaflet handles points and polygons
-  // ifferently, hence the weirdness for fetching the id of the selected feature.
+  // differently, hence the weirdness for fetching the id of the selected feature.
   let id = e.target.options.id;
   if (!id) id = e.layer.options.id;
 
   console.log(id);
 
-  e.target.setStyle(styles.popup);
-
-  //let geo = e.target.feature;
-
+  // Remove highlight from previous selection
   if (_selectedProject) {
-//    if(selectedSegment.feature.cmp_segid != geo.cmp_segid){
-      _prevselectedSegment = _selectedProject;
-      _layers[id].resetStyle(_prevselectedSegment);
-      _selectedProject = e.target;
-  } else {
-    _selectedProject = e.target;
+    _selectedProject.setStyle(_selectedStyle);
   }
 
+  // Add highlight to current selection
+  _selectedStyle = e.target.options.style;
+  if (!_selectedStyle) _selectedStyle = e.layer.options.style;
+  if (!_selectedStyle) _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
+
+  _selectedProject = e.target;
+
+  e.target.setStyle(styles.popup);
   showPopup(id, e.latlng);
 }
 

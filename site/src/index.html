@@ -7,7 +7,61 @@ css:
   - '/assets/css/standalone.css'
 ---
 
-{% include cmp.html %}
+<div id="container">
+
+  <div id="panel">
+      <div id="header">
+        <hr/>
+        <h3 class="apptitle">SFCTA MyStreet 2</h3>
+        <hr/>
+      </div>
+
+      <div id="stats-panel" style="position:relative">
+        <div id="geoinfo"><h5>(selections etc will go here)</h5></div>
+      </div>
+  </div>
+
+
+<!--
+  <div id="helpbox" v-show="showHelp" class="ui segment">
+        <h2 style="margin-bottom:0px;">
+        Congestion in San Francisco</h2>
+        <hr style="margin-bottom:5px"/>
+        This is data on observed auto and transit speeds
+        in San Francisco&mdash;by location and by time of day.
+        <ul>
+        <li>Auto speeds are observed on CMP roadway segments using floating car runs and other big data sources.</li>
+        <li>Transit speeds are estimated from Automated Passenger Counting (APC) data on SFMTA buses.</li>
+        </ul>
+        <h2 style="margin-top:10px; margin-bottom:0px;">
+        How to use this map</h2>
+        <hr style="margin-bottom:5px"/>
+        Click a roadway segment to see congestion metrics for it.
+        You can pick different years and times of day on the right panel.
+        <table><tr>
+          <td class="help"><img height=96 src="images/mouse-left.png"></td>
+          <td class="help"><img height=96 src="images/mouse-wheel.png"></td>
+          <td class="help"><img height=96 src="images/mouse-right.png"></td>
+        </tr><tr>
+          <td width="33%" class="help">Left-click and drag to pan the map</td>
+          <td width="33%"class="help">Mouse wheel changes zoom</td>
+          <td width="33%"class="help">Switch to 3D mode! Right-click and drag to change 3D view.</td>
+        </tr></table>
+
+        <div style="margin-top:20px;">
+          <button v-on:click="clickToggleHelp" class="small ui right floated violet button">OK, GOT IT</button>
+          &nbsp;&nbsp;
+          <button v-on:click="this.window.open('http://www.sfcta.org/congestion-management-program','_blank')"
+                  class="small ui right floated basic violet button"
+                  style="margin-right:5px">
+                  Learn more about CMP&hellip;
+          </button>
+        </div>
+  </div>
+-->
+
+  <div id="sfmap"></div>
+
+</div>
 
 <script type="application/javascript" src="bundle.js"></script>
-

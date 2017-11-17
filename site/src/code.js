@@ -15,7 +15,7 @@ mymap.setView([37.768890, -122.440997], 13);
 
 // some important global variables.
 const API_SERVER = 'http://api/api/';
-const GEO_VIEW = 'mystreet2_sample';
+const GEO_VIEW = 'mystreet2_all';
 const MISSING_COLOR = '#ccc';
 
 
@@ -47,30 +47,40 @@ function mapSegments(cmpsegJson) {
 
     let id = segment['id'];
 
-    let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">'
-               + '<Placemark>' + segment['geometry'] + '</Placemark></kml>';
+    try {
 
-    let geoLayer = L.geoJSON(null, {
-      style: styleByMetricColor(segment['icon_name']),
-      onEachFeature: function(feature, layer) {
-        layer.on({ //mouseover: highlightFeature,
-                   //mouseout: resetHighlight,
-                   click : clickedOnFeature,
-        });
-      },
-      pointToLayer: function(feature,latlng) {  // this turns 'points' into circles
-        return L.circleMarker(latlng, {id:id});
-      },
-    });
+      console.log(segment['geometry']);
 
-    // hang onto the data
-    geoLayer.options.id = id;
-    _cache[id] = segment;
+      let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">'
+                 + '<Placemark>' + segment['geometry'] + '</Placemark></kml>';
 
-    // add KML to the map
-    let layer = omnivore.kml.parse(kml, {id: "meow"}, geoLayer);
-    layer.addTo(mymap);
-    _layers[id] = layer;
+      let geoLayer = L.geoJSON(null, {
+        style: styleByMetricColor(segment['icon_name']),
+        onEachFeature: function(feature, layer) {
+          layer.on({ //mouseover: highlightFeature,
+                     //mouseout: resetHighlight,
+                     click : clickedOnFeature,
+          });
+        },
+        pointToLayer: function(feature,latlng) {  // this turns 'points' into circles
+          return L.circleMarker(latlng, {id:id});
+        },
+      });
+
+      // hang onto the data
+      geoLayer.options.id = id;
+      _cache[id] = segment;
+
+      // add KML to the map
+      let layer = omnivore.kml.parse(kml, null, geoLayer);
+      layer.addTo(mymap);
+      _layers[id] = layer;
+    } catch (err) {
+      console.log("--------\nerror adding segment to map.");
+      console.log(id);
+      console.log(segment);
+      // hrrrm
+    }
   }
 
   mymap.on('popupclose', function(e) {
@@ -180,8 +190,6 @@ function showPopup(id, latlng) {
 function clickedOnFeature(e) {
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
-  console.log(e);
-
   let id = e.target.options.id;
   if (!id) id = e.layer.options.id;
 

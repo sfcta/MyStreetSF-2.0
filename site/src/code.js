@@ -72,7 +72,17 @@ function mapSegments(cmpsegJson) {
     layer.addTo(mymap);
     _layers[id] = layer;
   }
+
+  mymap.on('popupclose', function(e) {
+    popupClosed();
+  });
 }
+
+function popupClosed() {
+  // Remove highlight from previous selection
+  if (_selectedProject) _selectedProject.setStyle(_selectedStyle);
+}
+
 
 function styleByMetricColor(icon_name) {
   let xcolor = generateColorFromDb(icon_name);
@@ -161,9 +171,10 @@ function showPopup(id, latlng) {
                     + details
                     + '<hr/>'
 
-    L.popup().setLatLng(latlng)
-             .setContent(popupText)
-             .openOn(mymap);
+    let popup = L.popup().setLatLng(latlng)
+             .setContent(popupText);
+
+    popup.openOn(mymap);
 }
 
 function clickedOnFeature(e) {

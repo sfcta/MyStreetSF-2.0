@@ -43,15 +43,12 @@ function mapSegments(cmpsegJson) {
   // add segments to the map by using metric data to color
   for (let segment of cmpsegJson) {
 
-    let kml = '<kml xmlns="http://www.opengis.net/kml/2.2"><Placemark>'
-               + segment['geometry']
-               + '</Placemark></kml>';
-
-    //update segment json with metric data (to be used to assign color)
-    let id = segment['id'];
-    segment["project_id"] = id;
-
     if (segment['geometry'] == null) continue;
+
+    let id = segment['id'];
+
+    let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">'
+               + '<Placemark>' + segment['geometry'] + '</Placemark></kml>';
 
     let geoLayer = L.geoJSON(null, {
       style: styleByMetricColor(segment['icon_name']),
@@ -62,7 +59,7 @@ function mapSegments(cmpsegJson) {
         });
       },
       pointToLayer: function(feature,latlng) {  // this turns 'points' into circles
-        return L.circleMarker(latlng, {});
+        return L.circleMarker(latlng, {id:id});
       },
     });
 
@@ -71,7 +68,7 @@ function mapSegments(cmpsegJson) {
     _cache[id] = segment;
 
     // add KML to the map
-    let layer = omnivore.kml.parse(kml, null, geoLayer);
+    let layer = omnivore.kml.parse(kml, {id: "meow"}, geoLayer);
     layer.addTo(mymap);
     _layers[id] = layer;
   }
@@ -156,29 +153,32 @@ function showPopup(id, latlng) {
     let details = prj['project_details_page'];
     if (details) details = '<br/><a target="_blank" href="' + details + '">&raquo; Go to Project Page</a>';
 
-    let popupText = '<b>' + prj['project_name'] + '</b><hr/>'
-                    + prj['new_project_type'] + '<br/>'
+    let popupText = '<h5 style="color:black;">' + prj['project_name'] + '</h5><hr/>'
+                    + '<b>Category: ' + prj['new_project_type'] + '</b><br/>'
                     + district + '<br/>'
                     + cost + '<hr/>'
                     + prj['description'] + '<br/>'
                     + details
                     + '<hr/>'
 
-    popHoverSegment = L.popup()
+//    popHoverSegment = L.popup()
+    L.popup()
                     .setLatLng(latlng)
                     .setContent(popupText)
                     .openOn(mymap);
 }
 
-
 function clickedOnFeature(e) {
-  console.log(e);
+  // For some reason, Leaflet handles points and polygons
+  // ifferently, hence the weirdness for fetching the id of the selected feature.
   let id = e.target.options.id;
-  if (id) console.log(_cache[id]);
+  if (!id) id = e.layer.options.id;
+
+  console.log(id);
 
   e.target.setStyle(styles.popup);
 
-  let geo = e.target.feature;
+  //let geo = e.target.feature;
 
   if (_selectedProject) {
 //    if(selectedSegment.feature.cmp_segid != geo.cmp_segid){
@@ -190,12 +190,6 @@ function clickedOnFeature(e) {
   }
 
   showPopup(id, e.latlng);
-  /*
-  let tmptxt = geo.cmp_name+" "+geo.direction+"-bound";
-  document.getElementById("geoinfo").innerHTML = "<h5>" + tmptxt + " [" +
-                                    geo.cmp_from + " to " + geo.cmp_to + "]</h5>";
-  */
-
 }
 
 

@@ -47,40 +47,36 @@ function mapSegments(cmpsegJson) {
 
     let id = segment['id'];
 
-    try {
+    let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">'
+               + '<Placemark>' + segment['geometry'] + '</Placemark></kml>';
 
-      console.log(segment['geometry']);
+    let geoLayer = L.geoJSON(null, {
+      style: styleByMetricColor(segment['icon_name']),
+      onEachFeature: function(feature, layer) {
+        layer.on({ mouseover: hoverFeature,
+                   mouseout: unHoverFeature,
+                   click : clickedOnFeature,
+        });
+      },
+      pointToLayer: function(feature,latlng) {  // this turns 'points' into circles
+        return L.circleMarker(latlng, {id:id});
+      },
+    });
 
-      let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">'
-                 + '<Placemark>' + segment['geometry'] + '</Placemark></kml>';
+    // hang onto the data
+    geoLayer.options.id = id;
+    _cache[id] = segment;
 
-      let geoLayer = L.geoJSON(null, {
-        style: styleByMetricColor(segment['icon_name']),
-        onEachFeature: function(feature, layer) {
-          layer.on({ mouseover: hoverFeature,
-                     mouseout: unHoverFeature,
-                     click : clickedOnFeature,
-          });
-        },
-        pointToLayer: function(feature,latlng) {  // this turns 'points' into circles
-          return L.circleMarker(latlng, {id:id});
-        },
-      });
+    // validate KML
+    var oParser = new DOMParser();
+    var oDOM = oParser.parseFromString(kml, "text/xml");
+    // print the name of the root element or error message
+    if (oDOM.documentElement.nodeName == "parsererror") console.log('## Error while parsing row id '+id);
 
-      // hang onto the data
-      geoLayer.options.id = id;
-      _cache[id] = segment;
-
-      // add KML to the map
-      let layer = omnivore.kml.parse(kml, null, geoLayer);
-      layer.addTo(mymap);
-      _layers[id] = layer;
-    } catch (err) {
-      console.log("--------\nerror adding segment to map.");
-      console.log(id);
-      console.log(segment);
-      // hrrrm
-    }
+    // add KML to the map
+    let layer = omnivore.kml.parse(kml, null, geoLayer);
+    layer.addTo(mymap);
+    _layers[id] = layer;
   }
 
   mymap.on('popupclose', function(e) {
@@ -95,7 +91,9 @@ function popupClosed() {
 
 function styleByMetricColor(icon_name) {
   let xcolor = generateColorFromDb(icon_name);
-  return {color: xcolor, weight: 4, fillOpacity:0.4, opacity: 1.0, radius: icon_name.startsWith('measle')? 8:4};
+  let radius = 4;
+  if (icon_name && icon_name.startsWith('measle')) radius = 8;
+  return {color: xcolor, weight: 4, fillOpacity:0.4, opacity: 1.0, radius: radius};
 }
 
 function generateColorFromDb(icon_name) {

@@ -347,3 +347,6 @@ a:focus {
   text-decoration: none;
 }
 
+.leaflet-popup-content-wrapper {
+  background-color: #ffffffee;
+}

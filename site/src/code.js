@@ -57,8 +57,8 @@ function mapSegments(cmpsegJson) {
       let geoLayer = L.geoJSON(null, {
         style: styleByMetricColor(segment['icon_name']),
         onEachFeature: function(feature, layer) {
-          layer.on({ //mouseover: highlightFeature,
-                     //mouseout: resetHighlight,
+          layer.on({ mouseover: hoverFeature,
+                     mouseout: unHoverFeature,
                      click : clickedOnFeature,
           });
         },
@@ -93,7 +93,6 @@ function popupClosed() {
   if (_selectedProject) _selectedProject.setStyle(_selectedStyle);
 }
 
-
 function styleByMetricColor(icon_name) {
   let xcolor = generateColorFromDb(icon_name);
   return {color: xcolor, weight: 4, fillOpacity:0.4, opacity: 1.0, radius: icon_name.startsWith('measle')? 8:4};
@@ -120,31 +119,6 @@ function generateColorFromDb(icon_name) {
   }
   return defaultColor;
 }
-
-function highlightFeature(e) {
-  let highlightedGeo = e.target;
-  highlightedGeo.bringToFront();
-
-  console.log(highlightedGeo);
-
-  if(highlightedGeo.feature.cmp_segid != selGeoId) {
-    highlightedGeo.setStyle(styles.selected);
-    let geo = e.target.feature;
-    let popupText = "<b>"+geo.cmp_name+" "+geo.direction+"-bound</b><br/>" +
-                  geo.cmp_from + " to " + geo.cmp_to;
-    popHoverSegment = L.popup()
-                    .setLatLng(e.latlng)
-                    .setContent(popupText)
-                    .openOn(mymap);
-  }
-}
-
-function resetHighlight(e) {
-  popHoverSegment.remove();
-  // if (e.target.feature.cmp_segid != selGeoId) geoLayer.resetStyle(e.target);
-  geoLayer.resetStyle(e.target);
-}
-
 
 function showPopup(id, latlng) {
     let prj = _cache[id];
@@ -215,6 +189,43 @@ function clickedOnFeature(e) {
 
   e.target.setStyle(styles.popup);
   showPopup(id, e.latlng);
+}
+
+function hoverFeature(e) {
+  // For some reason, Leaflet handles points and polygons
+  // differently, hence the weirdness for fetching the id of the selected feature.
+  let id = e.target.options.id;
+  if (!id) id = e.layer.options.id;
+
+  console.log(id);
+
+  // Remove highlight from previous selection
+  if (_selectedProject) {
+    _selectedProject.setStyle(_selectedStyle);
+  }
+
+  // Add highlight to current selection
+  _selectedStyle = e.target.options.style;
+  try {
+    if (!_selectedStyle) _selectedStyle = e.layer.options.style;
+    if (!_selectedStyle) _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
+  } catch(err) {
+    // hmm
+    let z = e.target.options;
+    _selectedStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight};
+  }
+
+  e.target.setStyle(styles.popup);
+
+  _selectedProject = e.target;
+}
+
+function unHoverFeature(e) {
+  // Remove highlight from previous selection
+/*  if (_selectedProject) {
+    _selectedProject.setStyle(_selectedStyle);
+  }
+  */
 }
 
 

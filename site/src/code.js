@@ -6,6 +6,7 @@ import 'isomorphic-fetch';
 import 'lodash';
 
 var maplib = require('../jslib/maplib');
+
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML;
 let getColorFromVal = maplib.getColorFromVal;
@@ -18,6 +19,8 @@ const API_SERVER = 'http://api/api/';
 const GEO_VIEW = 'mystreet2_all';
 const MISSING_COLOR = '#ccc';
 
+// hard code a few of the giant areas so they stay on the bottom layer of the map
+const _bigAreas = [407, 477, 79, 363, 366];
 
 let _cache = {};
 let _layers = {};
@@ -50,6 +53,9 @@ function mapSegments(cmpsegJson) {
     let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">'
                + '<Placemark>' + segment['geometry'] + '</Placemark></kml>';
 
+    let polygon = false;
+    if (segment['shape'] && segment['shape'].includes('Polygon')) polygon = true;
+
     let geoLayer = L.geoJSON(null, {
       style: styleByMetricColor(segment['icon_name']),
       onEachFeature: function(feature, layer) {
@@ -76,7 +82,15 @@ function mapSegments(cmpsegJson) {
     // add KML to the map
     let layer = omnivore.kml.parse(kml, null, geoLayer);
     layer.addTo(mymap);
+    if (polygon) layer.bringToBack();
+
     _layers[id] = layer;
+  }
+
+  // Hard-coded giant polygons -- send to back.
+  for (let giantArea of _bigAreas) {
+    _layers[giantArea].bringToBack();
+    console.log('bring to back: '+giantArea);
   }
 
   mymap.on('popupclose', function(e) {
@@ -93,7 +107,7 @@ function styleByMetricColor(icon_name) {
   let xcolor = generateColorFromDb(icon_name);
   let radius = 4;
   if (icon_name && icon_name.startsWith('measle')) radius = 8;
-  return {color: xcolor, weight: 4, fillOpacity:0.4, opacity: 1.0, radius: radius};
+  return {color: xcolor, fillColor:'#cce', weight: 2, fillOpacity:0.4, opacity: 1.0, radius: radius};
 }
 
 function generateColorFromDb(icon_name) {
@@ -111,7 +125,7 @@ function generateColorFromDb(icon_name) {
     case 'small_green': return '#4f4';
     case 'small_purple': return '#63c';
     case 'small_red': return '#f44';
-    case 'small_yellow': return '#dd3';
+    case 'small_yellow': return '#aa3';
     case 'measle_turquoise': return '#369';
     default: return defaultColor;
   }
@@ -180,12 +194,15 @@ function clickedOnFeature(e) {
   } catch(err) {
     // hmm
     let z = e.target.options;
-    _selectedStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight};
+    _selectedStyle = {color:z.color, fillColor:z.fillColor, radius:z.radius, weight:z.weight};
   }
 
   _selectedProject = e.target;
 
-  e.target.setStyle(styles.popup);
+  let clickedStyle = JSON.parse(JSON.stringify(styles.popup));
+  clickedStyle['fillColor'] = _selectedStyle.color;
+  e.target.setStyle(clickedStyle);
+
   showPopup(id, e.latlng);
 }
 
@@ -197,30 +214,32 @@ function hoverFeature(e) {
   let id = e.target.options.id;
   if (!id) id = e.layer.options.id;
 
-  console.log(id);
-
   // Remove highlight from previous selection
   if (_selectedProject) {
     _selectedProject.setStyle(_selectedStyle);
   }
 
   // Add highlight to current selection
+  let weight = 5;
   _selectedStyle = e.target.options.style;
+
   try {
     if (!_selectedStyle) _selectedStyle = e.layer.options.style;
-    if (!_selectedStyle) _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
+    if (!_selectedStyle) {
+      _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
+    }
   } catch(err) {
     // hmm
     let z = e.target.options;
     _selectedStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight};
   }
 
-  let hoverStyle = {'color':'#3ff', 'fillColor':_selectedStyle.color, "weight": 10, "opacity": 1.0 };
+  let hoverStyle = {'color':_selectedStyle.color, 'fillColor':_selectedStyle.color, "weight": weight, "opacity": 1.0 };
 
   clearTimeout(popupTimeout);
   popupTimeout = setTimeout( function () {
     e.target.setStyle(hoverStyle);
-  }, 30);
+  }, 50);
 
   _selectedProject = e.target;
 }

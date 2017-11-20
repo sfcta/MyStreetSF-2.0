@@ -189,6 +189,8 @@ function clickedOnFeature(e) {
   showPopup(id, e.latlng);
 }
 
+let popupTimeout;
+
 function hoverFeature(e) {
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
@@ -213,7 +215,12 @@ function hoverFeature(e) {
     _selectedStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight};
   }
 
-  e.target.setStyle(styles.popup);
+  let hoverStyle = {'color':'#3ff', 'fillColor':_selectedStyle.color, "weight": 10, "opacity": 1.0 };
+
+  clearTimeout(popupTimeout);
+  popupTimeout = setTimeout( function () {
+    e.target.setStyle(hoverStyle);
+  }, 30);
 
   _selectedProject = e.target;
 }

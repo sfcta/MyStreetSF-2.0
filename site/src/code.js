@@ -13,11 +13,11 @@ let getColorFromVal = maplib.getColorFromVal;
 let mymap = maplib.sfmap;
 
 mymap.setView([37.768890, -122.440997], 13);
+const MISSING_COLOR = '#ccc';
 
 // some important global variables.
-const API_SERVER = 'http://api/api/';
+const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'mystreet2_all';
-const MISSING_COLOR = '#ccc';
 
 // hard code a few of the giant areas so they stay on the bottom layer of the map
 const _bigAreas = [407, 477, 79, 363, 366];
@@ -57,7 +57,7 @@ function mapSegments(cmpsegJson) {
     if (segment['shape'] && segment['shape'].includes('Polygon')) polygon = true;
 
     let geoLayer = L.geoJSON(null, {
-      style: styleByMetricColor(segment['icon_name']),
+      style: styleByMetricColor(segment['icon_name'], polygon),
       onEachFeature: function(feature, layer) {
         layer.on({ mouseover: hoverFeature,
                    mouseout: unHoverFeature,
@@ -103,11 +103,11 @@ function popupClosed() {
   if (_selectedProject) _selectedProject.setStyle(_selectedStyle);
 }
 
-function styleByMetricColor(icon_name) {
+function styleByMetricColor(icon_name, polygon) {
   let xcolor = generateColorFromDb(icon_name);
   let radius = 4;
   if (icon_name && icon_name.startsWith('measle')) radius = 8;
-  return {color: xcolor, fillColor:'#cce', weight: 2, fillOpacity:0.4, opacity: 1.0, radius: radius};
+  return {color: xcolor, fillColor:"#88e", weight: (polygon?0:2), fillOpacity:0.4, opacity: 1.0, radius: radius};
 }
 
 function generateColorFromDb(icon_name) {
@@ -242,6 +242,8 @@ function hoverFeature(e) {
   }, 50);
 
   _selectedProject = e.target;
+
+  //app.description = _cache[id].project_name;
 }
 
 function unHoverFeature(e) {
@@ -260,6 +262,7 @@ let app = new Vue({
     isAMActive: true,
     isPMActive: false,
     sliderValue: 0,
+    description: "Choose any project!",
   },
   watch: {
   },

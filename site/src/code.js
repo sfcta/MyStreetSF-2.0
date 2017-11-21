@@ -80,11 +80,15 @@ function mapSegments(cmpsegJson) {
     if (oDOM.documentElement.nodeName == "parsererror") console.log('## Error while parsing row id '+id);
 
     // add KML to the map
-    let layer = omnivore.kml.parse(kml, null, geoLayer);
-    layer.addTo(mymap);
-    if (polygon) layer.bringToBack();
-
-    _layers[id] = layer;
+    try {
+      let layer = omnivore.kml.parse(kml, null, geoLayer);
+      layer.addTo(mymap);
+      if (polygon) layer.bringToBack();
+      _layers[id] = layer;
+    } catch (e) {
+      console.log('couldnt: '+id);
+      console.log(segment);
+    }
   }
 
   // Hard-coded giant polygons -- send to back.

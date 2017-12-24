@@ -15,10 +15,17 @@ permalink:        pretty
 relative_permalinks: false
 
 github:
-  repo:           https://github.com/sfcta/mystreet2
+  repo:           git@github.com:sfcta/mystreet2.git
 
 # --- Build settings
 source: src
-destination: build
+destination: _site
 exclude: ['node_modules']
-plugins: []
+plugins:
+  - jekyll-sitemap
+page_gen:
+  - data: 'projects'
+    template: 'projectpage'
+    name: 'project_number'
+    dir: 'project'
+    index_files: true

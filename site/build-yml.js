@@ -4,17 +4,21 @@ require('isomorphic-fetch');
 let yaml = require('node-yaml');
 
 const SERVER = 'https://api.sfcta.org/api/';
-const URL = 'mystreet2_all';
+const URL = 'mystreet2_sample';
 const COLUMNS = '';
 
+const OUTPUT = 'src/_data/projects.yml';
+
 async function fetchFromApiServer() {
-  console.log('1');
-
   try {
-    let data = await fetch(SERVER + URL + COLUMNS);
-    let j = await data.json();
+    let url = SERVER + URL + COLUMNS;
+    console.log('--reading: ' + url);
 
-    yaml.write('projects.yml', j);
+    let data = await fetch(SERVER + URL + COLUMNS);
+    let json = await data.json();
+
+    console.log('--writing: ' + OUTPUT);
+    yaml.write(OUTPUT, json);
 
   } catch (e) {
     console.log(e);

@@ -1,5 +1,5 @@
 # --- Setup
-title:            MyStreet 2
+title:            'MyStreet 2'
 tagline:          '(c) 2018 SFCTA'
 description:      'Project explorer'
 url:              'http://mystreet.sfcta.org'
@@ -18,8 +18,8 @@ github:
   repo:           git@github.com:sfcta/mystreet2.git
 
 # --- Build settings
-source: src
-destination: _site
+source: theme
+destination: build
 exclude: ['node_modules']
 plugins:
   - jekyll-sitemap
@@ -28,4 +28,4 @@ page_gen:
     template: 'projectpage'
     name: 'project_number'
     dir: 'project'
-    index_files: true
+    index_files: false

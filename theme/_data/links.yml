@@ -1,7 +1,7 @@
 nav_links:
   HOME: '/'
-  GALLERY: '/gallery/'
   SEARCH: '/search/'
+  PROJECT GALLERY: '/project/'
   SFCTA: 'http://www.sfcta.org'
 
 sfcta_links:

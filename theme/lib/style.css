@@ -256,7 +256,7 @@ fieldset[disabled] .btn-xl.active {
 .navbar-default .nav li a:focus {
     outline: 0;
     color: #ffff66; /*#f0a099;*/
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 #sidebar {
@@ -468,7 +468,6 @@ aside.clients img {
     margin: 50px auto;
 }
 
-
 footer {
     padding: 25px 0;
     text-align: center;
@@ -480,6 +479,10 @@ footer a {
 }
 footer a:hover {
 	color:#23527c;
+}
+
+footer p {
+  margin: 0 0;
 }
 
 footer span.copyright {
@@ -1234,7 +1237,7 @@ img.post-title-image {
   margin-bottom: 2px;
 }
 
-.banner-logo { padding-top: 0px;}
+.banner-logo { padding-top: 10px;}
 
 a:hover { text-decoration: none;}
 

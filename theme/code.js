@@ -1,5 +1,6 @@
 'use strict';
 
+
 // Must use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';

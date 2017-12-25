@@ -1,17 +1,13 @@
 'use strict';
 
-
 // Must use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
-import 'lodash';
 
-var maplib = require('../jslib/maplib');
-
-let styles = maplib.styles;
-let getLegHTML = maplib.getLegHTML;
-let getColorFromVal = maplib.getColorFromVal;
-let mymap = maplib.sfmap;
+let styles; // = maplib.styles;
+let getLegHTML; // = maplib.getLegHTML;
+let getColorFromVal; // = maplib.getColorFromVal;
+let mymap; // = maplib.sfmap;
 
 mymap.setView([37.768890, -122.440997], 13);
 const MISSING_COLOR = '#ccc';

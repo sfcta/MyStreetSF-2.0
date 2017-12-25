@@ -11,8 +11,8 @@
   "license": "MIT",
   "repository": "https://github.com/sfcta/mystreet2.git",
   "scripts": {
-    "build": "webpack",
-    "build-prod": "webpack -p",
+    "build": "webpack && bundle exec jekyll build",
+    "build-prod": "webpack -p && bundle exec jekyll build",
     "devserver": "concurrently \"webpack --watch\" \"bundle exec jekyll serve --incremental\""
   },
   "devDependencies": {

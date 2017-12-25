@@ -7,7 +7,7 @@ const SERVER = 'https://api.sfcta.org/api/';
 const URL = 'mystreet2_sample';
 const COLUMNS = '';
 
-const OUTPUT = 'src/_data/projects.yml';
+const OUTPUT = 'site/_data/projects.yml';
 
 async function fetchFromApiServer() {
   try {

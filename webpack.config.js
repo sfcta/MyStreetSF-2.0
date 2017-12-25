@@ -3,10 +3,10 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
      entry: {
-       'main': ['babel-polyfill', './theme/code.js'],
+       'main': ['babel-polyfill', './site/code.js'],
      },
      output: {
-         path: path.join(__dirname, './theme/lib'),
+         path: path.join(__dirname, './site/lib'),
          filename: '[name].bundle.js',
      },
      devtool: '#source-map',

@@ -18,7 +18,7 @@ github:
   repo:           git@github.com:sfcta/mystreet2.git
 
 # --- Build settings
-source: theme
+source: site
 destination: build
 exclude: ['node_modules']
 plugins:

@@ -37,5 +37,6 @@ bundles
 # Build artifacts
 bundle.js
 .jekyll-metadata
+*bundle.js*
 
 

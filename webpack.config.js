@@ -1,20 +1,45 @@
 const path = require('path');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
-     entry: () => {
-       let entries = {};
-       entries['mystreet2'] = `./src/code.js`;
-       return entries;
+     entry: {
+       'main': ['babel-polyfill', './theme/code.js'],
      },
-
      output: {
-         //path: path.join(__dirname, './src/bundles/'),
-         filename: 'src/bundle.js'
+         path: path.join(__dirname, './theme/lib'),
+         filename: '[name].bundle.js',
      },
+     devtool: '#source-map',
      module: {
        loaders: [{
-         exclude: /node_modules/,
          loader: 'babel-loader',
+         exclude: /node_modules/,
+         query: {
+           plugins: ['transform-runtime'],
+           presets: [
+             ['env', {
+               "targets": {
+                 "browsers": [
+                    "Explorer 11",
+                    "Safari >= 8",
+                    "last 3 Chrome versions",
+                    "last 3 Firefox versions",
+                    "last 3 Edge versions"
+                  ]
+               },
+               "useBuiltIns": true
+             }]
+           ]
+         }
        }]
      },
+/*  // uncomment this for production - compresses .js bundle:
+    plugins: [
+      new UglifyJsPlugin({
+          cache: true,
+          sourceMap: true,
+          parallel: true,
+      }),
+     ],
+*/
 };

@@ -4,7 +4,6 @@ title: MyStreet SFCTA
 thumbnail: scrnshot.png
 css:
   - '/main.css'
-  - '/assets/css/standalone.css'
 ---
 
 <br/>
@@ -67,4 +66,4 @@ spendin' some cash, buildin' some bikelanes
 
 <div id="sfmap"></div>
 
-<script type="application/javascript" src="bundle.js"></script>
+<script type="application/javascript" src="/lib/main.bundle.js"></script>

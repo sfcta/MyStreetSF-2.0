@@ -25,7 +25,7 @@ plugins:
   - jekyll-sitemap
 page_gen:
   - data: 'projects'
-    template: 'projectpage'
-    name: 'project_number'
-    dir: 'project'
+    dir: 'projects'
     index_files: false
+    name: 'project_number'
+    template: 'projectpage'

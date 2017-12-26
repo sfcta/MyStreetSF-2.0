@@ -63,17 +63,23 @@
     </nav>
     </header>
 
-  <!-- MOBILE NAV
+  <!-- MOBILE NAV -->
   <div class="mobilenav">
     <h5 style="margin-top:0px; padding-top:0px">
+
+    {% for item in site.data.links.nav_links %}
+      <a href="{{item[1]}}">{{item[0]}}</a> &bull;
+    {% endfor %}
+<!---
     <a href="/trends/peopleandplace">Growth</a> &bull;
     <a href="/trends/transportation">Transportation</a> &bull;
     <a href="/trends/economy">Economy</a> &bull;
     <a href="/trends/library">Archive</a>
+-->
     </h5>
     <hr/>
   </div>
--->
+
   <div class="container">
 
     <!-- MAIN CONTENT -->

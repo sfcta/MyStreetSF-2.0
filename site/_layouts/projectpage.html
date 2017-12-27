@@ -11,20 +11,22 @@ layout: default
 <hr />
 
 <table>
-<tr><td class="extension-details"><b>Sponsor</b></td>
-<td> {{page.sponsor}}</td></tr>
 
-<tr><td class="extension-details"><b>Districts</b></td>
-<td> {{page.districts}}</td></tr>
-
-<tr><td class="extension-details"><b>Cost Estimate</b></td>
-<td> {{page.project_cost_estimate}}</td></tr>
-
-<tr><td class="extension-details"><b>Status</b></td>
-<td>{{page.status}}</td></tr>
-
-<tr><td class="extension-details"><b>Percent Complete</b></td>
-<td> {{page.percent_complete}}</td></tr>
+{% include project-detail.html field="title" desc="Title" %}
+{% include project-detail.html field="resolution" desc="Resolution" %}
+{% include project-detail.html field="project_location" desc="Location" %}
+{% include project-detail.html field="new_project_type" desc="Project Type" %}
+{% include project-detail.html field="new_project_tags" desc="Tags" %}
+{% include project-detail.html field="sponsor" desc="Sponsor" %}
+{% include project-detail.html field="districts" desc="Districts" %}
+{% include project-detail.html field="current_phase" desc="Current Phase" %}
+{% include project-detail.html field="phase_expected_completion" desc="Expected Completion of this phase" %}
+{% include project-detail.html field="project_expected_completion" desc="Project Expected Completion" %}
+{% include project-detail.html field="funding_sources" desc="Funding sources" %}
+{% include project-detail.html field="project_details_page" desc="Link to project" %}
+{% include project-detail.html field="project_cost_estimate" desc="Project cost estimate" %}
+{% include project-detail.html field="percent_complete" desc="% Complete" %}
+{% include project-detail.html field="status" desc="Status" %}
 
 </table>
 

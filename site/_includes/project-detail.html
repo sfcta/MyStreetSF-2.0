@@ -1,2 +1,8 @@
   <tr><td class="extension-details"><b>{{ include.desc }}</b></td>
-  <td> {{ page[include.field] }}</td></tr>
+  <td>
+    {%if include.url %}
+      <a href="{{page[include.field]}}">{{page[include.field]}}</a>
+    {%else%}
+      {{ page[include.field] }}
+    {%endif%}
+  </td></tr>

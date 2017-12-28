@@ -23,6 +23,14 @@ body {
   -o-transition: none !important;
 }
 
+#zoom-map {
+  float: right;
+  width: 300px;
+  height: 300px;
+  margin-left: 20px;
+  background-color: #aac;
+}
+
 .text-muted {
     color: #777;
     margin-bottom: 20px;

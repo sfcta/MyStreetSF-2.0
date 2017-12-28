@@ -3,7 +3,13 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
      entry: {
-       'main': ['babel-polyfill', './site/maplib.js', './site/code.js'],
+       'main': ['babel-polyfill',
+            './site/maplib.js',
+            './site/code.js'
+       ],
+       'project-page': ['babel-polyfill',
+            './site/project-page.js'
+       ]
      },
      output: {
          path: path.join(__dirname, './site/lib'),

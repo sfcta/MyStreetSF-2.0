@@ -1,9 +1,11 @@
 ---
 layout: default
 ---
-<br/>
+<div id="zoom-map"></div>
+
 <h1>{{page.project_name}}</h1>
 <h4>Project ID: {{page.project_number}}</h4>
+
 <hr />
 
 <b>{{ page.description }}</b>
@@ -33,3 +35,10 @@ layout: default
 <br/>
 <br/>
 <br/>
+
+<script src="/lib/project-page.bundle.js"
+  project_id="{{page.project_number}}"
+  geometry="{{page.geometry}}"
+  feature_shape="{{page.shape}}"
+  icon="{{page.icon_name}}"
+></script>

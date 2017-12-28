@@ -10,9 +10,10 @@
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
           <div class="navbar-brand page-scroll title-link"><a href='/'>
-            <img class="banner-logo" src="/images/sfcta-logo-144.png" alt="SFCTA" /></a></div>
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <img class="banner-logo" src="/images/sfcta-logo-144.png" alt="SFCTA" /></a>
+          </div>
+          <!-- Collect the nav links, forms, and other content for toggling -->
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
                <ul class="nav navbar-nav navbar-right">
                   {% for item in site.data.links.nav_links %}
@@ -20,60 +21,55 @@
                   {% endfor %}
                </ul>
 
-            </div>
-            <!-- /.navbar-collapse -->
+          </div>
+          <!-- /.navbar-collapse -->
         </div>
         <!-- /.container-fluid -->
     </nav>
-    </header>
+  </header>
 
   <!-- MOBILE NAV -->
   <div class="mobilenav">
     <h5 style="margin-top:0px; padding-top:0px">
 
     {% for item in site.data.links.nav_links %}
-      <a href="{{item[1]}}">{{item[0]}}</a> &bull;
+      <a href="{{item[1]}}">{{item[0]}}</a>&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;
     {% endfor %}
-<!---
+<!--
     <a href="/trends/peopleandplace">Growth</a> &bull;
     <a href="/trends/transportation">Transportation</a> &bull;
     <a href="/trends/economy">Economy</a> &bull;
     <a href="/trends/library">Archive</a>
 -->
     </h5>
-    <hr/>
   </div>
 
   <div class="container">
 
-    <!-- MAIN CONTENT -->
-      <section id="main_content" class="inner">
+      {{ content }}
 
-        {{ content }}
-
-      </section>
   </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap">
-      <footer class="footer" id="footer_content">
+  <!-- FOOTER  -->
+  <div id="footer_wrap">
+    <footer class="footer" id="footer_content">
         <p><a href="http://www.sfcta.org">&copy; {{'now' | date: '%Y'}} San Francisco County Transportation Authority</a></p>
       </footer>
-    </div>
+  </div>
 
-    <!-- jQuery Version 1.11.0 -->
-    <script src="/lib/jquery-latest.min.js"></script>
+  <!-- jQuery Version 1.11.0 -->
+  <script src="/lib/jquery-latest.min.js"></script>
 
-    <!-- Bootstrap Core JavaScript -->
-    <script src="/lib/bootstrap.min.js"></script>
+  <!-- Bootstrap Core JavaScript -->
+  <script src="/lib/bootstrap.min.js"></script>
 
-    <!-- Plugin JavaScript -->
-    <script src="/lib/jquery.easing.min.js"></script>
-    <script src="/lib/classie.js"></script>
-    <script src="/lib/cbpAnimatedHeader.js"></script>
+  <!-- Plugin JavaScript -->
+  <script src="/lib/jquery.easing.min.js"></script>
+  <script src="/lib/classie.js"></script>
+  <script src="/lib/cbpAnimatedHeader.js"></script>
 
-    <!-- Custom Theme JavaScript -->
-    <script src="/lib/agency.js"></script>
+  <!-- Custom Theme JavaScript -->
+  <script src="/lib/agency.js"></script>
 
   </body>
 </html>

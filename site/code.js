@@ -16,7 +16,7 @@ const MISSING_COLOR = '#ccc';
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'mystreet2_all';
+const GEO_VIEW = 'mystreet2_sample';
 
 // hard code a few of the giant areas so they stay on the bottom layer of the map
 const _bigAreas = [407, 477, 79, 363, 366];
@@ -157,8 +157,10 @@ function showPopup(id, latlng) {
     let cost = prj['project_cost_estimate']
     if (cost && cost.trim().endsWith('.00')) cost = cost.trim().slice(0,-3);
 
-    let details = prj['project_details_page'];
-    if (details) details = '<br/><a target="_blank" href="' + details + '">&raquo; Go to Project Page</a>';
+    let url = '/projects/' + prj['project_number'];
+    let details = '<br/>' +
+      '<a target="_blank" href="' + url + '">' +
+      '&raquo; More details&hellip;</a>';
 
     let popupText = '<h5 style="color:black;">' + prj['project_name'] + '</h5><hr/>'
                     + '<b>Category: ' + prj['new_project_type'] + '</b><br/>'

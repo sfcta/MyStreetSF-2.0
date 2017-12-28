@@ -1,13 +1,15 @@
 'use strict';
 
-// Must use npm and babel to support IE11/Safari
+// use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 
-let styles; // = maplib.styles;
-let getLegHTML; // = maplib.getLegHTML;
-let getColorFromVal; // = maplib.getColorFromVal;
-let mymap; // = maplib.sfmap;
+var maplib = require('./maplib');
+
+let styles = maplib.styles;
+let getLegHTML = maplib.getLegHTML;
+let getColorFromVal = maplib.getColorFromVal;
+let mymap = maplib.sfmap;
 
 mymap.setView([37.768890, -122.440997], 13);
 const MISSING_COLOR = '#ccc';
@@ -24,23 +26,21 @@ let _layers = {};
 let _selectedProject, _selectedStyle;
 let _prevselectedSegment;
 
-function queryServer() {
+async function queryServer() {
   const geo_url = API_SERVER + GEO_VIEW;
 
-  fetch(geo_url)
-    .then((resp) => resp.json())
-    .then(function(jsonData) {
-
-      mapSegments(jsonData);
-
-    }).catch(function(error) {
-      console.log("map error: "+error);
-  });
+  try {
+    let resp = await fetch(geo_url);
+    let jsonData = await resp.json();
+    mapSegments(jsonData);
+  } catch (error) {
+    console.log("map error: "+error);
+  }
 }
 
+// add segments to the map by using metric data to color
 function mapSegments(cmpsegJson) {
 
-  // add segments to the map by using metric data to color
   for (let segment of cmpsegJson) {
 
     if (segment['geometry'] == null) continue;
@@ -108,7 +108,7 @@ function styleByMetricColor(icon_name, polygon) {
   let xcolor = generateColorFromDb(icon_name);
   let radius = 4;
   if (icon_name && icon_name.startsWith('measle')) radius = 8;
-  return {color: xcolor, fillColor:"#88e", weight: (polygon?0:2), fillOpacity:0.4, opacity: 1.0, radius: radius};
+  return {color: xcolor, fillColor:"#88e", weight: (polygon ? 0 : 4), fillOpacity:0.4, opacity: 1.0, radius: radius};
 }
 
 function generateColorFromDb(icon_name) {
@@ -221,7 +221,7 @@ function hoverFeature(e) {
   }
 
   // Add highlight to current selection
-  let weight = 5;
+  let weight = 6;
   _selectedStyle = e.target.options.style;
 
   try {

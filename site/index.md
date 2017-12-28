@@ -6,64 +6,13 @@ css:
   - '/main.css'
 ---
 
-<br/>
+# MyStreet &raquo; San Francisco
+### See how your tax dollars are improving your neighborhood.
 
-### SFCTA MyStreet 2
+---
 
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
-
-spendin' some cash, buildin' some bikelanes
+Select any project from the map below, or use the search filters to find something specific.
 
 <div id="sfmap"></div>
 
-<script type="application/javascript" src="/lib/main.bundle.js"></script>
+<script src="/lib/main.bundle.js"></script>

@@ -7,7 +7,7 @@ const SERVER = 'https://api.sfcta.org/api/';
 const URL = 'mystreet2_sample';
 const COLUMNS = '';
 
-const OUTPUT = 'site/_data/projects.yml';
+const OUTPUT = '../site/_data/projects.yml';
 
 async function fetchFromApiServer() {
   try {
@@ -16,6 +16,10 @@ async function fetchFromApiServer() {
 
     let data = await fetch(SERVER + URL + COLUMNS);
     let json = await data.json();
+
+    for (let entry of json) {
+      entry['internal_link'] = entry.project_number.toLowerCase();
+    }
 
     console.log('--writing: ' + OUTPUT);
     yaml.write(OUTPUT, json);

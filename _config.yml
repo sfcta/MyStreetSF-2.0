@@ -26,6 +26,6 @@ plugins:
 page_gen:
   - data: 'projects'
     dir: 'projects'
-    index_files: false
+    index_files: true
     name: 'project_number'
     template: 'projectpage'

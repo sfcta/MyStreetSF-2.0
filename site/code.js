@@ -157,13 +157,18 @@ function showPopup(id, latlng) {
     let cost = prj['project_cost_estimate']
     if (cost && cost.trim().endsWith('.00')) cost = cost.trim().slice(0,-3);
 
-    let url = '/projects/' + prj['project_number'];
+    // generate permalink
+    let permalink = prj['project_number'].toLowerCase();
+    let url = `/projects/${permalink}/`;
+
     let details = '<br/>' +
-      '<a target="_blank" href="' + url + '">' +
+      '<a href="' + url + '">' +
       '&raquo; More details&hellip;</a>';
 
+    let pType = (prj['new_project_type'] ? prj['new_project_type'] : "N/A" );
+
     let popupText = '<h5 style="color:black;">' + prj['project_name'] + '</h5><hr/>'
-                    + '<b>Category: ' + prj['new_project_type'] + '</b><br/>'
+                    + '<b>Category: ' + pType + '</b><br/>'
                     + district + '<br/>'
                     + cost + '<hr/>'
                     + prj['description'] + '<br/>'

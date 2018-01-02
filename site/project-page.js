@@ -72,7 +72,7 @@ function addProjectLayer(id, geometry, shape, icon) {
     layer.addTo(mymap);
     if (polygon) layer.bringToBack();
     console.log(layer);
-    mymap.fitBounds(layer.getBounds());
+    mymap.fitBounds(layer.getBounds(), {padding: [10,10]});
     // _layers[id] = layer;
   } catch (e) {
     console.log('couldnt: '+e);

@@ -11,7 +11,6 @@ let getLegHTML = maplib.getLegHTML;
 let getColorFromVal = maplib.getColorFromVal;
 let mymap = maplib.sfmap;
 
-mymap.setView([37.768890, -122.440997], 13);
 const MISSING_COLOR = '#ccc';
 
 // some important global variables.
@@ -25,6 +24,7 @@ let _cache = {};
 let _layers = {};
 let _selectedProject, _selectedStyle;
 let _prevselectedSegment;
+let _bounds;
 
 async function queryServer() {
   const geo_url = API_SERVER + GEO_VIEW;
@@ -82,17 +82,25 @@ function mapSegments(cmpsegJson) {
       layer.addTo(mymap);
       if (polygon) layer.bringToBack();
       _layers[id] = layer;
+
+      // how big is your map?
+      if (!_bounds) _bounds = layer.getBounds();
+      _bounds.extend(layer.getBounds());
+
     } catch (e) {
       console.log('couldnt: '+id);
       console.log(segment);
     }
   }
 
+  mymap.fitBounds(_bounds);
+
   // Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {
-    _layers[giantArea].bringToBack();
-    console.log('bring to back: '+giantArea);
+    if (_layers[giantArea]) _layers[giantArea].bringToBack();
+    console.log('bring to back: ' + giantArea);
   }
+
 
   mymap.on('popupclose', function(e) {
     popupClosed();
@@ -187,7 +195,9 @@ function clickedOnFeature(e) {
   let id = e.target.options.id;
   if (!id) id = e.layer.options.id;
 
+  console.log(e);
   console.log(id);
+  console.log(e.target._bounds);
 
   // Remove highlight from previous selection
   if (_selectedProject) {

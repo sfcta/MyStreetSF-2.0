@@ -235,8 +235,6 @@ fieldset[disabled] .btn-xl.active {
 
 .navbar-default {
     border-color: transparent;
-    background-color: #479ccc;
-    background-image: url("/images/banner.jpg");
     box-shadow: 0 0 12px rgba(0,0,0, 0.5);
     z-index: 22000;
 
@@ -283,7 +281,7 @@ header {
 }
 
 footer {
-  margin: 10px 0;
+  margin: 50px 0px 10px 0px;
   padding: 25px 0;
   text-align: center;
   background-color: #479ccc;
@@ -1012,6 +1010,8 @@ td {
     width: 100%;
     height: 250px;
     background-color: #aac;
+    border: 2px solid black;
+    border-radius: 10px;
   }
 
 }

@@ -18,7 +18,7 @@ const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'mystreet2_sample';
 
 // hard code a few of the giant areas so they stay on the bottom layer of the map
-const _bigAreas = [407, 477, 79, 363, 366];
+const _bigAreas = [407, 477, 79, 363, 366, 17];
 
 let _cache = {};
 let _layers = {};

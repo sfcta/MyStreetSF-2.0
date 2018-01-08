@@ -11,7 +11,6 @@ let getLegHTML = maplib.getLegHTML;
 let getColorFromVal = maplib.getColorFromVal;
 
 let mymap = maplib.sfmap;
-mymap.zoomControl.setPosition('bottomleft');
 
 const MISSING_COLOR = '#ccc';
 
@@ -95,7 +94,7 @@ function mapSegments(cmpsegJson) {
     }
   }
 
-  mymap.fitBounds(_bounds);
+  //mymap.fitBounds(_bounds);
 
   // Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {
@@ -172,12 +171,12 @@ function showPopup(id, latlng) {
     let url = `/projects/${permalink}/`;
 
     let details = '<br/>' +
-      '<a href="' + url + '">' +
+      '<a href="' + url + '" target="_blank">' +
       '&raquo; More details&hellip;</a>';
 
     let pType = (prj['new_project_type'] ? prj['new_project_type'] : "N/A" );
 
-    let popupText = '<h5 style="color:black;">' + prj['project_name'] + '</h5><hr/>'
+    let popupText = '<h4 style="color:black;">' + prj['project_name'] + '</h4><hr/>'
                     + '<b>Category: ' + pType + '</b><br/>'
                     + district + '<br/>'
                     + cost + '<hr/>'
@@ -185,10 +184,7 @@ function showPopup(id, latlng) {
                     + details
                     + '<hr/>'
 
-    let popup = L.popup().setLatLng(latlng)
-             .setContent(popupText);
-
-    popup.openOn(mymap);
+    updateInfoPanel(popupText);
 }
 
 function clickedOnFeature(e) {
@@ -291,6 +287,34 @@ let app = new Vue({
   components: {
   }
 });
+
+let infoPanel = L.control({position:"bottomright"});
+
+function updateInfoPanel(text) {
+  infoPanel._div.innerHTML = text;
+}
+
+infoPanel.onAdd = function(map) {
+  console.log('boop');
+  // create a div with a class "info"
+  this._div = L.DomUtil.create('div', 'info-panel');
+  this._div.innerHTML =
+    `<b>PROJECT DETAILS:</b><br/>` +
+    `Select a project on the map to learn more about it.`;
+  return this._div;
+};
+
+infoPanel.update = function(geo) {
+  infoPanel._div.innerHTML = '';
+  infoPanel._div.className = 'info-panel';
+
+  if (geo) {
+    this._div.innerHTML =
+      `<b>INFO PANEL -- will show stuff :-) </b><br/>` +
+      `wrho aefsk;lawg;o asdfjk`;
+  }
+};
+infoPanel.addTo(mymap);
 
 // ready to go!
 queryServer();

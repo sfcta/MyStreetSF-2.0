@@ -4,15 +4,25 @@
  * For details, see http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+/* SFCTA COLORS */
+/*
+    green rug:  #99ac90;
+    persimmon:  #ea790d;
+    deep olive: #48533d;
+    steel gray: #737f88;
+
+*/
+
 .mobilenav h5 {
 	  display: none;
 }
 
-body {
+html, body {
     overflow-x: hidden;
     font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
     color: #eee;
-    background-color: #248;
+    background-color: #48533d;
+    height: 100%;
 }
 
 /* prevents transition animations on page load (Screw you IE!) */
@@ -109,7 +119,7 @@ h3 {
 }
 
 h4 {
-    color: #337ab7;
+    color: #ea790d;
 }
 
 .index_entry {
@@ -250,7 +260,7 @@ fieldset[disabled] .btn-xl.active {
     font-weight: 400;
     letter-spacing: 1px;
     color: #fff;
-    background-color: rgba(71, 156, 204, 0.7);
+    background-color: rgba(231, 121, 13, 0.8);
     transition: background-color 0.3s ease-in-out 0s;
 }
 
@@ -258,8 +268,8 @@ fieldset[disabled] .btn-xl.active {
 .navbar-default .nav li a:hover,
 .navbar-default .nav li a:focus {
     outline: 0;
-    color: #ffff66; /*#f0a099;*/
-    background-color: rgba(0, 0, 0, 0.4);
+    color: #ffffaa; /*#f0a099;*/
+    background-color: #48533dcc; /* rgba(0, 0, 0, 0.7); */
 }
 
 
@@ -273,18 +283,14 @@ header {
     -moz-background-size: cover;
     background-size: cover;
     -o-background-size: cover;
-    margin-bottom:200px;
     z-index: 5000;
-}
-
-.container {
 }
 
 footer {
   margin: 50px 0px 10px 0px;
   padding: 25px 0;
   text-align: center;
-  background-color: #479ccc;
+  background-color: #99ac90;
   color:white;
 }
 footer a {
@@ -390,10 +396,10 @@ body {
 
 .banner-logo {
   padding-top: 10px;
-  margin-left: -70px;
+  margin-left: -80px;
   transition: padding 0.3s, height 0.3s;
   -webkit-filter: drop-shadow(0px 5px 0px 2px);
-  filter: drop-shadow(0px 2px 4px #444);
+  filter: drop-shadow(0px 1px 2px #666);
 }
 
 .gloop:hover {
@@ -536,6 +542,7 @@ h4 {margin-right:10px;}
 h5 {margin-top:4px; margin-bottom: 4px;}
 
 #header {
+  display: none;
   display:table-row;
   vertical-align:top;
 }
@@ -560,7 +567,9 @@ p.hint {color:#777; text-align:right; margin-right:24px; margin-top:-20px;}
 
 #sfmap {
   max-width: 100%;
-  height:700px;
+  height:100%;
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
 }
 
 #popup-title {
@@ -611,6 +620,10 @@ td {
     color: #777;
 }
 
+#main-content {
+  margin-top:200px;
+}
+
 /* ################################################################# */
 
 /*******************************************************************************
@@ -625,7 +638,7 @@ td {
         border: 0;
         background-image: url("/images/banner.jpg");
         background-repeat: no-repeat;
-        background-color: #479ccc;
+        background-color: #ea790d;
         background-size: cover;
         -webkit-transition: padding .3s;
         -moz-transition: padding .3s;
@@ -645,7 +658,7 @@ td {
 
     .navbar-default.navbar-shrink {
         padding: 5px 0;
-        background-color: #479ccc;
+        background-color: #ea790d;
     }
 
     .navbar-default.navbar-shrink .navbar-brand {
@@ -693,10 +706,6 @@ td {
   .mobilenav h5 { display: block; padding-left: 15px;}
 
 
-  header {
-      margin-bottom:85px;
-  }
-
   .section-thumb {
     margin-top: 10px;
     padding-right: 0px;
@@ -707,8 +716,11 @@ td {
     padding: 0px 0px;
   }
 
+  #main-content {
+    margin-top:75px;
+  }
+
   .container {
-    width: 100%;
     padding: 4px;
     font-size: 14px;
   }
@@ -728,7 +740,7 @@ td {
   }
 
   .navbar {
-	  background: #479ccc;
+	  background: #ea790d;
   }
 
   .banner-logo {
@@ -1000,19 +1012,16 @@ td {
       padding-bottom: 10px;
   }
 
-  #sfmap {margin-left: 8px; margin-right: 8px;}
-
   #zoom-map {
     float: none;
-    margin-left: 0px;
-    margin-right: 0px;
-    margin-bottom: 10px;
-    width: 100%;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-bottom: 15px;
+    width: 98%;
     height: 250px;
     background-color: #aac;
-    border: 2px solid black;
-    border-radius: 10px;
+    border: 2px solid #ea790d;
+    border-radius: 5px;
   }
 
 }
-

@@ -9,7 +9,9 @@ var maplib = require('./maplib');
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML;
 let getColorFromVal = maplib.getColorFromVal;
+
 let mymap = maplib.sfmap;
+mymap.zoomControl.setPosition('bottomleft');
 
 const MISSING_COLOR = '#ccc';
 

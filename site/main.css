@@ -20,8 +20,8 @@
 html, body {
     overflow-x: hidden;
     font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
-    color: #eee;
-    background-color: #48533d;
+    color: #444;
+    background-color: #fff;
     height: 100%;
 }
 
@@ -38,7 +38,10 @@ html, body {
   width: 300px;
   height: 300px;
   margin-left: 20px;
-  background-color: #aac;
+  margin-bottom: 10px;
+  background-color: #eee;
+  border: 1px solid #ea790d;
+  border-radius: 8px;
 }
 
 .text-muted {
@@ -85,14 +88,15 @@ a.active {
 }
 
 a {
-    color: #ffee99;
+    color: #4585f0;
+    text-decoration: none;
 }
 
 a:hover,
 a:focus,
 a:active,
 a.active {
-    color: #23527c;
+    color: ##4545c0;
 }
 
 a.entry_list_link {
@@ -626,11 +630,11 @@ td {
 
 
 .info-panel {
-    position: relative;
     color: black;
     width: 350px;
+    margin-top: 200px;
     padding: 10px 10px;
-    background: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.9);
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
     border-radius: 5px;
 }
@@ -642,14 +646,22 @@ td {
 .info-panel-hide {
     padding: 6px 8px;
     margin: 6px 8px;
-    background: white;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.9);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
-
     visibility: hidden;
     opacity: 0;
     transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
+
+.navbar-default {
+    border: 0;
+    background-image: url("/images/banner.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    -webkit-transition: padding .3s;
+    -moz-transition: padding .3s;
+    transition: padding .3s;
 }
 
 /* this is where shrinkydink happens */
@@ -659,7 +671,6 @@ td {
         border: 0;
         background-image: url("/images/banner.jpg");
         background-repeat: no-repeat;
-        background-color: #ea790d;
         background-size: cover;
         -webkit-transition: padding .3s;
         -moz-transition: padding .3s;
@@ -679,7 +690,6 @@ td {
 
     .navbar-default.navbar-shrink {
         padding: 5px 0;
-        background-color: #ea790d;
     }
 
     .navbar-default.navbar-shrink .navbar-brand {
@@ -707,6 +717,7 @@ td {
 
 @media screen and (max-width: 800px) {
 
+
   .banner-logo {
     height: 54px;
     margin-left: 0px;
@@ -725,7 +736,6 @@ td {
 @media screen and (max-width: 600px) {
 
   .mobilenav h5 { display: block; padding-left: 15px;}
-
 
   .section-thumb {
     margin-top: 10px;
@@ -747,7 +757,7 @@ td {
   }
 
   .mobilenav h5 {
-	display: block;
+    display: block;
   }
 
   body {
@@ -758,10 +768,6 @@ td {
 	  padding-left: 0px;
 	  margin-left: 0px;
     margin-top: -2px;
-  }
-
-  .navbar {
-	  background: #ea790d;
   }
 
   .banner-logo {
@@ -783,10 +789,6 @@ td {
   }
 
   #project_tagline {
-    display: none;
-  }
-
-  .header_image {
     display: none;
   }
 
@@ -911,6 +913,7 @@ td {
       padding:0;
       margin:0;
   }
+
   .nav-main-selected {
       color: yellow !important;
   }
@@ -927,7 +930,6 @@ td {
       float:right;
       margin-right:4px;
   }
-
 
   .nav-main-link {
       color: white;
@@ -1040,9 +1042,12 @@ td {
     margin-bottom: 15px;
     width: 98%;
     height: 250px;
-    background-color: #aac;
-    border: 2px solid #ea790d;
-    border-radius: 5px;
+    background-color: #eee;
+    border: 1px solid #ea790d;
+    border-radius: 8px;
   }
 
 }
+
+.navbar { background-color: #eee;}
+

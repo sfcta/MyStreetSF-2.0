@@ -81,13 +81,23 @@ function addProjectLayer(id, geometry, shape, icon) {
 
 // ---- start running things here:
 let mymap = L.map('zoom-map', {
-  zoomControl: false,
+  attributionControl: false,
+  clickable: false,
+  doubleClickZoom: false,
+  dragging: false,
+  interactive: false,
+  scrollWheelZoom: false,
   zoomAnimation: false,
+  zoomControl: false,
+  zooming: false,
 }).setView([37.77, -122.42], 11);
 
 L.tileLayer(url, {
   accessToken:token,
   attribution:attribution,
+  bubblingMouseEvents: true,
+  clickable: false,
+  interactive: false,
   maxZoom: 18,
 }).addTo(mymap);
 
@@ -99,4 +109,3 @@ let shape = thisScript.attr('feature_shape');
 let icon = thisScript.attr('icon');
 
 if (project) addProjectLayer(project, geometry, shape, icon);
-

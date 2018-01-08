@@ -171,7 +171,7 @@ function showPopup(id, latlng) {
     let url = `/projects/${permalink}/`;
 
     let details = '<br/>' +
-      '<a href="' + url + '" target="_blank">' +
+      `<a href="${url}">` +
       '&raquo; More details&hellip;</a>';
 
     let pType = (prj['new_project_type'] ? prj['new_project_type'] : "N/A" );
@@ -182,7 +182,7 @@ function showPopup(id, latlng) {
                     + cost + '<hr/>'
                     + prj['description'] + '<br/>'
                     + details
-                    + '<hr/>'
+                    + '<hr/>';
 
     updateInfoPanel(popupText);
 }

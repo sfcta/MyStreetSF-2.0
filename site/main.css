@@ -437,23 +437,6 @@ body {
   text-decoration: none;
 }
 
-.infobox {
-  font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  margin: 10px 10px 10px 0px;
-  padding: 20px 20px;
-}
-
-.infobox-thick {
-  font-size: 16px;
-  background: #eee;
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  margin: 10px 0px;
-  padding: 30px 50px;
-}
-
 .title-link a { color: #f0a033; }
 .title-link:hover a {
   text-decoration: none;
@@ -520,10 +503,6 @@ body {
 
 a:hover { text-decoration: none;}
 
-.infobox h4 {
-  margin-top: 0px;
-  padding-top: 0px;
-}
 
 .blog-byline {
   font-size: 12px;
@@ -634,19 +613,6 @@ td {
   opacity: 0
 }
 
-.info {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
-}
-.info h4 {
-    margin: 0 0 5px;
-    color: #777;
-}
-
 #main-content {
   margin-top:200px;
 }
@@ -689,6 +655,33 @@ td {
 
 .lead {
   color: #888;
+}
+
+.hover-panel {
+    color: black;
+    width: 100%;
+    padding: 10px 10px;
+    margin: 10px 20px 10px 10px;
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
+    border-radius: 5px;
+}
+
+.hover-panel-hide {
+    color: black;
+    width: 100%;
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
+    padding: 10px 10px;
+    margin: 10px 20px 10px 10px;
+    border-radius: 5px;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
+
+.leaflet-top.leaflet-right {
+  margin-top: 120px;
 }
 
 /* this is where shrinkydink happens */
@@ -825,8 +818,6 @@ td {
   #main_menu_wrap {
       padding: 5px 10px 5px 10px;
   }
-
-  .leaflet-control-attribution { display: none; }
 
   #main_menu a {
       padding-right: 3px;
@@ -1070,5 +1061,10 @@ td {
     width: 100%;
   }
 
+  .leaflet-top.leaflet-right {
+    padding-left: 0px;
+    padding-right: 20px;
+    margin-top: 60px;
+  }
 }
 

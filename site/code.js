@@ -220,15 +220,21 @@ function clickedOnFeature(e) {
 
 let popupTimeout;
 
+function isTargetAPolygon(target) {
+  try {
+    if (target.feature.geometry.type.includes('Polygon')) return true;
+  } catch(e) {}
+
+  try {
+    if (target.feature.geometry.geometries[0].type.includes('Polygon')) return true;
+  } catch(e) {}
+
+  return false;
+}
+
 function hoverFeature(e) {
 
-  let polygon = false;
-  try {
-    if (e.target.feature.geometry.type.includes('Polygon')) polygon = true;
-  } catch(e) {}
-  try {
-    if (e.target.feature.geometry.geometries[0].type.includes('Polygon')) polygon = true;
-  } catch(e) {}
+  let polygon = isTargetAPolygon(e.target);
 
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
@@ -269,6 +275,8 @@ function hoverFeature(e) {
 
   _selectedProject = e.target;
 
+  updateHoverPanel(id);
+
   //app.description = _cache[id].project_name;
 }
 
@@ -279,7 +287,6 @@ function unHoverFeature(e) {
   }
   */
 }
-
 
 let app = new Vue({
   el: '#panel',
@@ -298,15 +305,17 @@ let app = new Vue({
   }
 });
 
+// ---------- INFO PANEL ------------------------------------------------
+
 let infoPanel = L.control({position:"bottomright"});
+let hoverPanelTimeout;
 
 function updateInfoPanel(text) {
   infoPanel._div.innerHTML = text;
+
 }
 
 infoPanel.onAdd = function(map) {
-  console.log('boop');
-  // create a div with a class "info"
   this._div = L.DomUtil.create('div', 'info-panel');
   this._div.innerHTML =
     `<h5>PROJECT DETAILS:</h5>` +
@@ -315,6 +324,31 @@ infoPanel.onAdd = function(map) {
 };
 
 infoPanel.addTo(mymap);
+
+// ---------- HOVER PANEL -------------------------------------------------
+
+let hoverPanel = L.control({position:"topright"});
+
+hoverPanel.onAdd = function(map) {
+  this._div = L.DomUtil.create('div', 'hover-panel-hide');
+  this._div.innerHTML = '';
+  return this._div;
+};
+
+function updateHoverPanel(id) {
+  hoverPanel._div.className = 'hover-panel';
+  hoverPanel._div.innerHTML = `<b>${_cache[id].project_name}</b>`;
+
+  clearTimeout(hoverPanelTimeout);
+  hoverPanelTimeout = setTimeout(function() {
+    // use CSS to hide the info-panel
+    hoverPanel._div.className = 'hover-panel-hide';
+    // and clear the hover too
+    //geoLayer.resetStyle(oldHoverTarget);
+  }, 2000);
+}
+
+hoverPanel.addTo(mymap);
 
 // ready to go!
 queryServer();

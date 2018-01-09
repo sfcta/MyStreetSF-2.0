@@ -294,6 +294,10 @@ fieldset[disabled] .btn-xl.active {
     background-color: #737f88a0; /* #48533dcc; /* rgba(0, 0, 0, 0.7); */
 }
 
+.collapse.navbar-collapse {
+  padding-right: 25px;
+}
+
 header {
     text-align: left;
     color: #fff;
@@ -416,8 +420,9 @@ body {
 }
 
 .banner-logo {
-  padding-top: 10px;
-  margin-left: -80px;
+  position: absolute;
+  padding-top: 15px;
+  margin-left: 20px;
   transition: padding 0.3s, height 0.3s;
   -webkit-filter: drop-shadow(0px 5px 0px 2px);
   filter: drop-shadow(0px 1px 2px #666);
@@ -645,7 +650,6 @@ td {
   margin-top:200px;
 }
 
-
 .info-panel {
     color: black;
     width: 350px;
@@ -673,6 +677,7 @@ td {
 
 .navbar-default {
     border: 0;
+    background-color: #fa991d; /* this is a nice approx of the TA banner color mix */
     background-image: url("/images/banner.jpg");
     background-repeat: no-repeat;
     background-size: cover;
@@ -681,12 +686,13 @@ td {
     transition: padding .3s;
 }
 
+
 /* this is where shrinkydink happens */
 @media(min-width:800px) {
     .navbar-default {
         padding: 25px 0;
         border: 0;
-        background-image: url("/images/banner.jpg");
+/*        background-image: url("/images/banner.jpg"); */
         background-repeat: no-repeat;
         background-size: cover;
         -webkit-transition: padding .3s;
@@ -1065,6 +1071,4 @@ td {
   }
 
 }
-
-.navbar { background-color: #eee;}
 

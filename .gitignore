@@ -3,7 +3,7 @@ build
 _site
 .ruby-version
 
-projects.yml
+projects*.yml
 
 # Numerous always-ignore extensions
 *.diff

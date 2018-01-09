@@ -19,7 +19,7 @@ github:
 
 # --- Build settings
 source: site
-destination: build
+destination: _site
 exclude: ['node_modules']
 plugins:
   - jekyll-sitemap

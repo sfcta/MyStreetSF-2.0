@@ -17,7 +17,7 @@
 
                <ul class="nav navbar-nav navbar-right">
                   {% for item in site.data.links.nav_links %}
-                   <li class="li-header"><a class="page-scroll" href="{{item[1]}}">{{item[0]}}</a></li>
+                   <li class="li-header{%if page.section==item[0]%} navbar-selected{%endif%}"><a class="page-scroll" href="{{item[1]}}">{{item[0]}}</a></li>
                   {% endfor %}
                </ul>
 

@@ -4,6 +4,8 @@
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 
+const GEO_VIEW = 'mystreet2_sample';
+
 var maplib = require('./maplib');
 
 let styles = maplib.styles;
@@ -16,7 +18,6 @@ const MISSING_COLOR = '#ccc';
 
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
-const GEO_VIEW = 'mystreet2_sample';
 
 // hard code a few of the giant areas so they stay on the bottom layer of the map
 const _bigAreas = [407, 477, 79, 363, 366, 17];

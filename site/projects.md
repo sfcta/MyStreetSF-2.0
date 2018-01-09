@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Gallery - MyStreet SFCTA
+section: PROJECT GALLERY
 thumbnail: scrnshot.png
 css:
   - '/main.css'

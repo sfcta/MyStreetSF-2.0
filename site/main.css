@@ -263,19 +263,36 @@ fieldset[disabled] .btn-xl.active {
 .navbar-default .nav li a {
     font-weight: 400;
     letter-spacing: 1px;
-    color: #fff;
-    background-color: rgba(231, 121, 13, 0.8);
-    transition: background-color 0.3s ease-in-out 0s;
+    text-shadow:1px 0px 1px #fff;
+    color: #228;
+    background-color: #ffffff88;
+    transition: background-color 0.15s ease-in-out 0s;
 }
 
 /* navbar hover */
 .navbar-default .nav li a:hover,
-.navbar-default .nav li a:focus {
-    outline: 0;
-    color: #ffffaa; /*#f0a099;*/
-    background-color: #48533dcc; /* rgba(0, 0, 0, 0.7); */
+.navbar-default .nav .navbar-selected li a:focus {
+    color: #fff;
+    text-shadow:1px 0px 1px #228;
+    background-color: #737f88a0; /* #48533dcc; /* rgba(0, 0, 0, 0.7); */
+
 }
 
+.navbar-selected {
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-shadow:1px 0px 1px #fff;
+    color: #228;
+    background-color: #ffffff88;
+    transition: background-color 0.15s ease-in-out 0s;
+}
+
+.navbar-selected a:hover,
+.navbar-selected a:focus {
+    color: #fff;
+    text-shadow:1px 0px 1px #228;
+    background-color: #737f88a0; /* #48533dcc; /* rgba(0, 0, 0, 0.7); */
+}
 
 header {
     text-align: left;
@@ -291,7 +308,7 @@ header {
 }
 
 footer {
-  margin: 50px 0px 10px 0px;
+  margin: 50px 0px 0px 0px;
   padding: 25px 0;
   text-align: center;
   background-color: #99ac90;

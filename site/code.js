@@ -26,7 +26,6 @@ let _cache = {};
 let _layers = {};
 let _selectedProject, _selectedStyle;
 let _prevselectedSegment;
-let _bounds;
 
 async function queryServer() {
   const geo_url = API_SERVER + GEO_VIEW;
@@ -85,16 +84,14 @@ function mapSegments(cmpsegJson) {
       if (polygon) layer.bringToBack();
       _layers[id] = layer;
 
-      // how big is your map?
-      if (!_bounds) _bounds = layer.getBounds();
-      _bounds.extend(layer.getBounds());
-
     } catch (e) {
       console.log('couldnt: '+id);
       console.log(segment);
     }
   }
-  //mymap.fitBounds(_bounds); // skipping for now
+
+  // bounds of San Francisco
+  mymap.fitBounds([ [37.84, -122.36], [37.70, -122.52] ]);
 
   // Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {

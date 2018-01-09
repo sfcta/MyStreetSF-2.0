@@ -4,7 +4,7 @@
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 
-const GEO_VIEW = 'mystreet2_sample';
+const GEO_VIEW = 'mystreet2_all';
 
 var maplib = require('./maplib');
 
@@ -19,7 +19,7 @@ const MISSING_COLOR = '#ccc';
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 
-// hard code a few of the giant areas so they stay on the bottom layer of the map
+// hard code the giant areas so they stay on the bottom layer of the map
 const _bigAreas = [407, 477, 79, 363, 366, 17];
 
 let _cache = {};
@@ -94,15 +94,13 @@ function mapSegments(cmpsegJson) {
       console.log(segment);
     }
   }
-
-  //mymap.fitBounds(_bounds);
+  //mymap.fitBounds(_bounds); // skipping for now
 
   // Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {
     if (_layers[giantArea]) _layers[giantArea].bringToBack();
     console.log('bring to back: ' + giantArea);
   }
-
 
   mymap.on('popupclose', function(e) {
     popupClosed();
@@ -118,7 +116,7 @@ function styleByMetricColor(icon_name, polygon) {
   let xcolor = generateColorFromDb(icon_name);
   let radius = 4;
   if (icon_name && icon_name.startsWith('measle')) radius = 8;
-  return {color: xcolor, fillColor:"#88e", weight: (polygon ? 0 : 4), fillOpacity:0.4, opacity: 1.0, radius: radius};
+  return {color: xcolor, fillColor:"#68e", weight: (polygon ? 0 : 6), fillOpacity:0.4, opacity: 0.8, radius: radius};
 }
 
 function generateColorFromDb(icon_name) {
@@ -226,6 +224,15 @@ function clickedOnFeature(e) {
 let popupTimeout;
 
 function hoverFeature(e) {
+
+  let polygon = false;
+  try {
+    if (e.target.feature.geometry.type.includes('Polygon')) polygon = true;
+  } catch(e) {}
+  try {
+    if (e.target.feature.geometry.geometries[0].type.includes('Polygon')) polygon = true;
+  } catch(e) {}
+
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
   let id = e.target.options.id;
@@ -237,7 +244,7 @@ function hoverFeature(e) {
   }
 
   // Add highlight to current selection
-  let weight = 6;
+  let weight = 10;
   _selectedStyle = e.target.options.style;
 
   try {
@@ -251,12 +258,17 @@ function hoverFeature(e) {
     _selectedStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight};
   }
 
-  let hoverStyle = {'color':_selectedStyle.color, 'fillColor':_selectedStyle.color, "weight": weight, "opacity": 1.0 };
+  let hoverStyle = {'color': "#8ff", 'fillColor': "#8ff", "weight": weight, "opacity": 1.0 };
+  if (polygon) hoverStyle = {'fillColor': "#8ff" };
+
+  // the 15ms timeout keeps the highlight from flashing too much on mouse movement
+  // the 300ms timeout keeps the highlight from selecting areas every time
+  let timeout = polygon ? 300 : 15;
 
   clearTimeout(popupTimeout);
   popupTimeout = setTimeout( function () {
     e.target.setStyle(hoverStyle);
-  }, 50);
+  }, timeout);
 
   _selectedProject = e.target;
 
@@ -300,21 +312,11 @@ infoPanel.onAdd = function(map) {
   // create a div with a class "info"
   this._div = L.DomUtil.create('div', 'info-panel');
   this._div.innerHTML =
-    `<b>PROJECT DETAILS:</b><br/>` +
-    `Select a project on the map to learn more about it.`;
+    `<h5>PROJECT DETAILS:</h5>` +
+    `Select any project on the map to learn more about it.`;
   return this._div;
 };
 
-infoPanel.update = function(geo) {
-  infoPanel._div.innerHTML = '';
-  infoPanel._div.className = 'info-panel';
-
-  if (geo) {
-    this._div.innerHTML =
-      `<b>INFO PANEL -- will show stuff :-) </b><br/>` +
-      `wrho aefsk;lawg;o asdfjk`;
-  }
-};
 infoPanel.addTo(mymap);
 
 // ready to go!

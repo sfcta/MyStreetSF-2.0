@@ -18,8 +18,8 @@ let dark_styles = { normal  : {"color": "#ff7800", "weight":4,  "opacity": 1.0, 
                     popup   : {"color": "#33f",    "weight":10, "opacity": 1.0, },
 };
 
-let light_styles = {normal  : {"color": "#3c6", "weight": 4, "opacity": 1.0 },
-                    selected: {"color": "#39f", "weight": 5, "opacity": 1.0 },
+let light_styles = {normal  : {"color": "#3c6", "weight": 6, "opacity": 1.0 },
+                    selected: {"color": "#39f", "weight": 8, "opacity": 1.0 },
                     popup   : {"color": "#33f", "weight": 10, "opacity": 1.0 }
 };
 let styles = (theme==='dark' ? dark_styles : light_styles);

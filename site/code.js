@@ -4,9 +4,9 @@
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 
-const GEO_VIEW = 'mystreet2_all';
-
 var maplib = require('./maplib');
+
+const GEO_VIEW = 'mystreet2_all';
 
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML;
@@ -25,7 +25,7 @@ const _bigAreas = [407, 477, 79, 363, 366, 17];
 let _cache = {};
 let _layers = {};
 let _selectedProject, _selectedStyle;
-let _prevselectedSegment;
+let _hoverProject, _hoverStyle;
 
 async function queryServer() {
   const geo_url = API_SERVER + GEO_VIEW;
@@ -95,21 +95,21 @@ function mapSegments(cmpsegJson) {
     if (_layers[giantArea]) _layers[giantArea].bringToBack();
   }
 
-  mymap.on('popupclose', function(e) {
-    popupClosed();
-  });
-}
-
-function popupClosed() {
-  // Remove highlight from previous selection
-  if (_selectedProject) _selectedProject.setStyle(_selectedStyle);
 }
 
 function styleByMetricColor(icon_name, polygon) {
-  let xcolor = generateColorFromDb(icon_name);
+  let truecolor = generateColorFromDb(icon_name); // actual project color;
   let radius = 4;
   if (icon_name && icon_name.startsWith('measle')) radius = 8;
-  return {color: xcolor, fillColor:"#68e", weight: (polygon ? 0 : 6), fillOpacity:0.4, opacity: 0.8, radius: radius};
+
+  return { color: "#444488" + "a0",   // this is the "unselected" color -- same for all projects
+           truecolor: truecolor,  // this is the "actual" project color
+           fillColor: (polygon ? "#448844" + "90" : truecolor),
+           weight: (polygon ? 1 : 2),
+           fillOpacity:0.7,
+           opacity: 1.0,
+           radius: radius,
+  };
 }
 
 function generateColorFromDb(icon_name) {
@@ -134,7 +134,7 @@ function generateColorFromDb(icon_name) {
   return defaultColor;
 }
 
-function showPopup(id, latlng) {
+function updatePanelDetails(id, latlng) {
     let prj = _cache[id];
 
     let district = '';
@@ -185,33 +185,32 @@ function clickedOnFeature(e) {
   let id = e.target.options.id;
   if (!id) id = e.layer.options.id;
 
-  console.log(e);
-  console.log(id);
-  console.log(e.target._bounds);
+  console.log('clicked on' + id);
 
   // Remove highlight from previous selection
-  if (_selectedProject) {
-    _selectedProject.setStyle(_selectedStyle);
-  }
+  if (_selectedProject) _selectedProject.setStyle(_selectedStyle);
 
-  // Add highlight to current selection
-  _selectedStyle = e.target.options.style;
+  // Remember what the thing looked like before we hovered or clicked on it
+  _selectedStyle = _hoverStyle;
+
   try {
     if (!_selectedStyle) _selectedStyle = e.layer.options.style;
     if (!_selectedStyle) _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
   } catch(err) {
     // hmm
     let z = e.target.options;
-    _selectedStyle = {color:z.color, fillColor:z.fillColor, radius:z.radius, weight:z.weight};
+    _selectedStyle = {color:z.color, fillColor:z.fillColor, radius:z.radius, weight:z.weight, truecolor: z.truecolor};
   }
 
+  // save this project as the selected project; it's no longer just being hovered over!
+  _hoverProject = null;
   _selectedProject = e.target;
 
   let clickedStyle = JSON.parse(JSON.stringify(styles.popup));
-  clickedStyle['fillColor'] = _selectedStyle.color;
+  clickedStyle['fillColor'] = _selectedStyle.truecolor;
   e.target.setStyle(clickedStyle);
 
-  showPopup(id, e.latlng);
+  updatePanelDetails(id, e.latlng);
 }
 
 let popupTimeout;
@@ -230,6 +229,9 @@ function isTargetAPolygon(target) {
 
 function hoverFeature(e) {
 
+  // don't add a hover if the proj is already selected
+  if (e.target == _selectedProject) return;
+
   let polygon = isTargetAPolygon(e.target);
 
   // For some reason, Leaflet handles points and polygons
@@ -238,50 +240,45 @@ function hoverFeature(e) {
   if (!id) id = e.layer.options.id;
 
   // Remove highlight from previous selection
-  if (_selectedProject) {
-    _selectedProject.setStyle(_selectedStyle);
-  }
+  if (_hoverProject) _hoverProject.setStyle(_hoverStyle);
 
   // Add highlight to current selection
   let weight = 10;
-  _selectedStyle = e.target.options.style;
+
+  // save real style info
+  _hoverStyle = e.target.options.style;
 
   try {
-    if (!_selectedStyle) _selectedStyle = e.layer.options.style;
-    if (!_selectedStyle) {
-      _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
-    }
+    if (!_hoverStyle) _hoverStyle = e.layer.options.style;
+    if (!_hoverStyle) _hoverStyle = JSON.parse(JSON.stringify(e.layer.options));
   } catch(err) {
     // hmm
     let z = e.target.options;
-    _selectedStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight};
+    _hoverStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight, truecolor: z.truecolor};
   }
 
-  let hoverStyle = {'color': "#8ff", 'fillColor': "#8ff", "weight": weight, "opacity": 1.0 };
-  if (polygon) hoverStyle = {'fillColor': "#8ff" };
+  let style = {'color': _hoverStyle.truecolor, 'fillColor': _hoverStyle.fillColor, "weight": weight, "opacity": 1.0 };
+  if (polygon) style = {'fillColor': _hoverStyle.truecolor };
 
   // the 15ms timeout keeps the highlight from flashing too much on mouse movement
   // the 300ms timeout keeps the highlight from selecting areas every time
-  let timeout = polygon ? 300 : 15;
+  let timeout = polygon ? 300 : 0;
 
   clearTimeout(popupTimeout);
   popupTimeout = setTimeout( function () {
-    e.target.setStyle(hoverStyle);
+    e.target.setStyle(style);
   }, timeout);
 
-  _selectedProject = e.target;
+  _hoverProject = e.target;
 
   updateHoverPanel(id);
-
-  //app.description = _cache[id].project_name;
 }
 
 function unHoverFeature(e) {
   // Remove highlight from previous selection
-/*  if (_selectedProject) {
-    _selectedProject.setStyle(_selectedStyle);
+  if (_hoverProject) {
+    _hoverProject.setStyle(_hoverStyle);
   }
-  */
 }
 
 let app = new Vue({

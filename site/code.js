@@ -102,7 +102,7 @@ function styleByMetricColor(icon_name, polygon) {
   let radius = 4;
   if (icon_name && icon_name.startsWith('measle')) radius = 8;
 
-  return { color: "#444488" + "a0",   // this is the "unselected" color -- same for all projects
+  return { color: "#444488" + "c0",   // this is the "unselected" color -- same for all projects
            truecolor: truecolor,  // this is the "actual" project color
            fillColor: (polygon ? "#448844" + "90" : truecolor),
            weight: (polygon ? 1 : 2),

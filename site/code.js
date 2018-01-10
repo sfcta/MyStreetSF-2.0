@@ -90,13 +90,9 @@ function mapSegments(cmpsegJson) {
     }
   }
 
-  // bounds of San Francisco
-  mymap.fitBounds([ [37.84, -122.36], [37.70, -122.52] ]);
-
   // Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {
     if (_layers[giantArea]) _layers[giantArea].bringToBack();
-    console.log('bring to back: ' + giantArea);
   }
 
   mymap.on('popupclose', function(e) {

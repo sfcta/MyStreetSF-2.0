@@ -1,7 +1,8 @@
 
 let theme = "light";
-let sfmap = L.map('sfmap', {zoomSnap: 0.5}).setView([37.77, -122.44], 12);
+let sfmap = L.map('sfmap', {zoomSnap: 0.5});
 sfmap.zoomControl.setPosition('bottomleft');
+sfmap.fitBounds([ [37.84, -122.36], [37.70, -122.52] ]);
 
 let url = 'https://api.mapbox.com/styles/v1/mapbox/'+theme+'-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
 let token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';

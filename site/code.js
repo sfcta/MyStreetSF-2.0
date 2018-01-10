@@ -13,6 +13,7 @@ let getLegHTML = maplib.getLegHTML;
 let getColorFromVal = maplib.getColorFromVal;
 
 let mymap = maplib.sfmap;
+mymap.fitBounds([ [37.84, -122.36], [37.70, -122.52] ]);
 
 const MISSING_COLOR = '#ccc';
 

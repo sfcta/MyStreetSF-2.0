@@ -15,7 +15,15 @@ function styleByMetricColor(icon_name, polygon) {
   let xcolor = generateColorFromDb(icon_name);
   let radius = 4;
   if (icon_name && icon_name.startsWith('measle')) radius = 8;
-  return {color: xcolor, fillColor:"#88e", weight: (polygon ? 0 : 4), fillOpacity:0.4, opacity: 1.0, radius: radius};
+
+  return {
+    color: xcolor,
+    fillColor: (polygon ? xcolor : "#88e"),
+    weight: (polygon ? 0 : 4),
+    fillOpacity:0.7,
+    opacity: 1.0,
+    radius: radius
+  };
 }
 
 function generateColorFromDb(icon_name) {
@@ -69,11 +77,9 @@ function addProjectLayer(id, geometry, shape, icon) {
   // add KML to the map
   try {
     let layer = omnivore.kml.parse(kml, null, geoLayer);
+    mymap.fitBounds(layer.getBounds(), {padding: [10,10], maxZoom: 15});
     layer.addTo(mymap);
     if (polygon) layer.bringToBack();
-    console.log(layer);
-    mymap.fitBounds(layer.getBounds(), {padding: [10,10], maxZoom: 15});
-    // _layers[id] = layer;
   } catch (e) {
     console.log('couldnt: '+e);
   }

@@ -243,8 +243,6 @@ function hoverFeature(e) {
   // Remove highlight from previous selection
   if (_hoverProject) _hoverProject.setStyle(_hoverStyle);
 
-  // Add highlight to current selection
-  let weight = 10;
 
   // save real style info
   _hoverStyle = e.target.options.style;
@@ -258,8 +256,13 @@ function hoverFeature(e) {
     _hoverStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight, truecolor: z.truecolor};
   }
 
+  let weight = polygon ? 6 : 10;
+
   let style = {'color': _hoverStyle.truecolor, 'fillColor': _hoverStyle.fillColor, "weight": weight, "opacity": 1.0 };
-  if (polygon) style = {'fillColor': _hoverStyle.truecolor };
+  if (polygon) {
+    style.fillColor = _hoverStyle.truecolor;
+    style.fillOpacity = 0.3;
+  }
 
   // the 15ms timeout keeps the highlight from flashing too much on mouse movement
   // the 300ms timeout keeps the highlight from selecting areas every time

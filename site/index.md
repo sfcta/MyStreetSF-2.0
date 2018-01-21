@@ -1,7 +1,7 @@
 ---
 layout: fullscreen
 title: MyStreet SFCTA
-section: MYSTREET SF
+section: "&nbsp;MAP&nbsp;"
 css:
   - '/main.css'
 ---

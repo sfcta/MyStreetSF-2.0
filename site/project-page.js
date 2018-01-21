@@ -20,7 +20,7 @@ function styleByMetricColor(icon_name, polygon) {
     color: xcolor,
     fillColor: (polygon ? xcolor : "#88e"),
     weight: (polygon ? 0 : 4),
-    fillOpacity:0.7,
+    fillOpacity:0.5,
     opacity: 1.0,
     radius: radius
   };

@@ -13,6 +13,10 @@
 
 */
 
+[v-cloak] {
+  display: none;
+}
+
 .mobilenav h5 {
 	  display: none;
 }
@@ -689,6 +693,7 @@ td {
 }
 
 #panel {
+  color: #fff;
   position: absolute;
   display:table;
   float: right;
@@ -697,11 +702,15 @@ td {
   bottom:0;
   width:400px;
   height:100%;
-  padding:0px 10px 0px 10px;
+  padding:0px 15px 0px 15px;
   z-index:10;
   background-color:#444;
   border-color: transparent;
   box-shadow: 0 0 8px rgba(0,0,0, 0.5);
+}
+
+#panel a {
+  color: #fff;
 }
 
 #sfmap {
@@ -727,6 +736,23 @@ td {
   margin: 8px 0px;
 }
 
+#preheader hr { margin: 6px 0px; }
+
+.search-panel {
+  margin-top:20px;
+}
+
+.pickers {
+  text-align: left;
+}
+
+.pickers h5 { margin-bottom: 4px;}
+
+.details-link {
+  text-align: right;
+  margin-right: 10px;
+}
+
 .bottom-panel {
   display:table-row;
   text-align:right;
@@ -738,21 +764,22 @@ td {
 }
 
 .apptitle {
-  margin-top:-5px;
-  margin-bottom:3px;
-  color:#fff;
+  font-size: 22px;
+  margin: 0px 0px;
   text-align:center;
 }
 
 td.td-logo {
   margin: 0px 0px;
+  padding: 5px 10px;
   vertical-align: middle;
   text-align: right;
 }
 
 .agency a {
+  color: #fff;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 15px;
   float: right;
 }
 

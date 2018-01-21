@@ -27,6 +27,7 @@ let _cache = {};
 let _layers = {};
 let _selectedProject, _selectedStyle;
 let _hoverProject, _hoverStyle;
+let hoverPanelTimeout;
 
 async function queryServer() {
   const geo_url = API_SERVER + GEO_VIEW;
@@ -156,28 +157,14 @@ function updatePanelDetails(id, latlng) {
       district = 'Citywide';
     }
 
-    let cost = prj['project_cost_estimate']
-    if (cost && cost.trim().endsWith('.00')) cost = cost.trim().slice(0,-3);
-
     // generate permalink
     let permalink = prj['project_number'].toLowerCase();
-    let url = `/projects/${permalink}/`;
 
-    let details = '<br/>' +
-      `<a href="${url}">` +
-      '&raquo; More details&hellip;</a>';
+    let url = `<a target="_blank" href="/projects/${permalink}/">&raquo; More details&hellip;</a>`;
 
-    let pType = (prj['new_project_type'] ? prj['new_project_type'] : "N/A" );
-
-    let popupText = '<h4 style="color:black;">' + prj['project_name'] + '</h4><hr/>'
-                    + '<b>Category: ' + pType + '</b><br/>'
-                    + district + '<br/>'
-                    + cost + '<hr/>'
-                    + prj['description'] + '<br/>'
-                    + details
-                    + '<hr/>';
-
-    updateInfoPanel(popupText);
+    app.infoTitle = prj['project_name'];
+    app.infoDetails = prj['description'];
+    app.infoUrl = url;
 }
 
 function clickedOnFeature(e) {
@@ -291,8 +278,9 @@ let app = new Vue({
   data: {
     isAMActive: true,
     isPMActive: false,
-    sliderValue: 0,
-    description: "Choose any project!",
+    infoTitle: "Select any project to learn more about it.",
+    infoDetails: "",
+    infoUrl: "",
   },
   watch: {
   },
@@ -302,25 +290,6 @@ let app = new Vue({
   }
 });
 
-// ---------- INFO PANEL ------------------------------------------------
-
-let infoPanel = L.control({position:"bottomright"});
-let hoverPanelTimeout;
-
-function updateInfoPanel(text) {
-  infoPanel._div.innerHTML = text;
-
-}
-
-infoPanel.onAdd = function(map) {
-  this._div = L.DomUtil.create('div', 'info-panel');
-  this._div.innerHTML =
-    `<h5>PROJECT DETAILS:</h5>` +
-    `Select any project on the map to learn more about it.`;
-  return this._div;
-};
-
-infoPanel.addTo(mymap);
 
 // ---------- HOVER PANEL -------------------------------------------------
 

@@ -1,27 +1,13 @@
 <!DOCTYPE html>
 <html>
 
-  {% include head.html %}
+{% include head.html %}
 
-  <body>
+<body>
 
-  {%include nav-header.html %}
+{{ content }}
 
-  {{ content }}
+{% include scripts-footer.html %}
 
-  <!-- jQuery Version 1.11.0 -->
-  <script src="/lib/jquery-latest.min.js"></script>
-
-  <!-- Bootstrap Core JavaScript -->
-  <script src="/lib/bootstrap.min.js"></script>
-
-  <!-- Plugin JavaScript -->
-  <script src="/lib/jquery.easing.min.js"></script>
-  <script src="/lib/classie.js"></script>
-  <script src="/lib/cbpAnimatedHeader.js"></script>
-
-  <!-- Custom Theme JavaScript -->
-  <script src="/lib/agency.js"></script>
-
-  </body>
+</body>
 </html>

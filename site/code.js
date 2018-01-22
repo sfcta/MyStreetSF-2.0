@@ -265,6 +265,20 @@ function hoverFeature(e) {
   updateHoverPanel(id);
 }
 
+function clickedFilter(e) {
+  console.log(e.target);
+  let id = e.target.id;
+
+  if (id == 'btn-transit') app.filterTransit = !app.filterTransit;
+  if (id == 'btn-streets') app.filterStreets = !app.filterStreets;
+  if (id == 'btn-areas') app.filterAreas = !app.filterAreas;
+
+  updateFilters();
+}
+
+function updateFilters() {
+}
+
 function unHoverFeature(e) {
   // Remove highlight from previous selection
   if (_hoverProject) {
@@ -276,8 +290,9 @@ let app = new Vue({
   el: '#panel',
   delimiters: ['${', '}'],
   data: {
-    isAMActive: true,
-    isPMActive: false,
+    filterTransit: false,
+    filterStreets: false,
+    filterAreas: false,
     infoTitle: "Select any project to learn more about it.",
     infoDetails: "",
     infoUrl: "",
@@ -285,6 +300,7 @@ let app = new Vue({
   watch: {
   },
   methods: {
+    clickedFilter: clickedFilter,
   },
   components: {
   }

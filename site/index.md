@@ -27,13 +27,19 @@ css:
 
       <div class="pickers">
         <h5>NARROW BY PROJECT TYPE:</h5>
-        <button v-bind:class="{ active: isAMActive, yellow: isAMActive}"
+        <button v-on:click="clickedFilter"
+                id="btn-transit"
+                v-bind:class="{ active: filterTransit, yellow: filterTransit}"
                 class="small ui grey button">
                  Transit</button>
-        <button v-bind:class="{ active: false, yellow: false}"
+        <button v-on:click="clickedFilter"
+                id="btn-streets"
+                v-bind:class="{ active: filterStreets, yellow: filterStreets}"
                 class="small ui grey button">
                  Streets</button>
-        <button v-bind:class="{ active: false, yellow: false}"
+        <button v-on:click="clickedFilter"
+                id="btn-areas"
+                v-bind:class="{ active: filterAreas, yellow: filterAreas}"
                 class="small ui grey button">
                  Area Plans</button>
 

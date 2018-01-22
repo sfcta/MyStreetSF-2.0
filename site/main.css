@@ -519,7 +519,7 @@ td.extension-details {
   text-align: right;
   vertical-align: top;
   padding: 5px 5px 5px 5px;
-  width: min-content;
+  width: max-content;
 
 }
 

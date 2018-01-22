@@ -518,6 +518,17 @@ a:hover { text-decoration: none;}
 td.extension-details {
   text-align: right;
   vertical-align: top;
+  padding: 5px 5px 5px 5px;
+  width: min-content;
+
+}
+
+td.col2 {
+  text-align: left;
+}
+
+.project-subtitle {
+  background-color: #c80;
 }
 
 .extension-table {
@@ -541,8 +552,9 @@ td.extension-details {
 }
 
 .extension-table tr:hover td {
-background-color: #e5e5e5;
+  background-color: #e5e5e5;
 }
+
 p {color:#ccc;}
 
 h1 {margin-top:0px;}
@@ -594,13 +606,13 @@ a:hover { color: #46f;}
 li {margin-bottom:4px;}
 ul {margin-top:5px;}
 
-table {text-align:center; vertical-align:top; }
+table {vertical-align:top; }
 
 td {
   text-align:left;
   vertical-align:top;
   padding: 6px 10px;
-  margin: 0 0;
+  margin: 5px 5px;
 }
 
 .fade-enter-active, .fade-leave-active {
@@ -611,7 +623,7 @@ td {
 }
 
 #main-content {
-  margin-top:200px;
+  margin-top:100px;
 }
 
 .info-panel {
@@ -641,8 +653,8 @@ td {
 
 .navbar-default {
     border: 0;
-    background-color: #fa991d; /* this is a nice approx of the TA banner color mix */
-    background-image: url("/images/banner.jpg");
+    background-color: #99ac90;
+    /* #fa991d; this is a nice approx of the TA banner color mix */
     background-repeat: no-repeat;
     background-size: cover;
     -webkit-transition: padding .3s;

@@ -5,9 +5,11 @@ section: PROJECT GALLERY
 <div id="zoom-map"></div>
 
 <h1>{{page.project_name}}</h1>
-<h4>Project ID: {{page.project_number}}</h4>
+<h4 style="color:#444;">Project ID: {{page.project_number}}</h4>
 
 <hr />
+
+<h3 class="project-subtitle">Brief Project Description</h3>
 
 <b>{{ page.description }}</b>
 
@@ -17,21 +19,30 @@ section: PROJECT GALLERY
 
 <table>
 
-{% include project-detail.html field="title" desc="Title" %}
-{% include project-detail.html field="resolution" desc="Resolution" %}
-{% include project-detail.html field="project_location" desc="Location" %}
-{% include project-detail.html field="new_project_type" desc="Project Type" %}
-{% include project-detail.html field="new_project_tags" desc="Tags" %}
-{% include project-detail.html field="sponsor" desc="Sponsor" %}
-{% include project-detail.html field="districts" desc="Districts" %}
+<tr class="project-subtitle"><td><h3>Detailed Project Information</h3></td><td></td></tr>
+
 {% include project-detail.html field="current_phase" desc="Current Phase" %}
-{% include project-detail.html field="phase_expected_completion" desc="Expected Completion of this phase" %}
-{% include project-detail.html field="project_expected_completion" desc="Project Expected Completion" %}
-{% include project-detail.html field="funding_sources" desc="Funding sources" %}
-{% include project-detail.html field="project_details_page" desc="Link to project" url=true %}
-{% include project-detail.html field="project_cost_estimate" desc="Project cost estimate" %}
-{% include project-detail.html field="percent_complete" desc="% Complete" %}
 {% include project-detail.html field="status" desc="Status" %}
+{% include project-detail.html field="percent_complete" desc="% Complete" %}
+{% include project-detail.html field="project_expected_completion" desc="Project Expected Completion" %}
+{% include project-detail.html field="sponsor" desc="Lead Agency" %}
+
+{% include project-detail.html field="project_location" desc="Location" %}
+{% include project-detail.html field="districts" desc="Districts" %}
+
+{% include project-detail.html field="new_project_tags" desc="Tags" %}
+{% include project-detail.html field="project_cost_estimate" desc="Project cost estimate" %}
+{% include project-detail.html field="funding_sources" desc="Funding sources" %}
+
+</table>
+
+<br/>
+
+<table>
+
+<tr class="project-subtitle"><td class="td-project-subtitle"><h3>For More Information</h3></td><td></td></tr>
+
+{% include project-detail.html field="project_details_page" desc="Link to project" url=true %}
 
 </table>
 

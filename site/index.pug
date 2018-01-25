@@ -1,0 +1,65 @@
+---
+layout: fullscreen
+title: MyStreet SFCTA
+section: "&nbsp;MAP&nbsp;"
+css:
+  - '/main.css'
+---
+#container
+  #panel 
+    #preheader
+      hr
+      h3.apptitle MyStreet SF
+      hr
+    
+    .information-panel
+        br
+        h2 ${ infoTitle }
+        p  ${ infoDetails }
+        .details-link(v-html="infoUrl")
+
+    .bottom-panel
+      .pickers
+        h5 NARROW BY PROJECT TYPE:
+        
+        button#btn-transit.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterTransit, yellow: filterTransit}"
+        ) Transit
+
+        button#btn-streets.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterStreets, yellow: filterStreets}"
+        ) Streets
+
+        button#btn-areas.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterAreas, yellow: filterAreas}"
+        ) Area Plans
+
+        br
+        h5 FIND A PROJECT:
+        
+        .ui.icon.inverted.input(style="width:100%")
+            input(type="text" placeholder="Search...")
+            i.search.icon
+        br
+        br
+        br
+
+      // logo panel
+      hr(style="margin: 0px 0px;")
+
+      table#table-logo
+        tr
+          td.td-logo: h4.agency: b 
+            a(target="_blank"
+              href="http://www.sfcta.org/"
+            ) SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY
+          td.td-logo
+            a.agency-link(target="_blank" href="http://www.sfcta.org/")   
+              img.img-logo(src="/images/sfcta-logo-144.png" width="60")
+  
+  #sfmap
+
+script(src="/lib/main.bundle.js")

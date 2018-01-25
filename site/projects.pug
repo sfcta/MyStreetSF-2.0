@@ -1,0 +1,38 @@
+---
+layout: default
+title: Gallery - MyStreet SF
+section: PROJECT GALLERY
+thumbnail: scrnshot.png
+css:
+  - '/main.css'
+---
+h1 Project Gallery
+
+hr
+
+h3 Notable projects from around our city:
+
+table: tr
+    td
+        img(src="/images/thumbnail.jpg" width="250")
+        br
+        b Marquee Project #1
+    td
+        img(src="/images/thumbnail.jpg" width="250")
+        br
+        b Marquee Project #2
+    td
+        img(src="/images/thumbnail.jpg" width="250")
+        br
+        b Marquee Project #3
+br
+hr
+
+h1 Project List
+h3 in no particular order, for now
+
+| <ul>
+| {% for prj in site.data.projects %}<li><a href="/projects{{ prj.internal_link | datapage_url: dir | remove: '.html' }}/">{{prj.project_name}}</a></li>
+| {% endfor%}
+| </ul>
+

@@ -1,7 +1,9 @@
 _gh_pages
 build
-_site
+dist
+
 .ruby-version
+.pug-cache
 
 projects*.yml
 
@@ -38,5 +40,4 @@ bundles
 bundle.js
 .jekyll-metadata
 *bundle.js*
-
 

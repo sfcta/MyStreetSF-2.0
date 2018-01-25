@@ -19,13 +19,19 @@ github:
 
 # --- Build settings
 source: site
-destination: _site
+destination: dist
 exclude: ['node_modules']
 plugins:
   - jekyll-sitemap
+  - jekyll-pug
+
 page_gen:
   - data: 'projects'
     dir: 'projects'
     index_files: true
     name: 'project_number'
     template: 'projectpage'
+
+jekyll-pug:
+    shipped_version: 2.0.0-beta10
+

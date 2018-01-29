@@ -265,8 +265,11 @@ function hoverFeature(e) {
   updateHoverPanel(id);
 }
 
+function clickedDistrict(e) {
+  console.log(e);
+}
+
 function clickedFilter(e) {
-  console.log(e.target);
   let id = e.target.id;
 
   if (id == 'btn-transit') app.filterTransit = !app.filterTransit;
@@ -296,7 +299,7 @@ function updateFilters() {
     if (showAll) {
       show = true;
     } else {
-      if (prj.new_project_tags == undefined ) {
+      if (prj.new_project_type == undefined ) {
         show = false;
       } else {
         if (transit && prj.new_project_type.includes('Transit')) show = true;
@@ -305,7 +308,8 @@ function updateFilters() {
       }
     }
 
-    console.log(prj); console.log(show);
+    //console.log(prj);
+    //console.log(show);
 
     if (show && !mymap.hasLayer(layer)) {
       mymap.addLayer(layer);
@@ -343,6 +347,7 @@ let app = new Vue({
   },
   methods: {
     clickedFilter: clickedFilter,
+    clickedDistrict: clickedDistrict,
   },
   components: {
   }
@@ -373,6 +378,11 @@ function updateHoverPanel(id) {
 }
 
 hoverPanel.addTo(mymap);
+
+  // semantic requires this line for dropdowns to work
+  // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
+  $(".ui.dropdown").dropdown();
+
 
 // ready to go!
 queryServer();

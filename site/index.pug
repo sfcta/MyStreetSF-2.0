@@ -20,6 +20,59 @@ css:
 
     .bottom-panel
       .pickers
+        h5 CHOOSE BY TAGS:
+
+        .ui.multiple.dropdown
+          input(type="hidden" name="filters")
+          i.filter.icon
+          span.text Select some tags:
+          .menu
+            .ui.icon.search.input
+              i.search.icon
+              input(type="text" placeholder="Search tags...")
+            .divider
+            .header
+              i.tags.icon
+              | Tag Label
+            .scrolling.menu
+              .item(data-value="1")
+                .ui.red.empty.circular.label
+                | Bicycle Safety
+              .item(data-value="4")
+                .ui.red.empty.circular.label
+                | Capital Projects
+              .item(data-value="6")
+                .ui.black.empty.circular.label
+                | Pedestrian Improvements
+              .item(data-value="5")
+                .ui.blue.empty.circular.label
+                | Plans and Studies
+              .item(data-value="2")
+                .ui.blue.empty.circular.label
+                | Traffic Calming
+              .item(data-value="3")
+                .ui.black.empty.circular.label
+                | Transit
+
+        h5 NARROW BY DISTRICT:
+
+        .ui.selection.dropdown
+          .text: div(v-cloak) Citywide
+          i.dropdown.icon
+          .menu
+            .item(v-on:click="clickedDistrict") Citywide
+            .item(v-on:click="clickedDistrict") District 1
+            .item(v-on:click="clickedDistrict") District 2
+            .item(v-on:click="clickedDistrict") District 3
+            .item(v-on:click="clickedDistrict") District 4
+            .item(v-on:click="clickedDistrict") District 5
+            .item(v-on:click="clickedDistrict") District 6
+            .item(v-on:click="clickedDistrict") District 7
+            .item(v-on:click="clickedDistrict") District 8
+            .item(v-on:click="clickedDistrict") District 9
+            .item(v-on:click="clickedDistrict") District 10
+            .item(v-on:click="clickedDistrict") District 11
+
         h5 NARROW BY PROJECT TYPE:
 
         button#btn-transit.small.ui.grey.button(

@@ -6,7 +6,7 @@ import 'isomorphic-fetch';
 
 var maplib = require('./maplib');
 
-const GEO_VIEW = 'mystreet2_all';
+const GEO_VIEW = 'mystreet2_sample';
 
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML;
@@ -277,7 +277,49 @@ function clickedFilter(e) {
 }
 
 function updateFilters() {
+  let transit = app.filterTransit;
+  let streets = app.filterStreets;
+  let areas = app.filterAreas;
+
+  // if none are clicked, then all are clicked! :-O
+  let showAll = false;
+  if (transit == streets == areas == false) {
+    showAll = true;
+  }
+
+  for (let id in _layers) {
+    let layer = _layers[id];
+    let prj = _cache[id];
+
+    let show = false;
+
+    if (showAll) {
+      show = true;
+    } else {
+      if (prj.new_project_tags == undefined ) {
+        show = false;
+      } else {
+        if (transit && prj.new_project_type.includes('Transit')) show = true;
+        if (streets && prj.new_project_type.includes('Streets')) show = true;
+        if (areas && prj.new_project_type.includes('Plans')) show = true;
+      }
+    }
+
+    console.log(prj); console.log(show);
+
+    if (show && !mymap.hasLayer(layer)) {
+      mymap.addLayer(layer);
+      continue;
+    }
+    if ((!show) && mymap.hasLayer(layer)) {
+      mymap.removeLayer(layer);
+      continue;
+    }
+
+  }
+
 }
+
 
 function unHoverFeature(e) {
   // Remove highlight from previous selection

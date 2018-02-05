@@ -30,10 +30,7 @@ css:
             .ui.icon.search.input
               i.search.icon
               input(type="text" placeholder="Search tags...")
-            .divider
             .header
-              i.tags.icon
-              | Tag Label
             .scrolling.menu
               .item(data-value="1")
                 .ui.red.empty.circular.label
@@ -60,18 +57,18 @@ css:
           .text: div(v-cloak) Citywide
           i.dropdown.icon
           .menu
-            .item(v-on:click="clickedDistrict") Citywide
-            .item(v-on:click="clickedDistrict") District 1
-            .item(v-on:click="clickedDistrict") District 2
-            .item(v-on:click="clickedDistrict") District 3
-            .item(v-on:click="clickedDistrict") District 4
-            .item(v-on:click="clickedDistrict") District 5
-            .item(v-on:click="clickedDistrict") District 6
-            .item(v-on:click="clickedDistrict") District 7
-            .item(v-on:click="clickedDistrict") District 8
-            .item(v-on:click="clickedDistrict") District 9
-            .item(v-on:click="clickedDistrict") District 10
-            .item(v-on:click="clickedDistrict") District 11
+            .item(v-on:click="clickedDistrict(0)") Citywide
+            .item(v-on:click="clickedDistrict(1)") District 1
+            .item(v-on:click="clickedDistrict(2)") District 2
+            .item(v-on:click="clickedDistrict(3)") District 3
+            .item(v-on:click="clickedDistrict(4)") District 4
+            .item(v-on:click="clickedDistrict(5)") District 5
+            .item(v-on:click="clickedDistrict(6)") District 6
+            .item(v-on:click="clickedDistrict(7)") District 7
+            .item(v-on:click="clickedDistrict(8)") District 8
+            .item(v-on:click="clickedDistrict(9)") District 9
+            .item(v-on:click="clickedDistrict(10)") District 10
+            .item(v-on:click="clickedDistrict(11)") District 11
 
         h5 NARROW BY PROJECT TYPE:
 

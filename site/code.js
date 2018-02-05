@@ -265,8 +265,11 @@ function hoverFeature(e) {
   updateHoverPanel(id);
 }
 
-function clickedDistrict(e) {
-  console.log(e);
+function clickedDistrict(district) {
+  console.log("Chose District" + district);
+  app.filterDistrict = parseInt(district);
+
+  updateFilters();
 }
 
 function clickedFilter(e) {
@@ -308,14 +311,21 @@ function updateFilters() {
       }
     }
 
-    //console.log(prj);
-    //console.log(show);
+    // now check district
+    let district = app.filterDistrict;
+    let districtColName = "district" + district;
 
-    if (show && !mymap.hasLayer(layer)) {
+    let isCorrectDistrict = (district == 0 ||
+                             district > 0 && prj[districtColName]==1);
+
+    // the final word
+    let passedAllTests = show && isCorrectDistrict;
+
+    if (passedAllTests && !mymap.hasLayer(layer)) {
       mymap.addLayer(layer);
       continue;
     }
-    if ((!show) && mymap.hasLayer(layer)) {
+    if ((!passedAllTests) && mymap.hasLayer(layer)) {
       mymap.removeLayer(layer);
       continue;
     }
@@ -339,6 +349,7 @@ let app = new Vue({
     filterTransit: false,
     filterStreets: false,
     filterAreas: false,
+    filterDistrict: 0,
     infoTitle: "Select any project to learn more about it.",
     infoDetails: "",
     infoUrl: "",

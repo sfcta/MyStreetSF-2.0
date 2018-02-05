@@ -17,6 +17,7 @@
   display: none;
 }
 
+
 .mobilenav h5 {
 	  display: none;
 }
@@ -704,21 +705,40 @@ td {
   padding: 0px 0px 0px 0px;
 }
 
+
 #panel {
-  color: #fff;
-  position: absolute;
-  display:table;
-  float: right;
-  top:0;
-  right:0;
-  bottom:0;
-  width:400px;
-  height:100%;
-  padding:0px 15px 0px 15px;
-  z-index:10;
   background-color:#444;
   border-color: transparent;
+  bottom:0;
   box-shadow: 0 0 8px rgba(0,0,0, 0.5);
+  color: #fff;
+  display:table;
+  float: right;
+  height: 100%;
+  padding:0px 15px 0px 15px;
+  position: absolute;
+  right:0;
+  top:0;
+  width:400px;
+  z-index:10;
+}
+
+.information-panel {
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.information-panel::-webkit-scrollbar {
+    width: 0.3em;
+}
+
+.information-panel::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+.information-panel::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
 }
 
 #panel a {
@@ -733,7 +753,7 @@ td {
 }
 
 #panel label {
-  color:white;
+  color:#fff;
 }
 
 #panel p {color:#ccc;}
@@ -1119,4 +1139,3 @@ td.td-logo {
     margin-top: 60px;
   }
 }
-

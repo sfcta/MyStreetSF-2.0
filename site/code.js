@@ -364,6 +364,17 @@ let app = new Vue({
   }
 });
 
+// ---------- SEARCH PANEL ----------------------
+let searchPanel = L.control({position:"topleft"});
+searchPanel.onAdd = function(map) {
+  this._div = L.DomUtil.create('div', 'search-panel');
+  this._div.innerHTML = `<div style="width:100%" class="ui icon inverted input">
+      <input type="text" placeholder="Search by project name, street..." .><i class="search icon"></i></input></div>`;
+  return this._div;
+};
+searchPanel.addTo(mymap);
+
+
 
 // ---------- HOVER PANEL -------------------------------------------------
 

@@ -6,7 +6,7 @@ import 'isomorphic-fetch';
 
 var maplib = require('./maplib');
 
-const GEO_VIEW = 'mystreet2_sample';
+const GEO_VIEW = 'mystreet2_all';
 
 let styles = maplib.styles;
 let getLegHTML = maplib.getLegHTML;
@@ -49,6 +49,13 @@ function mapSegments(cmpsegJson) {
     if (segment['geometry'] == null) continue;
 
     let id = segment['id'];
+
+
+    //TODO:  Fake project types, for now
+    if (segment.sponsor && segment.sponsor === 'MUNI') segment.new_project_type = "Transit";
+    if (segment.description && segment.description.includes('safety')) segment.new_project_type = "Streets";
+    if (segment.description && segment.description.includes('study')) segment.new_project_type = "Plans and Studies";
+    if (segment.name && segment.name.includes('Planning')) segment.new_project_type = "Plans and Studies";
 
     let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">'
                + '<Placemark>' + segment['geometry'] + '</Placemark></kml>';
@@ -302,9 +309,11 @@ function updateFilters() {
     if (showAll) {
       show = true;
     } else {
-      if (prj.new_project_type == undefined ) {
+
+      if (!prj || !prj.new_project_type) {
         show = false;
       } else {
+        console.log(id + " - " + prj.new_project_type);
         if (transit && prj.new_project_type.includes('Transit')) show = true;
         if (streets && prj.new_project_type.includes('Streets')) show = true;
         if (areas && prj.new_project_type.includes('Plans')) show = true;
@@ -365,15 +374,57 @@ let app = new Vue({
 });
 
 // ---------- SEARCH PANEL ----------------------
-let searchPanel = L.control({position:"topleft"});
-searchPanel.onAdd = function(map) {
-  this._div = L.DomUtil.create('div', 'search-panel');
-  this._div.innerHTML = `<div style="width:100%" class="ui icon inverted input">
-      <input type="text" placeholder="Search by project name, street..." .><i class="search icon"></i></input></div>`;
-  return this._div;
-};
-searchPanel.addTo(mymap);
 
+let _queryString;
+
+async function fetchSearchResults (terms) {
+  // let searchUrl = 'https://api.sfcta.org/api/mystreet2_search?terms=@@.{'
+  // searchUrl += terms + '}'
+
+  let searchUrl = 'http://api.sfcta.org/api/mystreet2_search?select=id,name&name=ilike.'
+
+  let query = terms.replace(/ /g, '*')
+  searchUrl += `*${query}*`
+
+  console.log(searchUrl)
+
+  try {
+    let resp = await fetch(searchUrl)
+    let jsonData = await resp.json()
+
+    // update list ONLY if query has not changed while we were fetching
+    if (terms === _queryString) {
+      searchComponent.results = jsonData;
+    }
+  } catch (error) {
+    console.log('map error: ' + error)
+  }
+}
+
+function termChanged () {
+  console.log(searchComponent.terms)
+  _queryString = searchComponent.terms.trim()
+
+  if (_queryString) fetchSearchResults(_queryString)
+  else searchComponent.results = []
+}
+
+let searchComponent = new Vue({
+  el: '#search-panel',
+  delimiters: ['${', '}'],
+  data: {
+    terms: '',
+    results: [],
+  },
+  watch: {
+    terms: termChanged,
+  },
+  methods: {
+    termChanged: termChanged,
+  },
+  components: {
+  }
+});
 
 
 // ---------- HOVER PANEL -------------------------------------------------
@@ -401,10 +452,9 @@ function updateHoverPanel(id) {
 
 hoverPanel.addTo(mymap);
 
-  // semantic requires this line for dropdowns to work
-  // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
-  $(".ui.dropdown").dropdown();
-
+// semantic requires this line for dropdowns to work
+// https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
+$(".ui.dropdown").dropdown();
 
 // ready to go!
 queryServer();

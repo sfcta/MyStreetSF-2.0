@@ -12,15 +12,15 @@ css:
       h3.apptitle MyStreet SF
       hr
 
-    .information-panel
+    .information-panel(v-cloak)
         br
         h2 ${ infoTitle }
         p  ${ infoDetails }
         .details-link(v-html="infoUrl")
 
-    .bottom-panel
+    .bottom-panel(v-cloak)
       .pickers
-        h5 CHOOSE BY TAGS:
+        h5 NARROW BY TAGS:
 
         .ui.multiple.dropdown
           input(type="hidden" name="filters")
@@ -104,6 +104,18 @@ css:
             a.agency-link(target="_blank" href="http://www.sfcta.org/")
               img.img-logo(src="/images/sfcta-logo-144.png" width="60")
 
+  #search-panel
+    #search-term-box.ui.fluid.icon.inverted.input
+      input(v-model="terms" type="text" placeholder="Search by project name, topic...")
+      i.search.icon
+    #search-results(v-cloak v-if="results.length")
+      .ui.relaxed.list
+        target(v-for="result in results")
+          a(v-bind:href="'/projects/' + result.id + '/'")
+            .search-item
+              hr
+              h4 ${ result.name }
+              p Project ID: ${ result.id }
   #sfmap
 
 script(src="/lib/main.bundle.js")

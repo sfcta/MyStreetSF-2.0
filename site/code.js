@@ -374,30 +374,39 @@ let app = new Vue({
 });
 
 // ---------- SEARCH PANEL ----------------------
-
 let _queryString;
 
 async function fetchSearchResults (terms) {
-  // let searchUrl = 'https://api.sfcta.org/api/mystreet2_search?terms=@@.{'
-  // searchUrl += terms + '}'
+  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search';
 
-  let searchUrl = 'http://api.sfcta.org/api/mystreet2_search?select=id,name&name=ilike.'
+  let fancySearch = searchAPI + '?terms=@@.{';
+  fancySearch += terms + '}';
+  fancySearch = fancySearch.replace(/ /g, ',');
 
-  let query = terms.replace(/ /g, '*')
-  searchUrl += `*${query}*`
-
-  console.log(searchUrl)
+  let simpleSearch = searchAPI + '?select=id,name&name=ilike.';
+  let query = terms.replace(/ /g, '*');
+  simpleSearch += `*${query}*`;
 
   try {
-    let resp = await fetch(searchUrl)
-    let jsonData = await resp.json()
+    // first try smart keyword search
+    console.log(fancySearch);
+    let resp = await fetch(fancySearch);
+    let jsonData = await resp.json();
+
+    // if no results, try simple text search
+    if (terms === _queryString && jsonData.length == 0) {
+      console.log('nuthin');
+      console.log(simpleSearch);
+      resp = await fetch(simpleSearch)
+      jsonData = await resp.json()
+    }
 
     // update list ONLY if query has not changed while we were fetching
     if (terms === _queryString) {
       searchComponent.results = jsonData;
     }
   } catch (error) {
-    console.log('map error: ' + error)
+    console.log('search error'); console.log(error);
   }
 }
 

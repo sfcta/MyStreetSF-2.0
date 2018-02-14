@@ -110,8 +110,8 @@ css:
       i.search.icon
     #search-results(v-cloak v-if="results.length")
       .ui.relaxed.list
-        target(v-for="result in results")
-          a(v-bind:href="'/projects/' + result.id + '/'")
+        template(v-for="result in results")
+          a(v-bind:href="'/projects/' + result.id.toLowerCase() + '/'")
             .search-item
               hr
               h4 ${ result.name }

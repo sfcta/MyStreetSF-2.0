@@ -438,8 +438,8 @@ async function fetchTagResults(terms) {
   let answer = [];
   let termsLower = terms.toLowerCase();
   for (let tag of _tagList) {
-    let keywords = keyword_extractor.extract(tag);
-    console.log(keywords);
+    let cleaned = tag.replace(/\//g,' ');
+    let keywords = keyword_extractor.extract(cleaned);
     for (let word of keywords) {
       if (word.startsWith(termsLower)) {
         answer.push(tag);
@@ -495,9 +495,25 @@ function termChanged () {
   else searchComponent.results = [];
 }
 
-function clickedSearch(id) {
+let _hoverSearchLastId;
+
+function hoverSearch(id) {
+  if (id == _hoverSearchLastId) return;
+
+  _hoverSearchLastId = id;
   hoverFeature(id);
+}
+
+function clickedSearch(id) {
   clickedOnFeature(id);
+}
+
+function clickedSearchTag(tag) {
+  alert("YOU CLICKED: " + tag + "\nOnce the database has some tags in it, this will be more useful.");
+}
+
+function clearSearchBox() {
+  searchComponent.terms = '';
 }
 
 let searchComponent = new Vue({
@@ -514,6 +530,9 @@ let searchComponent = new Vue({
   methods: {
     termChanged: termChanged,
     clickedSearch: clickedSearch,
+    clickedSearchTag: clickedSearchTag,
+    clearSearchBox: clearSearchBox,
+    hoverSearch: hoverSearch,
   },
   components: {
   }

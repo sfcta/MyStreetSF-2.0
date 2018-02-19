@@ -106,17 +106,26 @@ css:
 
   #search-panel
     #search-term-box.ui.fluid.icon.inverted.input
-      input(v-model="terms" type="text" placeholder="Search by project name, topic...")
-      i.search.icon
+      input(v-model="terms"
+            tabindex="1"
+            type="text"
+            v-on:keyup.esc="clearSearchBox"
+            placeholder="Search by project name, topic...")
+      i.search.icon(v-if="!terms")
+      i.remove.link.icon(v-if="terms" v-on:click="clearSearchBox")
     #search-results(v-cloak v-if="results.length + tagresults.length")
       .ui.relaxed.list
         .search-category(v-if="tagresults.length")
           p TAGS
-        #search-tags.tiny.basic.ui.button(v-for="tag in tagresults") ${ tag }
+        #search-tags.tiny.basic.pink.ui.button(
+          v-for="tag in tagresults"
+          v-on:click='clickedSearchTag(tag)'
+        ) ${ tag }
         .search-category(v-if="results.length")
           p PROJECTS
         template(v-for="result in results")
-          div(v-on:click="clickedSearch(result.id)")
+          div(v-on:click="clickedSearch(result.id)"
+              v-on:mouseover="hoverSearch(result.id)")
             .search-item
               hr
               h4 ${ result.name }

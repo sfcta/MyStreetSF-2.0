@@ -715,6 +715,7 @@ td {
     background-color: white;
     max-height: 500px;
     overflow-y: auto;
+    padding-bottom: 10px;
 }
 #search-results::-webkit-scrollbar {
     width: 0.3em;

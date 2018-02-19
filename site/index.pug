@@ -111,7 +111,7 @@ css:
     #search-results(v-cloak v-if="results.length")
       .ui.relaxed.list
         template(v-for="result in results")
-          a(v-bind:href="'/projects/' + result.id.toLowerCase() + '/'")
+          div(v-on:click="clickedSearch(result.id)")
             .search-item
               hr
               h4 ${ result.name }

@@ -48,7 +48,7 @@ function mapSegments(cmpsegJson) {
 
     if (segment['geometry'] == null) continue;
 
-    let id = segment['id'];
+    let id = segment['project_number'];
 
 
     //TODO:  Fake project types, for now
@@ -143,7 +143,7 @@ function generateColorFromDb(icon_name) {
   return defaultColor;
 }
 
-function updatePanelDetails(id, latlng) {
+function updatePanelDetails(id) {
     let prj = _cache[id];
 
     let district = '';
@@ -175,12 +175,19 @@ function updatePanelDetails(id, latlng) {
 }
 
 function clickedOnFeature(e) {
-  // For some reason, Leaflet handles points and polygons
-  // differently, hence the weirdness for fetching the id of the selected feature.
-  let id = e.target.options.id;
-  if (!id) id = e.layer.options.id;
+  let id;
+  let target;
 
-  console.log('clicked on' + id);
+  if (e in _layers) { // search box!
+    id = e;
+    target = _layers[id];
+  } else {
+    // For some reason, Leaflet handles points and polygons
+    // differently, hence the weirdness for fetching the id of the selected feature.
+    target = e.target;
+    if (target) id = target.options.id;
+    if (!id) id = e.layer.options.id;
+  }
 
   // Remove highlight from previous selection
   if (_selectedProject) _selectedProject.setStyle(_selectedStyle);
@@ -193,19 +200,20 @@ function clickedOnFeature(e) {
     if (!_selectedStyle) _selectedStyle = JSON.parse(JSON.stringify(e.layer.options));
   } catch(err) {
     // hmm
-    let z = e.target.options;
+    let z = target.options;
     _selectedStyle = {color:z.color, fillColor:z.fillColor, radius:z.radius, weight:z.weight, truecolor: z.truecolor};
   }
 
   // save this project as the selected project; it's no longer just being hovered over!
   _hoverProject = null;
-  _selectedProject = e.target;
+  _selectedProject = target;
 
   let clickedStyle = JSON.parse(JSON.stringify(styles.popup));
   clickedStyle['fillColor'] = _selectedStyle.truecolor;
-  e.target.setStyle(clickedStyle);
+  target.setStyle(clickedStyle);
 
-  updatePanelDetails(id, e.latlng);
+  updatePanelDetails(id);
+
 }
 
 let popupTimeout;
@@ -223,15 +231,23 @@ function isTargetAPolygon(target) {
 }
 
 function hoverFeature(e) {
+  let target;
+
+  // deal w search clicks first
+  if (e in _layers) {
+    target = _layers[e];
+  } else {
+    target = e.target;
+  }
 
   // don't add a hover if the proj is already selected
-  if (e.target == _selectedProject) return;
+  if (target == _selectedProject) return;
 
-  let polygon = isTargetAPolygon(e.target);
+  let polygon = isTargetAPolygon(target);
 
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
-  let id = e.target.options.id;
+  let id = target.options.id;
   if (!id) id = e.layer.options.id;
 
   // Remove highlight from previous selection
@@ -239,14 +255,14 @@ function hoverFeature(e) {
 
 
   // save real style info
-  _hoverStyle = e.target.options.style;
+  _hoverStyle = target.options.style;
 
   try {
     if (!_hoverStyle) _hoverStyle = e.layer.options.style;
     if (!_hoverStyle) _hoverStyle = JSON.parse(JSON.stringify(e.layer.options));
   } catch(err) {
     // hmm
-    let z = e.target.options;
+    let z = target.options;
     _hoverStyle = {color:z.color, fill:z.fill, radius:z.radius, weight:z.weight, truecolor: z.truecolor};
   }
 
@@ -264,10 +280,10 @@ function hoverFeature(e) {
 
   clearTimeout(popupTimeout);
   popupTimeout = setTimeout( function () {
-    e.target.setStyle(style);
+    target.setStyle(style);
   }, timeout);
 
-  _hoverProject = e.target;
+  _hoverProject = target;
 
   updateHoverPanel(id);
 }
@@ -418,18 +434,25 @@ function termChanged () {
   else searchComponent.results = []
 }
 
+function clickedSearch(id) {
+  hoverFeature(id);
+  clickedOnFeature(id);
+}
+
 let searchComponent = new Vue({
   el: '#search-panel',
   delimiters: ['${', '}'],
   data: {
     terms: '',
     results: [],
+    tagResults: [],
   },
   watch: {
     terms: termChanged,
   },
   methods: {
     termChanged: termChanged,
+    clickedSearch: clickedSearch,
   },
   components: {
   }

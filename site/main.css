@@ -684,6 +684,17 @@ td {
   background-color: #eee;
 }
 
+.search-category p {
+  padding-left: 5px;
+  padding-top: 10px;
+  color: #882;
+}
+
+#search-tags {
+  margin-left: 5px;
+  margin-top: 5px;
+}
+
 #search-panel {
     background-color: white;
     box-shadow: 0 0 8px rgba(0,0,0,0.5);
@@ -748,7 +759,7 @@ td {
 #container {
   background-color:#ccc;
   display: grid;
-  grid-template-columns: 300px 1fr 400px;
+  grid-template-columns: 350px 1fr 400px;
   grid-template-rows: auto 1fr;
   height: 100%;
   margin: 0px 0px 0px 0px;

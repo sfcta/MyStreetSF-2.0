@@ -3,6 +3,7 @@
 // use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
+var keyword_extractor = require("keyword-extractor");
 
 var maplib = require('./maplib');
 
@@ -25,6 +26,51 @@ const _bigAreas = [407, 477, 79, 363, 366, 17];
 
 let _cache = {};
 let _layers = {};
+let _tagList = [
+'Plans and Programs',
+'Streets',
+'Transit',
+'ADA/Accessibility',
+'Bicycle/Bike Facilities',
+'Bicycle/Bike Lanes',
+'Bicycle/Bike Projects',
+'Bicycle/Bike Safety',
+'Bulb-outs/Curb Extension/Curb ramps',
+'Bus Rapid Transit (BRT)',
+'Buses',
+'Citywide Plan',
+'Community-based transportation plans',
+'Corridor plan',
+'Countdown signals',
+'Elevators/Escalators',
+'Facilities',
+'Freeway or Congestion Management',
+'Freeways/Ramps',
+'Heavy rail',
+'Historic streetcar',
+'Light rail',
+'Motor coaches',
+'Neighborhood Plan',
+'Neighborhood Transportation Improvement Program (NTIP)',
+'Outreach',
+'Paratransit',
+'Pedestrian Safety',
+'Safe routes to school (SRTS)',
+'School transportation',
+'Sidewalks',
+'Stations/Stops',
+'Street Resurfacing',
+'Tracks/Guideways',
+'Traffic Calming',
+'Traffic Signals',
+'Trains',
+'Transit lanes',
+'Transportation demand management',
+'Trees',
+'Trolleybuses',
+'Vessels/Ferries',
+];
+
 let _selectedProject, _selectedStyle;
 let _hoverProject, _hoverStyle;
 let hoverPanelTimeout;
@@ -49,7 +95,6 @@ function mapSegments(cmpsegJson) {
     if (segment['geometry'] == null) continue;
 
     let id = segment['project_number'];
-
 
     //TODO:  Fake project types, for now
     if (segment.sponsor && segment.sponsor === 'MUNI') segment.new_project_type = "Transit";
@@ -354,11 +399,8 @@ function updateFilters() {
       mymap.removeLayer(layer);
       continue;
     }
-
   }
-
 }
-
 
 function unHoverFeature(e) {
   // Remove highlight from previous selection
@@ -391,6 +433,22 @@ let app = new Vue({
 
 // ---------- SEARCH PANEL ----------------------
 let _queryString;
+
+async function fetchTagResults(terms) {
+  let answer = [];
+  let termsLower = terms.toLowerCase();
+  for (let tag of _tagList) {
+    let keywords = keyword_extractor.extract(tag);
+    console.log(keywords);
+    for (let word of keywords) {
+      if (word.startsWith(termsLower)) {
+        answer.push(tag);
+        break;
+      }
+    }
+  }
+  searchComponent.tagresults = answer;
+}
 
 async function fetchSearchResults (terms) {
   let searchAPI = 'https://api.sfcta.org/api/mystreet2_search';
@@ -430,8 +488,11 @@ function termChanged () {
   console.log(searchComponent.terms)
   _queryString = searchComponent.terms.trim()
 
-  if (_queryString) fetchSearchResults(_queryString)
-  else searchComponent.results = []
+  if (_queryString) fetchTagResults(_queryString);
+  else searchComponent.tagresults = [];
+
+  if (_queryString) fetchSearchResults(_queryString);
+  else searchComponent.results = [];
 }
 
 function clickedSearch(id) {
@@ -445,7 +506,7 @@ let searchComponent = new Vue({
   data: {
     terms: '',
     results: [],
-    tagResults: [],
+    tagresults: [],
   },
   watch: {
     terms: termChanged,

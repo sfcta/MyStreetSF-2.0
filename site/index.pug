@@ -108,8 +108,13 @@ css:
     #search-term-box.ui.fluid.icon.inverted.input
       input(v-model="terms" type="text" placeholder="Search by project name, topic...")
       i.search.icon
-    #search-results(v-cloak v-if="results.length")
+    #search-results(v-cloak v-if="results.length + tagresults.length")
       .ui.relaxed.list
+        .search-category(v-if="tagresults.length")
+          p TAGS
+        #search-tags.tiny.basic.ui.button(v-for="tag in tagresults") ${ tag }
+        .search-category(v-if="results.length")
+          p PROJECTS
         template(v-for="result in results")
           div(v-on:click="clickedSearch(result.id)")
             .search-item

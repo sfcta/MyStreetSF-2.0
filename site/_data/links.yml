@@ -1,9 +1,0 @@
-nav_links:
-  "&nbsp;MAP&nbsp;": '/'
-  PROJECT GALLERY: '/projects/'
-  SEARCH: '/search/'
-  SFCTA: 'http://www.sfcta.org'
-
-sfcta_links:
-  SFCTA Website: "http://www.sfcta.org"
-  Contact Us: "http://www.sfcta.org/about/contact"

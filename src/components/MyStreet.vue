@@ -1,0 +1,1140 @@
+<template lang="pug">
+#container
+  #panel
+    #preheader
+      hr
+      h3.apptitle MyStreet SF
+      hr
+
+    .information-panel(v-cloak)
+        br
+        h2 {{ infoTitle }}
+        p  {{ infoDetails }}
+        .details-link(v-html="infoUrl")
+
+    .bottom-panel(v-cloak)
+      .pickers
+        h5 NARROW BY TAGS:
+
+        .ui.multiple.bottom.pointing.dropdown
+          input(type="hidden" name="filters")
+          i.filter.icon
+          span.text Select some tags:
+          .menu
+            .ui.icon.search.input
+              i.search.icon
+              input(type="text" placeholder="Search tags...")
+            .header
+            .scrolling.menu
+              .item(data-value="1")
+                .ui.red.empty.circular.label
+                | Bicycle Safety
+              .item(data-value="4")
+                .ui.red.empty.circular.label
+                | Capital Projects
+              .item(data-value="6")
+                .ui.black.empty.circular.label
+                | Pedestrian Improvements
+              .item(data-value="5")
+                .ui.blue.empty.circular.label
+                | Plans and Studies
+              .item(data-value="2")
+                .ui.blue.empty.circular.label
+                | Traffic Calming
+              .item(data-value="3")
+                .ui.black.empty.circular.label
+                | Transit
+
+        h5 NARROW BY DISTRICT:
+
+        .ui.selection.bottom.pointing.dropdown
+          .text: div(v-cloak) Citywide
+          i.dropdown.icon
+          .menu
+            .item(v-on:click="clickedDistrict(0)") Citywide
+            .item(v-on:click="clickedDistrict(1)") District 1
+            .item(v-on:click="clickedDistrict(2)") District 2
+            .item(v-on:click="clickedDistrict(3)") District 3
+            .item(v-on:click="clickedDistrict(4)") District 4
+            .item(v-on:click="clickedDistrict(5)") District 5
+            .item(v-on:click="clickedDistrict(6)") District 6
+            .item(v-on:click="clickedDistrict(7)") District 7
+            .item(v-on:click="clickedDistrict(8)") District 8
+            .item(v-on:click="clickedDistrict(9)") District 9
+            .item(v-on:click="clickedDistrict(10)") District 10
+            .item(v-on:click="clickedDistrict(11)") District 11
+
+        h5 NARROW BY PROJECT TYPE:
+
+        button#btn-transit.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterTransit, yellow: filterTransit}"
+        ) Transit
+
+        button#btn-streets.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterStreets, yellow: filterStreets}"
+        ) Streets
+
+        button#btn-areas.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterAreas, yellow: filterAreas}"
+        ) Plans and Studies
+
+        br
+        br
+        br
+
+      // logo panel
+      hr(style="margin: 0px 0px;")
+
+      table#table-logo
+        tr
+          td.td-logo: h4.agency: b
+            a(target="_blank"
+              href="http://www.sfcta.org/"
+            ) SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY
+          td.td-logo
+            a.agency-link(target="_blank" href="http://www.sfcta.org/")
+              img.img-logo(src="/images/sfcta-logo-144.png" width="60")
+
+  #search-panel
+    #search-term-box.ui.fluid.icon.inverted.input
+      input(v-model="terms"
+            tabindex="1"
+            type="text"
+            v-on:keyup.esc="clearSearchBox"
+            placeholder="Search by project name, topic...")
+      i.search.icon(v-if="!terms")
+      i.remove.link.icon(v-if="terms" v-on:click="clearSearchBox")
+    #search-results(v-cloak v-if="results.length + tagresults.length")
+      .ui.relaxed.list
+        .search-category(v-if="tagresults.length")
+          p TAGS
+        #search-tags.tiny.basic.pink.ui.button(
+          v-for="tag in tagresults"
+          v-on:click='clickedSearchTag(tag)'
+        ) {{ tag }}
+        .search-category(v-if="results.length")
+          p PROJECTS
+        template(v-for="result in results")
+          div(v-on:click="clickedSearch(result.id)"
+              v-on:mouseover="hoverSearch(result.id)")
+            .search-item
+              hr
+              h4 {{ result.name }}
+              p Project ID: {{ result.id }}
+  #mymap
+</template>
+
+<script>
+'use strict'
+
+import 'isomorphic-fetch';
+
+let keywordExtractor = require('keyword-extractor');
+let L = require('leaflet');
+let omnivore = require('leaflet-omnivore');
+
+let store = {
+  filterTransit: false,
+  filterStreets: false,
+  filterAreas: false,
+  filterDistrict: 0,
+  infoTitle: 'Select any project to learn more about it.',
+  infoDetails: '',
+  infoUrl: '',
+  terms: '',
+  results: [],
+  tagresults: []
+}
+
+let theme = 'light';
+let mymap;
+let hoverPanel;
+
+const GEO_VIEW = 'mystreet2_all';
+
+let darkStyles = {
+  normal: { color: '#ff7800', weight: 4, opacity: 1.0 },
+  selected: { color: '#39f', weight: 5, opacity: 1.0 },
+  popup: { color: '#33f', weight: 10, opacity: 1.0 }
+};
+
+let lightStyles = {
+  normal: { color: '#3c6', weight: 6, opacity: 1.0 },
+  selected: { color: '#39f', weight: 8, opacity: 1.0 },
+  popup: { color: '#36f', weight: 10, opacity: 1.0 }
+};
+let styles = theme === 'dark' ? darkStyles : lightStyles;
+
+function clickedFilter (e) {
+  let id = e.target.id;
+
+  if (id === 'btn-transit') store.filterTransit = !store.filterTransit;
+  if (id === 'btn-streets') store.filterStreets = !store.filterStreets;
+  if (id === 'btn-areas') store.filterAreas = !store.filterAreas;
+
+  updateFilters();
+}
+
+function mounted () {
+  console.log('calling MOUNTED');
+
+  mymap = L.map('mymap', { zoomSnap: 0.5 });
+  mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]]);
+  mymap.zoomControl.setPosition('bottomright');
+
+  let url =
+    'https://api.mapbox.com/styles/v1/mapbox/' +
+    theme +
+    '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+  let token =
+    'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
+  let attribution =
+    '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
+    '<a href="http://mapbox.com">Mapbox</a>';
+  L.tileLayer(url, {
+    attribution: attribution,
+    maxZoom: 18,
+    accessToken: token
+  }).addTo(mymap);
+
+  hoverPanel = L.control({ position: 'topright' });
+  hoverPanel.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'hover-panel-hide');
+    this._div.innerHTML = '';
+    return this._div;
+  };
+  hoverPanel.addTo(mymap);
+
+  // semantic requires this line for dropdowns to work
+  // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
+  // $('.ui.dropdown').dropdown();
+
+  queryServer();
+}
+
+function updateHoverPanel (id) {
+  hoverPanel._div.className = 'hover-panel';
+  hoverPanel._div.innerHTML = `<b>${_cache[id].project_name}</b>`;
+
+  clearTimeout(hoverPanelTimeout);
+  hoverPanelTimeout = setTimeout(function () {
+    // use CSS to hide the info-panel
+    hoverPanel._div.className = 'hover-panel-hide';
+    // and clear the hover too
+    // geoLayer.resetStyle(oldHoverTarget);
+  }, 2000);
+}
+
+export default {
+  name: 'HelloWorld',
+  data () {
+    return store
+  },
+  mounted: function () {
+    this.$nextTick(function () {
+      // Code that will run only after the entire view has been rendered
+      mounted();
+    })
+  },
+  methods: {
+    clickedFilter: clickedFilter,
+    clickedDistrict: clickedDistrict,
+    clickedSearch: clickedSearch,
+    clickedSearchTag: clickedSearchTag,
+    clearSearchBox: clearSearchBox,
+    hoverSearch: hoverSearch,
+    termChanged: termChanged
+  },
+  watch: {
+    terms: termChanged
+  }
+}
+
+// some important global variables.
+const API_SERVER = 'https://api.sfcta.org/api/';
+
+// hard code the giant areas so they stay on the bottom layer of the map
+const _bigAreas = [407, 477, 79, 363, 366, 17];
+
+let _cache = {};
+let _layers = {};
+let _tagList = [
+  'Plans and Programs',
+  'Streets',
+  'Transit',
+  'ADA/Accessibility',
+  'Bicycle/Bike Facilities',
+  'Bicycle/Bike Lanes',
+  'Bicycle/Bike Projects',
+  'Bicycle/Bike Safety',
+  'Bulb-outs/Curb Extension/Curb ramps',
+  'Bus Rapid Transit (BRT)',
+  'Buses',
+  'Citywide Plan',
+  'Community-based transportation plans',
+  'Corridor plan',
+  'Countdown signals',
+  'Elevators/Escalators',
+  'Facilities',
+  'Freeway or Congestion Management',
+  'Freeways/Ramps',
+  'Heavy rail',
+  'Historic streetcar',
+  'Light rail',
+  'Motor coaches',
+  'Neighborhood Plan',
+  'Neighborhood Transportation Improvement Program (NTIP)',
+  'Outreach',
+  'Paratransit',
+  'Pedestrian Safety',
+  'Safe routes to school (SRTS)',
+  'School transportation',
+  'Sidewalks',
+  'Stations/Stops',
+  'Street Resurfacing',
+  'Tracks/Guideways',
+  'Traffic Calming',
+  'Traffic Signals',
+  'Trains',
+  'Transit lanes',
+  'Transportation demand management',
+  'Trees',
+  'Trolleybuses',
+  'Vessels/Ferries'
+];
+
+let _selectedProject, _selectedStyle;
+let _hoverProject, _hoverStyle;
+let hoverPanelTimeout;
+
+async function queryServer () {
+  const geoUrl = API_SERVER + GEO_VIEW;
+
+  try {
+    let resp = await fetch(geoUrl);
+    let jsonData = await resp.json();
+    mapSegments(jsonData);
+  } catch (error) {
+    console.log('map error: ' + error);
+  }
+}
+
+// add segments to the map by using metric data to color
+function mapSegments (cmpsegJson) {
+  for (let segment of cmpsegJson) {
+    if (segment['geometry'] == null) continue;
+
+    let id = segment['project_number'];
+
+    // TODO:  Fake project types, for now
+    if (segment.sponsor && segment.sponsor === 'MUNI') { segment.new_project_type = 'Transit'; }
+    if (segment.description && segment.description.includes('safety')) { segment.new_project_type = 'Streets'; }
+    if (segment.description && segment.description.includes('study')) { segment.new_project_type = 'Plans and Studies'; }
+    if (segment.name && segment.name.includes('Planning')) { segment.new_project_type = 'Plans and Studies'; }
+
+    let kml =
+      '<kml xmlns="http://www.opengis.net/kml/2.2">' +
+      '<Placemark>' +
+      segment['geometry'] +
+      '</Placemark></kml>';
+
+    let polygon = false;
+    if (segment['shape'] && segment['shape'].includes('Polygon')) { polygon = true; }
+
+    let geoLayer = L.geoJSON(null, {
+      style: styleByMetricColor(segment['icon_name'], polygon),
+      onEachFeature: function (feature, layer) {
+        layer.on({
+          mouseover: hoverFeature,
+          mouseout: unHoverFeature,
+          click: clickedOnFeature
+        });
+      },
+      pointToLayer: function (feature, latlng) {
+        // this turns 'points' into circles
+        return L.circleMarker(latlng, { id: id });
+      }
+    });
+
+    // hang onto the data
+    geoLayer.options.id = id;
+    _cache[id] = segment;
+
+    // validate KML
+    var oParser = new DOMParser();
+    var oDOM = oParser.parseFromString(kml, 'text/xml');
+    // print the name of the root element or error message
+    if (oDOM.documentElement.nodeName === 'parsererror') { console.log('## Error while parsing row id ' + id); }
+
+    // add KML to the map
+    try {
+      let layer = omnivore.kml.parse(kml, null, geoLayer);
+      layer.addTo(mymap);
+      if (polygon) layer.bringToBack();
+      _layers[id] = layer;
+    } catch (e) {
+      console.log('couldnt: ' + id);
+      console.log(segment);
+    }
+  }
+
+  // Hard-coded giant polygons -- send to back.
+  for (let giantArea of _bigAreas) {
+    if (_layers[giantArea]) _layers[giantArea].bringToBack();
+  }
+}
+
+function styleByMetricColor (iconName, polygon) {
+  let truecolor = generateColorFromDb(iconName); // actual project color;
+  let radius = 4;
+  if (iconName && iconName.startsWith('measle')) radius = 8;
+
+  return {
+    color: '#444488' + 'c0', // this is the "unselected" color -- same for all projects
+    truecolor: truecolor, // this is the "actual" project color
+    fillColor: polygon ? '#448844' + '90' : truecolor,
+    weight: polygon ? 1 : 2,
+    fillOpacity: 0.7,
+    opacity: 1.0,
+    radius: radius
+  };
+}
+
+function generateColorFromDb (iconName) {
+  let defaultColor = '#44c';
+
+  // no color? use blue.
+  if (!iconName) return defaultColor;
+
+  // color code in db? use it.
+  if (iconName.startsWith('#')) return iconName;
+
+  // icon name in db? convert to a color code.
+  switch (iconName) {
+    case 'small_blue':
+      return '#44f';
+    case 'small_green':
+      return '#4f4';
+    case 'small_purple':
+      return '#63c';
+    case 'small_red':
+      return '#f44';
+    case 'small_yellow':
+      return '#aa3';
+    case 'measle_turquoise':
+      return '#369';
+    default:
+      return defaultColor;
+  }
+}
+
+function updatePanelDetails (id) {
+  let prj = _cache[id];
+
+  let district = '';
+  if (prj['district1']) district += '1, ';
+  if (prj['district2']) district += '2, ';
+  if (prj['district3']) district += '3, ';
+  if (prj['district4']) district += '4, ';
+  if (prj['district5']) district += '5, ';
+  if (prj['district6']) district += '6, ';
+  if (prj['district7']) district += '7, ';
+  if (prj['district8']) district += '8, ';
+  if (prj['district9']) district += '9, ';
+  if (prj['district10']) district += '10, ';
+  if (prj['district11']) district += '11, ';
+  if (district) {
+    district = 'District ' + district.slice(0, -2);
+  } else {
+    district = 'Citywide';
+  }
+
+  // generate permalink
+  let permalink = prj['project_number'].toLowerCase();
+
+  let url = `<a target="_blank" href="/projects/${permalink}/">&raquo; More details&hellip;</a>`;
+
+  store.infoTitle = prj['project_name'];
+  store.infoDetails = prj['description'];
+  store.infoUrl = url;
+}
+
+function clickedOnFeature (e) {
+  let id;
+  let target;
+
+  if (e in _layers) {
+    // search box!
+    id = e;
+    target = _layers[id];
+  } else {
+    // For some reason, Leaflet handles points and polygons
+    // differently, hence the weirdness for fetching the id of the selected feature.
+    target = e.target;
+    if (target) id = target.options.id;
+    if (!id) id = e.layer.options.id;
+  }
+
+  // Remove highlight from previous selection
+  if (_selectedProject) _selectedProject.setStyle(_selectedStyle);
+
+  // Remember what the thing looked like before we hovered or clicked on it
+  _selectedStyle = _hoverStyle;
+
+  try {
+    if (!_selectedStyle) _selectedStyle = e.layer.options.style;
+    if (!_selectedStyle) { _selectedStyle = JSON.parse(JSON.stringify(e.layer.options)); }
+  } catch (err) {
+    // hmm
+    let z = target.options;
+    _selectedStyle = {
+      color: z.color,
+      fillColor: z.fillColor,
+      radius: z.radius,
+      weight: z.weight,
+      truecolor: z.truecolor
+    };
+  }
+
+  // save this project as the selected project; it's no longer just being hovered over!
+  _hoverProject = null;
+  _selectedProject = target;
+
+  let clickedStyle = JSON.parse(JSON.stringify(styles.popup));
+  clickedStyle['fillColor'] = _selectedStyle.truecolor;
+  target.setStyle(clickedStyle);
+
+  updatePanelDetails(id);
+}
+
+let popupTimeout;
+
+function isTargetAPolygon (target) {
+  try {
+    if (target.feature.geometry.type.includes('Polygon')) return true;
+  } catch (e) {}
+
+  try {
+    if (target.feature.geometry.geometries[0].type.includes('Polygon')) { return true; }
+  } catch (e) {}
+
+  return false;
+}
+
+function hoverFeature (e) {
+  let target;
+
+  // deal w search clicks first
+  if (e in _layers) {
+    target = _layers[e];
+  } else {
+    target = e.target;
+  }
+
+  // don't add a hover if the proj is already selected
+  if (target === _selectedProject) return;
+
+  let polygon = isTargetAPolygon(target);
+
+  // For some reason, Leaflet handles points and polygons
+  // differently, hence the weirdness for fetching the id of the selected feature.
+  let id = target.options.id;
+  if (!id) id = e.layer.options.id;
+
+  // Remove highlight from previous selection
+  if (_hoverProject) _hoverProject.setStyle(_hoverStyle);
+
+  // save real style info
+  _hoverStyle = target.options.style;
+
+  try {
+    if (!_hoverStyle) _hoverStyle = e.layer.options.style;
+    if (!_hoverStyle) _hoverStyle = JSON.parse(JSON.stringify(e.layer.options));
+  } catch (err) {
+    // hmm
+    let z = target.options;
+    _hoverStyle = {
+      color: z.color,
+      fill: z.fill,
+      radius: z.radius,
+      weight: z.weight,
+      truecolor: z.truecolor
+    };
+  }
+
+  let weight = polygon ? 6 : 10;
+
+  let style = {
+    color: _hoverStyle.truecolor,
+    fillColor: _hoverStyle.fillColor,
+    weight: weight,
+    opacity: 1.0
+  };
+  if (polygon) {
+    style.fillColor = _hoverStyle.truecolor;
+    style.fillOpacity = 0.3;
+  }
+
+  // the 15ms timeout keeps the highlight from flashing too much on mouse movement
+  // the 300ms timeout keeps the highlight from selecting areas every time
+  let timeout = polygon ? 300 : 0;
+
+  clearTimeout(popupTimeout);
+  popupTimeout = setTimeout(function () {
+    target.setStyle(style);
+  }, timeout);
+
+  _hoverProject = target;
+
+  updateHoverPanel(id);
+}
+
+function clickedDistrict (district) {
+  console.log('Chose District' + district);
+  store.filterDistrict = parseInt(district);
+
+  updateFilters();
+}
+
+function updateFilters () {
+  let transit = store.filterTransit;
+  let streets = store.filterStreets;
+  let areas = store.filterAreas;
+
+  // if none are clicked, then all are clicked! :-O
+  let showAll = false;
+  if (((transit === streets) === areas) === false) {
+    showAll = true;
+  }
+
+  for (let id in _layers) {
+    let layer = _layers[id];
+    let prj = _cache[id];
+
+    let show = false;
+
+    if (showAll) {
+      show = true;
+    } else {
+      if (!prj || !prj.new_project_type) {
+        show = false;
+      } else {
+        console.log(id + ' - ' + prj.new_project_type);
+        if (transit && prj.new_project_type.includes('Transit')) show = true;
+        if (streets && prj.new_project_type.includes('Streets')) show = true;
+        if (areas && prj.new_project_type.includes('Plans')) show = true;
+      }
+    }
+
+    // now check district
+    let district = store.filterDistrict;
+    let districtColName = 'district' + district;
+
+    let isCorrectDistrict =
+      district === 0 || (district > 0 && prj[districtColName] === 1);
+
+    // the final word
+    let passedAllTests = show && isCorrectDistrict;
+
+    if (passedAllTests && !mymap.hasLayer(layer)) {
+      mymap.addLayer(layer);
+      continue;
+    }
+    if (!passedAllTests && mymap.hasLayer(layer)) {
+      mymap.removeLayer(layer);
+      continue;
+    }
+  }
+}
+
+function unHoverFeature (e) {
+  // Remove highlight from previous selection
+  if (_hoverProject) {
+    _hoverProject.setStyle(_hoverStyle);
+  }
+}
+
+// ---------- SEARCH PANEL ----------------------
+let _queryString;
+
+async function fetchTagResults (terms) {
+  let answer = [];
+  let termsLower = terms.toLowerCase();
+  for (let tag of _tagList) {
+    let cleaned = tag.replace(/\//g, ' ');
+    let keywords = keywordExtractor.extract(cleaned);
+    for (let word of keywords) {
+      if (word.startsWith(termsLower)) {
+        answer.push(tag);
+        break;
+      }
+    }
+  }
+  store.tagresults = answer;
+}
+
+async function fetchSearchResults (terms) {
+  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search';
+
+  let fancySearch = searchAPI + '?terms=@@.{';
+  fancySearch += terms + '}';
+  fancySearch = fancySearch.replace(/ /g, ',');
+
+  let simpleSearch = searchAPI + '?select=id,name&name=ilike.';
+  let query = terms.replace(/ /g, '*');
+  simpleSearch += `*${query}*`;
+
+  try {
+    // first try smart keyword search
+    console.log(fancySearch);
+    let resp = await fetch(fancySearch);
+    let jsonData = await resp.json();
+
+    // if no results, try simple text search
+    if (terms === _queryString && jsonData.length === 0) {
+      console.log('nuthin');
+      console.log(simpleSearch);
+      resp = await fetch(simpleSearch);
+      jsonData = await resp.json();
+    }
+
+    // update list ONLY if query has not changed while we were fetching
+    if (terms === _queryString) {
+      store.results = jsonData;
+    }
+  } catch (error) {
+    console.log('search error');
+    console.log(error);
+  }
+}
+
+function termChanged () {
+  console.log(store.terms);
+  _queryString = store.terms.trim();
+
+  if (_queryString) fetchTagResults(_queryString);
+  else store.tagresults = [];
+
+  if (_queryString) fetchSearchResults(_queryString);
+  else store.results = [];
+}
+
+let _hoverSearchLastId;
+
+function hoverSearch (id) {
+  if (id === _hoverSearchLastId) return;
+
+  _hoverSearchLastId = id;
+  hoverFeature(id);
+}
+
+function clickedSearch (id) {
+  clickedOnFeature(id);
+}
+
+function clickedSearchTag (tag) {
+  alert(
+    'YOU CLICKED: ' +
+      tag +
+      '\nOnce the database has some tags in it, this will be more useful.'
+  );
+}
+
+function clearSearchBox () {
+  store.terms = '';
+}
+
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style>
+
+[v-cloak] {
+  display: none;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #444;
+  background-color: #fff;
+  height: 100%;
+}
+
+/* prevents transition animations on page load (Screw you IE!) */
+.preload * {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -ms-transition: none !important;
+  -o-transition: none !important;
+}
+
+.text-muted {
+  color: #777;
+  margin-bottom: 20px;
+}
+
+.text-primary {
+  color: #f0a033;
+}
+
+p {
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+ul {
+  font-size: 14px;
+}
+
+ol {
+  font-size: 14px;
+}
+
+li {
+  padding-top: 8px;
+}
+
+li.li-header {
+  padding-top: 0px;
+}
+
+p.large {
+  font-size: 16px;
+}
+
+a,
+a:hover,
+a:focus,
+a:active,
+a.active {
+  outline: 0;
+}
+
+a {
+  color: #4585f0;
+  text-decoration: none;
+}
+
+a:hover,
+a:focus,
+a:active,
+a.active {
+  color: #4545c0;
+}
+
+a.entry_list_link {
+  color: #4545c0;
+  text-decoration: none;
+}
+
+a.entry_list_link:hover {
+  color: #4585f0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+}
+
+h3 {
+  margin-top: -10px;
+  margin-bottom: 30px;
+}
+
+h4 {
+  color: #ea790d;
+}
+
+#zoom-map {
+  float: right;
+  width: 300px;
+  height: 300px;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  background-color: #eee;
+  border: 1px solid #ea790d;
+  border-radius: 8px;
+  box-shadow: 0 0 3px #00000060;
+}
+
+.search-item {
+  height: 80px;
+  color: black;
+  cursor: pointer;
+  padding: 5px 5px;
+}
+
+.search-item h4 {
+  color: #226;
+  font-size: 16px;
+  margin: 0px 0px;
+}
+.search-item p {
+  color: #666;
+  font-size: 13px;
+}
+.search-item hr {
+  margin-top: 0px;
+  margin-bottom: 3px;
+}
+.search-item:hover {
+  background-color: #eee;
+}
+
+.search-category p {
+  padding-left: 5px;
+  padding-top: 10px;
+  color: #882;
+}
+
+#search-tags {
+  margin-left: 5px;
+  margin-top: 5px;
+}
+
+#search-panel {
+  background-color: white;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+  color: black;
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  margin: 10px 20px 10px 10px;
+  z-index: 5;
+}
+
+#search-panel input {
+  padding: 10px 10px;
+  width: 100%;
+}
+
+#search-results {
+  background-color: white;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-bottom: 10px;
+}
+#search-results::-webkit-scrollbar {
+  width: 0.3em;
+}
+
+#search-results::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+#search-results::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
+
+#container {
+  background-color: #ccc;
+  display: grid;
+  grid-template-columns: 350px 1fr 400px;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+}
+
+#panel {
+  background-color: #444;
+  border-color: transparent;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: table;
+  grid-row: 1 / 3;
+  grid-column: 3 / 4;
+  height: 100%;
+  padding: 0px 15px 0px 15px;
+  z-index: 5;
+}
+
+#mymap {
+  grid-row: 1 / 3;
+  grid-column: 1 / 3;
+  z-index: 1;
+}
+
+.info-panel {
+  color: black;
+  width: 350px;
+  padding: 10px 10px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+}
+
+.info-panel h4 {
+  margin: 0 0 5px;
+  color: #777;
+}
+
+.info-panel-hide {
+  padding: 6px 8px;
+  margin: 6px 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
+
+.hover-panel {
+  color: black;
+  width: 100%;
+  padding: 10px 10px;
+  margin: 10px 20px 10px 10px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+}
+
+.hover-panel-hide {
+  color: black;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  padding: 10px 10px;
+  margin: 10px 20px 10px 10px;
+  border-radius: 5px;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
+
+.leaflet-top.leaflet-right {
+  margin: 10px 20px;
+}
+
+.information-panel {
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.information-panel::-webkit-scrollbar {
+  width: 0.3em;
+}
+
+.information-panel::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.information-panel::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
+
+.bottom-panel {
+  display: table-row;
+  text-align: right;
+  vertical-align: bottom;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 0px;
+  height: 80px;
+}
+
+.agency a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  float: right;
+}
+
+.agency a:hover {
+  color: #ccc;
+}
+
+td.td-logo {
+  margin: 0px 0px;
+  padding: 5px 10px;
+  vertical-align: middle;
+  text-align: right;
+}
+
+#table-logo {
+  margin: 0px 0px;
+}
+
+.apptitle {
+  font-size: 22px;
+  margin: 0px 0px;
+  text-align: center;
+}
+
+#panel a {
+  color: #fff;
+}
+
+#panel label {
+  color: #fff;
+}
+
+#panel p {
+  color: #ccc;
+}
+
+#panel h1,
+h3,
+h4,
+h5 {
+  color: white;
+  padding: 0px 0px;
+  margin: 0px 0px;
+}
+
+#panel hr {
+  margin: 8px 0px;
+}
+
+#preheader hr {
+  margin: 6px 0px;
+}
+
+.pickers {
+  text-align: left;
+}
+
+.pickers h5 {
+  margin-bottom: 4px;
+  margin-top: 25px;
+}
+
+.details-link {
+  text-align: right;
+  margin-right: 10px;
+}
+
+p {
+  color: #ccc;
+}
+
+h1 {
+  margin-top: 0px;
+}
+h2 {
+  margin-top: 4px;
+}
+h3 {
+  padding-top: 5px;
+}
+h4 {
+  margin-right: 10px;
+}
+h5 {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+</style>

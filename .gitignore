@@ -1,6 +1,7 @@
 _gh_pages
 build
 dist
+/semantic
 
 .ruby-version
 .pug-cache
@@ -40,4 +41,3 @@ bundles
 bundle.js
 .jekyll-metadata
 *bundle.js*
-

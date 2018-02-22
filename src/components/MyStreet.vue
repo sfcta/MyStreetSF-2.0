@@ -90,13 +90,13 @@
 
       table#table-logo
         tr
-          td.td-logo: h4.agency: b
+          td.agency-logo: h4.agency: b
             a(target="_blank"
               href="http://www.sfcta.org/"
             ) SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY
-          td.td-logo
+          td.agency-logo
             a.agency-link(target="_blank" href="http://www.sfcta.org/")
-              img.img-logo(src="/images/sfcta-logo-144.png" width="60")
+              img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
 
   #search-panel
     #search-term-box.ui.fluid.icon.inverted.input
@@ -121,19 +121,17 @@
           div(v-on:click="clickedSearch(result.id)"
               v-on:mouseover="hoverSearch(result.id)")
             .search-item
-              hr
               h4 {{ result.name }}
               p Project ID: {{ result.id }}
   #mymap
+  #hover-panel(v-bind:class="{ 'hover-panel-hide': hoverPanelHide }"): p {{ hoverPanelText }}
 </template>
 
 <script>
 'use strict'
 
-import 'isomorphic-fetch';
-
-let keywordExtractor = require('keyword-extractor');
 let L = require('leaflet');
+let keywordExtractor = require('keyword-extractor');
 let omnivore = require('leaflet-omnivore');
 
 let store = {
@@ -141,6 +139,8 @@ let store = {
   filterStreets: false,
   filterAreas: false,
   filterDistrict: 0,
+  hoverPanelHide: false,
+  hoverPanelText: '',
   infoTitle: 'Select any project to learn more about it.',
   infoDetails: '',
   infoUrl: '',
@@ -151,7 +151,6 @@ let store = {
 
 let theme = 'light';
 let mymap;
-let hoverPanel;
 
 const GEO_VIEW = 'mystreet2_all';
 
@@ -179,8 +178,6 @@ function clickedFilter (e) {
 }
 
 function mounted () {
-  console.log('calling MOUNTED');
-
   mymap = L.map('mymap', { zoomSnap: 0.5 });
   mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]]);
   mymap.zoomControl.setPosition('bottomright');
@@ -200,44 +197,33 @@ function mounted () {
     accessToken: token
   }).addTo(mymap);
 
-  hoverPanel = L.control({ position: 'topright' });
-  hoverPanel.onAdd = function (map) {
-    this._div = L.DomUtil.create('div', 'hover-panel-hide');
-    this._div.innerHTML = '';
-    return this._div;
-  };
-  hoverPanel.addTo(mymap);
-
   // semantic requires this line for dropdowns to work
   // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
-  // $('.ui.dropdown').dropdown();
+  // eslint-disable-next-line
+  $('.ui.dropdown').dropdown();
 
   queryServer();
 }
 
 function updateHoverPanel (id) {
-  hoverPanel._div.className = 'hover-panel';
-  hoverPanel._div.innerHTML = `<b>${_cache[id].project_name}</b>`;
+  store.hoverPanelText = _cache[id].project_name;
+  store.hoverPanelHide = false;
 
   clearTimeout(hoverPanelTimeout);
   hoverPanelTimeout = setTimeout(function () {
-    // use CSS to hide the info-panel
-    hoverPanel._div.className = 'hover-panel-hide';
-    // and clear the hover too
+    store.hoverPanelHide = true;
+    // clear the hover too
     // geoLayer.resetStyle(oldHoverTarget);
   }, 2000);
 }
 
 export default {
-  name: 'HelloWorld',
+  name: 'MyStreet',
   data () {
     return store
   },
   mounted: function () {
-    this.$nextTick(function () {
-      // Code that will run only after the entire view has been rendered
-      mounted();
-    })
+    mounted();
   },
   methods: {
     clickedFilter: clickedFilter,
@@ -262,9 +248,6 @@ const _bigAreas = [407, 477, 79, 363, 366, 17];
 let _cache = {};
 let _layers = {};
 let _tagList = [
-  'Plans and Programs',
-  'Streets',
-  'Transit',
   'ADA/Accessibility',
   'Bicycle/Bike Facilities',
   'Bicycle/Bike Lanes',
@@ -290,15 +273,18 @@ let _tagList = [
   'Outreach',
   'Paratransit',
   'Pedestrian Safety',
+  'Plans and Programs',
   'Safe routes to school (SRTS)',
   'School transportation',
   'Sidewalks',
   'Stations/Stops',
   'Street Resurfacing',
+  'Streets',
   'Tracks/Guideways',
   'Traffic Calming',
   'Traffic Signals',
   'Trains',
+  'Transit',
   'Transit lanes',
   'Transportation demand management',
   'Trees',
@@ -750,7 +736,7 @@ function clearSearchBox () {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
+<style scoped>
 
 [v-cloak] {
   display: none;
@@ -759,10 +745,6 @@ function clearSearchBox () {
 html,
 body {
   overflow-x: hidden;
-  font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color: #444;
-  background-color: #fff;
-  height: 100%;
 }
 
 /* prevents transition animations on page load (Screw you IE!) */
@@ -868,6 +850,7 @@ h4 {
 
 .search-item {
   height: 80px;
+  border-top: 1px solid #eee;
   color: black;
   cursor: pointer;
   padding: 5px 5px;
@@ -899,6 +882,10 @@ h4 {
 #search-tags {
   margin-left: 5px;
   margin-top: 5px;
+}
+
+#search-tags.button {
+  padding: 7px 8px;
 }
 
 #search-panel {
@@ -940,7 +927,7 @@ h4 {
   background-color: #ccc;
   display: grid;
   grid-template-columns: 350px 1fr 400px;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   height: 100%;
   margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
@@ -952,7 +939,7 @@ h4 {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   color: #fff;
   display: table;
-  grid-row: 1 / 3;
+  grid-row: 1 / 4;
   grid-column: 3 / 4;
   height: 100%;
   padding: 0px 15px 0px 15px;
@@ -960,66 +947,44 @@ h4 {
 }
 
 #mymap {
-  grid-row: 1 / 3;
+  grid-row: 1 / 4;
   grid-column: 1 / 3;
   z-index: 1;
 }
 
-.info-panel {
-  color: black;
-  width: 350px;
-  padding: 10px 10px;
+#hover-panel {
+  grid-row: 3 / 4;
+  grid-column: 1 / 3;
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   border-radius: 5px;
-}
-
-.info-panel h4 {
-  margin: 0 0 5px;
-  color: #777;
-}
-
-.info-panel-hide {
-  padding: 6px 8px;
-  margin: 6px 8px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s 0.5s, opacity 0.5s linear;
-}
-
-.hover-panel {
-  color: black;
-  width: 100%;
-  padding: 10px 10px;
-  margin: 10px 20px 10px 10px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
+  margin: 0px auto;
+  margin-bottom: 25px;
+  padding: 1px 10px;
+  z-index: 2;
 }
 
 .hover-panel-hide {
-  color: black;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  padding: 10px 10px;
-  margin: 10px 20px 10px 10px;
-  border-radius: 5px;
   visibility: hidden;
   opacity: 0;
   transition: visibility 0s 0.5s, opacity 0.5s linear;
 }
 
-.leaflet-top.leaflet-right {
-  margin: 10px 20px;
+#hover-panel p {
+  color: #66a;
+  font-weight: 700;
+  font-size: 13px;
 }
 
 .information-panel {
   max-height: 100%;
   overflow-y: auto;
+}
+
+.information-panel p {
+  padding-top: 10px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .information-panel::-webkit-scrollbar {
@@ -1056,15 +1021,16 @@ h4 {
   color: #ccc;
 }
 
-td.td-logo {
+td.agency-logo {
   margin: 0px 0px;
-  padding: 5px 10px;
+  padding: 2px 0px 0px 0px;
   vertical-align: middle;
   text-align: right;
 }
 
 #table-logo {
   margin: 0px 0px;
+  padding: 0px 0px;
 }
 
 .apptitle {
@@ -1135,6 +1101,26 @@ h4 {
 h5 {
   margin-top: 4px;
   margin-bottom: 4px;
+}
+
+table {
+  vertical-align: top;
+}
+
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 6px 10px;
+  margin: 5px 5px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 
 </style>

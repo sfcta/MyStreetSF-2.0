@@ -19,9 +19,13 @@ body,p,h1,h2,h3,h4,h5,h6 {
 
 #app {
   height: 100%;
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
 }
 
 </style>

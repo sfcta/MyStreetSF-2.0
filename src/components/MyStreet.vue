@@ -15,7 +15,8 @@
 
     .bottom-panel(v-cloak)
       .pickers
-        h5 NARROW BY TAGS:
+        hr
+        h5 BY TAGS:
 
         .ui.multiple.bottom.pointing.dropdown
           input(type="hidden" name="filters")
@@ -36,17 +37,20 @@
               .item(data-value="6")
                 .ui.black.empty.circular.label
                 | Pedestrian Improvements
-              .item(data-value="5")
-                .ui.blue.empty.circular.label
-                | Plans and Studies
-              .item(data-value="2")
-                .ui.blue.empty.circular.label
-                | Traffic Calming
-              .item(data-value="3")
-                .ui.black.empty.circular.label
-                | Transit
 
-        h5 NARROW BY DISTRICT:
+        h5 BY STATUS:
+
+        button#btn-underway.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterUnderway, yellow: filterUnderway}"
+        ) Active
+
+        button#btn-complete.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterComplete, yellow: filterComplete}"
+        ) Closed
+
+        h5 BY DISTRICT:
 
         .ui.selection.bottom.pointing.dropdown
           .text: div(v-cloak) Citywide
@@ -65,7 +69,7 @@
             .item(v-on:click="clickedDistrict(10)") District 10
             .item(v-on:click="clickedDistrict(11)") District 11
 
-        h5 NARROW BY PROJECT TYPE:
+        h5 BY PROJECT TYPE:
 
         button#btn-transit.small.ui.grey.button(
                v-on:click="clickedFilter"
@@ -80,7 +84,7 @@
         button#btn-areas.small.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterAreas, yellow: filterAreas}"
-        ) Plans and Studies
+        ) Plans &amp; Studies
 
         br
         br
@@ -138,6 +142,8 @@ let keywordExtractor = require('keyword-extractor');
 let omnivore = require('leaflet-omnivore');
 
 let store = {
+  filterComplete: false,
+  filterUnderway: false,
   filterTransit: false,
   filterStreets: false,
   filterAreas: false,
@@ -176,6 +182,9 @@ function clickedFilter (e) {
   if (id === 'btn-transit') store.filterTransit = !store.filterTransit;
   if (id === 'btn-streets') store.filterStreets = !store.filterStreets;
   if (id === 'btn-areas') store.filterAreas = !store.filterAreas;
+
+  if (id === 'btn-complete') store.filterComplete = !store.filterComplete;
+  if (id === 'btn-underway') store.filterUnderway = !store.filterUnderway;
 
   updateFilters();
 }
@@ -593,6 +602,9 @@ function updateFilters () {
   let streets = store.filterStreets;
   let areas = store.filterAreas;
 
+  let complete = store.filterComplete;
+  let underway = store.filterUnderway;
+
   // if none are clicked, then all are clicked! :-O
   let showAll = false;
   if (((transit === streets) === areas) === false) {
@@ -618,6 +630,11 @@ function updateFilters () {
       }
     }
 
+    // now check STATUS
+    let isCorrectStatus = (complete === underway); // true if both or neither are checked
+    if (complete && prj.status.includes('Closed')) isCorrectStatus = true;
+    if (underway && prj.status.includes('Active')) isCorrectStatus = true;
+
     // now check district
     let district = store.filterDistrict;
     let districtColName = 'district' + district;
@@ -626,7 +643,7 @@ function updateFilters () {
       district === 0 || (district > 0 && prj[districtColName] === 1);
 
     // the final word
-    let passedAllTests = show && isCorrectDistrict;
+    let passedAllTests = show && isCorrectDistrict && isCorrectStatus;
 
     if (passedAllTests && !mymap.hasLayer(layer)) {
       mymap.addLayer(layer);

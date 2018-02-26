@@ -10,7 +10,8 @@
         br
         h2 {{ infoTitle }}
         p  {{ infoDetails }}
-        .details-link(v-html="infoUrl")
+        .details-link(v-if="infoUrl")
+          a(v-bind:href="infoUrl" target="_blank") &raquo; More details&hellip;
 
     .bottom-panel(v-cloak)
       .pickers
@@ -129,6 +130,8 @@
 
 <script>
 'use strict'
+
+import 'babel-polyfill';
 
 let L = require('leaflet');
 let keywordExtractor = require('keyword-extractor');
@@ -441,7 +444,7 @@ function updatePanelDetails (id) {
   // generate permalink
   let permalink = prj['project_number'].toLowerCase();
 
-  let url = `<a target="_blank" href="/projects/${permalink}/">&raquo; More details&hellip;</a>`;
+  let url = `/projects/${permalink}/`;
 
   store.infoTitle = prj['project_name'];
   store.infoDetails = prj['description'];
@@ -1079,6 +1082,7 @@ h5 {
 
 .details-link {
   text-align: right;
+  margin-top: 5px;
   margin-right: 10px;
 }
 

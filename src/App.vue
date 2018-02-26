@@ -13,8 +13,9 @@ export default {
 <style>
 
 body,p,h1,h2,h3,h4,h5,h6 {
-    margin: 0px 0px;
-    padding: 0px 0px;
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
+  margin: 0px 0px;
+  padding: 0px 0px;
 }
 
 #app {
@@ -22,10 +23,6 @@ body,p,h1,h2,h3,h4,h5,h6 {
   font-family: 'Lato', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-html, body, h1, h2, h3, h4, h5, h6 {
-  font-family: 'Lato', Helvetica, Arial, sans-serif;
 }
 
 </style>

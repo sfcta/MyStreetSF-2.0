@@ -137,6 +137,9 @@
 
 import 'babel-polyfill';
 
+// Shared stuff across all components
+import { EventBus, BigStore } from '../shared-store.js';
+
 let L = require('leaflet');
 let keywordExtractor = require('keyword-extractor');
 let omnivore = require('leaflet-omnivore');
@@ -224,7 +227,7 @@ function mounted () {
 }
 
 function updateHoverPanel (id) {
-  store.hoverPanelText = _cache[id].project_name;
+  store.hoverPanelText = BigStore.state.prjCache[id].project_name;
   store.hoverPanelHide = false;
 
   clearTimeout(hoverPanelTimeout);
@@ -263,8 +266,6 @@ const API_SERVER = 'https://api.sfcta.org/api/';
 // hard code the giant areas so they stay on the bottom layer of the map
 const _bigAreas = [407, 477, 79, 363, 366, 17];
 
-let _cache = {};
-let _layers = {};
 let _tagList = [
   'ADA/Accessibility',
   'Bicycle/Bike Facilities',
@@ -354,18 +355,18 @@ function mapSegments (cmpsegJson) {
         layer.on({
           mouseover: hoverFeature,
           mouseout: unHoverFeature,
-          click: clickedOnFeature
+          click: clickedOnFeature,
         });
       },
       pointToLayer: function (feature, latlng) {
         // this turns 'points' into circles
         return L.circleMarker(latlng, { id: id });
-      }
+      },
     });
 
     // hang onto the data
     geoLayer.options.id = id;
-    _cache[id] = segment;
+    BigStore.addCacheItem(id, segment);
 
     // validate KML
     var oParser = new DOMParser();
@@ -378,7 +379,7 @@ function mapSegments (cmpsegJson) {
       let layer = omnivore.kml.parse(kml, null, geoLayer);
       layer.addTo(mymap);
       if (polygon) layer.bringToBack();
-      _layers[id] = layer;
+      BigStore.addLayer(id, layer);
     } catch (e) {
       console.log('couldnt: ' + id);
       console.log(segment);
@@ -387,7 +388,7 @@ function mapSegments (cmpsegJson) {
 
   // Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {
-    if (_layers[giantArea]) _layers[giantArea].bringToBack();
+    if (BigStore.state.layers[giantArea]) BigStore.sendLayerBack(giantArea);
   }
 }
 
@@ -436,7 +437,7 @@ function generateColorFromDb (iconName) {
 }
 
 function updatePanelDetails (id) {
-  let prj = _cache[id];
+  let prj = BigStore.state.prjCache[id];
 
   let district = '';
   if (prj['district1']) district += '1, ';
@@ -470,10 +471,10 @@ function clickedOnFeature (e) {
   let id;
   let target;
 
-  if (e in _layers) {
+  if (e in BigStore.state.layers) {
     // search box!
     id = e;
-    target = _layers[id];
+    target = BigStore.state.layers[id];
   } else {
     // For some reason, Leaflet handles points and polygons
     // differently, hence the weirdness for fetching the id of the selected feature.
@@ -532,8 +533,8 @@ function hoverFeature (e) {
   let target;
 
   // deal w search clicks first
-  if (e in _layers) {
-    target = _layers[e];
+  if (e in BigStore.state.layers) {
+    target = BigStore.state.layers[e];
   } else {
     target = e.target;
   }
@@ -617,9 +618,9 @@ function updateFilters () {
     showAll = true;
   }
 
-  for (let id in _layers) {
-    let layer = _layers[id];
-    let prj = _cache[id];
+  for (let id in BigStore.state.layers) {
+    let layer = BigStore.state.layers[id];
+    let prj = BigStore.state.prjCache[id];
 
     let show = false;
 

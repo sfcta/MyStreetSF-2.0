@@ -155,7 +155,7 @@ let store = {
   infoUrl: '',
   terms: '',
   results: [],
-  tagresults: []
+  tagresults: [],
 }
 
 let theme = 'light';
@@ -166,13 +166,13 @@ const GEO_VIEW = 'mystreet2_all';
 let darkStyles = {
   normal: { color: '#ff7800', weight: 4, opacity: 1.0 },
   selected: { color: '#39f', weight: 5, opacity: 1.0 },
-  popup: { color: '#33f', weight: 10, opacity: 1.0 }
+  popup: { color: '#33f', weight: 10, opacity: 1.0 },
 };
 
 let lightStyles = {
   normal: { color: '#3c6', weight: 6, opacity: 1.0 },
   selected: { color: '#39f', weight: 8, opacity: 1.0 },
-  popup: { color: '#36f', weight: 10, opacity: 1.0 }
+  popup: { color: '#36f', weight: 10, opacity: 1.0 },
 };
 let styles = theme === 'dark' ? darkStyles : lightStyles;
 
@@ -206,7 +206,7 @@ function mounted () {
   L.tileLayer(url, {
     attribution: attribution,
     maxZoom: 18,
-    accessToken: token
+    accessToken: token,
   }).addTo(mymap);
 
   // semantic requires this line for dropdowns to work
@@ -244,11 +244,11 @@ export default {
     clickedSearchTag: clickedSearchTag,
     clearSearchBox: clearSearchBox,
     hoverSearch: hoverSearch,
-    termChanged: termChanged
+    termChanged: termChanged,
   },
   watch: {
-    terms: termChanged
-  }
+    terms: termChanged,
+  },
 }
 
 // some important global variables.
@@ -301,7 +301,7 @@ let _tagList = [
   'Transportation demand management',
   'Trees',
   'Trolleybuses',
-  'Vessels/Ferries'
+  'Vessels/Ferries',
 ];
 
 let _selectedProject, _selectedStyle;
@@ -397,7 +397,7 @@ function styleByMetricColor (iconName, polygon) {
     weight: polygon ? 1 : 2,
     fillOpacity: 0.7,
     opacity: 1.0,
-    radius: radius
+    radius: radius,
   };
 }
 
@@ -493,7 +493,7 @@ function clickedOnFeature (e) {
       fillColor: z.fillColor,
       radius: z.radius,
       weight: z.weight,
-      truecolor: z.truecolor
+      truecolor: z.truecolor,
     };
   }
 
@@ -559,7 +559,7 @@ function hoverFeature (e) {
       fill: z.fill,
       radius: z.radius,
       weight: z.weight,
-      truecolor: z.truecolor
+      truecolor: z.truecolor,
     };
   }
 
@@ -569,7 +569,7 @@ function hoverFeature (e) {
     color: _hoverStyle.truecolor,
     fillColor: _hoverStyle.fillColor,
     weight: weight,
-    opacity: 1.0
+    opacity: 1.0,
   };
   if (polygon) {
     style.fillColor = _hoverStyle.truecolor;

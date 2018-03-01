@@ -56,7 +56,7 @@ let store = {
   project: '',
   project_name: '',
   project_number: '',
-  description: ''
+  description: '',
 };
 
 export default {
@@ -86,7 +86,7 @@ function mounted (component) {
     scrollWheelZoom: false,
     zoomAnimation: false,
     zoomControl: false,
-    zooming: false
+    zooming: false,
   }).setView([37.77, -122.42], 11);
 
   L.tileLayer(url, {
@@ -95,8 +95,19 @@ function mounted (component) {
     bubblingMouseEvents: true,
     clickable: false,
     interactive: false,
-    maxZoom: 18
+    maxZoom: 18,
   }).addTo(mymap);
+
+  // add the layer data
+  /*
+  let thisScript = $('script[src*="project-page.bundle.js"]');
+  let project = thisScript.attr('project_id');
+  let geometry = thisScript.attr('geometry');
+  let shape = thisScript.attr('feature_shape');
+  let icon = thisScript.attr('icon');
+
+  if (project) addProjectLayer(project, geometry, shape, icon);
+  */
 }
 
 function styleByMetricColor (iconName, polygon) {
@@ -107,10 +118,10 @@ function styleByMetricColor (iconName, polygon) {
   return {
     color: xcolor,
     fillColor: (polygon ? xcolor : '#88e'),
-    weight: (polygon ? 0 : 4),
     fillOpacity: 0.5,
     opacity: 1.0,
-    radius: radius
+    radius: radius,
+    weight: (polygon ? 0 : 4),
   };
 }
 
@@ -147,7 +158,7 @@ function addProjectLayer (id, geometry, shape, icon) {
     style: styleByMetricColor(icon, polygon),
     pointToLayer: function (feature, latlng) { // this turns 'points' into circles
       return L.circleMarker(latlng, {id: id});
-    }
+    },
   });
 
   // hang onto the data
@@ -170,17 +181,6 @@ function addProjectLayer (id, geometry, shape, icon) {
     console.log('couldnt: ' + e);
   }
 }
-
-// add the layer data
-/*
-let thisScript = $('script[src*="project-page.bundle.js"]');
-let project = thisScript.attr('project_id');
-let geometry = thisScript.attr('geometry');
-let shape = thisScript.attr('feature_shape');
-let icon = thisScript.attr('icon');
-
-if (project) addProjectLayer(project, geometry, shape, icon);
-*/
 
 </script>
 

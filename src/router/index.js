@@ -11,17 +11,17 @@ export default new Router({
     {
       path: '/',
       name: 'MyStreet',
-      component: MyStreet
+      component: MyStreet,
     },
     {
       path: '/projects/:id',
       name: 'ProjectPage',
-      component: ProjectPage
+      component: ProjectPage,
     },
     { // catch-all for mispelled URLs. Maybe add a 404 page...
       path: '*',
       name: 'MyStreet',
-      component: MyStreet
-    }
+      component: MyStreet,
+    },
   ]
 })

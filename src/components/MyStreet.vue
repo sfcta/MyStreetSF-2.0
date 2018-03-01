@@ -183,8 +183,14 @@ function clickedFilter (e) {
   if (id === 'btn-streets') store.filterStreets = !store.filterStreets;
   if (id === 'btn-areas') store.filterAreas = !store.filterAreas;
 
-  if (id === 'btn-complete') store.filterComplete = !store.filterComplete;
-  if (id === 'btn-underway') store.filterUnderway = !store.filterUnderway;
+  if (id === 'btn-complete') {
+    store.filterComplete = !store.filterComplete;
+    if (store.filterComplete) store.filterUnderway = false;
+  }
+  if (id === 'btn-underway') {
+    store.filterUnderway = !store.filterUnderway;
+    if (store.filterUnderway) store.filterComplete = false;
+  }
 
   updateFilters();
 }

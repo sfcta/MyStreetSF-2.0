@@ -5,20 +5,19 @@
       hr
       h3.apptitle MyStreet SF
       hr
-
     .information-panel(v-cloak)
         br
         h2 {{ infoTitle }}
         p  {{ infoDetails }}
-        .details-link(v-if="infoUrl")
-          a(v-bind:href="infoUrl" target="_blank") &raquo; More details&hellip;
 
-    .bottom-panel(v-cloak)
+    #bottom-panel(v-cloak)
+      .details-link(v-if="infoUrl")
+        a(v-bind:href="infoUrl" target="_blank") &raquo; MORE DETAILS&hellip;
       .pickers
         hr
-        h5 BY TAGS:
+        h5 TAGS:
 
-        .ui.multiple.bottom.pointing.dropdown
+        .ui.multiple.dropdown
           input(type="hidden" name="filters")
           i.filter.icon
           span.text Select some tags:
@@ -26,19 +25,12 @@
             .ui.icon.search.input
               i.search.icon
               input(type="text" placeholder="Search tags...")
-            .header
-            .scrolling.menu
-              .item(data-value="1")
-                .ui.red.empty.circular.label
-                | Bicycle Safety
-              .item(data-value="4")
-                .ui.red.empty.circular.label
-                | Capital Projects
-              .item(data-value="6")
-                .ui.black.empty.circular.label
-                | Pedestrian Improvements
+            .scrolling.menu(style="max-height: 230px")
+              .item(v-for="tag in tags" v-bind:data-value="tag")
+                .ui.blue.empty.circular.label
+                | {{ tag.substring(0,35) }}
 
-        h5 BY STATUS:
+        h5 STATUS:
 
         button#btn-underway.small.ui.grey.button(
                v-on:click="clickedFilter"
@@ -50,51 +42,52 @@
                v-bind:class="{ active: filterComplete, yellow: filterComplete}"
         ) Closed
 
-        h5 BY FUNDING SOURCE:
-
-        .ui.selection.dropdown
-          .text: div(v-cloak) All sources&hellip;
-          i.dropdown.icon
-          .menu
-            .item(@click="clickedFunds" :data-fund="null") All sources
-            .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
-
-        h5 BY DISTRICT:
-
-        .ui.selection.bottom.pointing.dropdown
-          .text: div(v-cloak) Citywide
-          i.dropdown.icon
-          .menu
-            .item(v-on:click="clickedDistrict(0)") Citywide
-            .item(v-on:click="clickedDistrict(1)") District 1
-            .item(v-on:click="clickedDistrict(2)") District 2
-            .item(v-on:click="clickedDistrict(3)") District 3
-            .item(v-on:click="clickedDistrict(4)") District 4
-            .item(v-on:click="clickedDistrict(5)") District 5
-            .item(v-on:click="clickedDistrict(6)") District 6
-            .item(v-on:click="clickedDistrict(7)") District 7
-            .item(v-on:click="clickedDistrict(8)") District 8
-            .item(v-on:click="clickedDistrict(9)") District 9
-            .item(v-on:click="clickedDistrict(10)") District 10
-            .item(v-on:click="clickedDistrict(11)") District 11
-
-        h5 BY PROJECT TYPE:
-
-        button#btn-transit.small.ui.grey.button(
-               v-on:click="clickedFilter"
-               v-bind:class="{ active: filterTransit, yellow: filterTransit}"
-        ) Transit
+        h5 CATEGORY:
 
         button#btn-streets.small.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterStreets, yellow: filterStreets}"
         ) Streets
 
+        button#btn-transit.small.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterTransit, yellow: filterTransit}"
+        ) Transit
+
         button#btn-areas.small.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterAreas, yellow: filterAreas}"
         ) Plans &amp; Studies
 
+        #dropdowns
+          .narrow-dropdown(style="float:left;")
+            h5 DISTRICT:
+            .ui.selection.fluid.dropdown
+              .text: div(v-cloak) Citywide
+              i.dropdown.icon
+              .menu
+                .item(v-on:click="clickedDistrict(0)") Citywide
+                .item(v-on:click="clickedDistrict(1)") District 1
+                .item(v-on:click="clickedDistrict(2)") District 2
+                .item(v-on:click="clickedDistrict(3)") District 3
+                .item(v-on:click="clickedDistrict(4)") District 4
+                .item(v-on:click="clickedDistrict(5)") District 5
+                .item(v-on:click="clickedDistrict(6)") District 6
+                .item(v-on:click="clickedDistrict(7)") District 7
+                .item(v-on:click="clickedDistrict(8)") District 8
+                .item(v-on:click="clickedDistrict(9)") District 9
+                .item(v-on:click="clickedDistrict(10)") District 10
+                .item(v-on:click="clickedDistrict(11)") District 11
+          .narrow-dropdown(style="float:right;")
+            h5 FUNDING SOURCE:
+            .ui.selection.fluid.dropdown
+              .text: div(v-cloak) All sources&hellip;
+              i.dropdown.icon
+              .menu
+                .item(@click="clickedFunds" v-bind:data-fund="null") All sources
+                .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
+        br
+        br
         br
         br
         br
@@ -153,6 +146,51 @@ let L = require('leaflet');
 let keywordExtractor = require('keyword-extractor');
 let omnivore = require('leaflet-omnivore');
 
+let _tagList = [
+  'ADA/Accessibility',
+  'Bicycle/Bike Facilities',
+  'Bicycle/Bike Lanes',
+  'Bicycle/Bike Projects',
+  'Bicycle/Bike Safety',
+  'Bulb-outs/Curb Extension/Curb ramps',
+  'Bus Rapid Transit (BRT)',
+  'Buses',
+  'Citywide Plan',
+  'Community-based transportation plans',
+  'Corridor plan',
+  'Countdown signals',
+  'Elevators/Escalators',
+  'Facilities',
+  'Freeway or Congestion Management',
+  'Freeways/Ramps',
+  'Heavy rail',
+  'Historic streetcar',
+  'Light rail',
+  'Motor coaches',
+  'Neighborhood Plan',
+  'NTIP / Neighborhood Transportation Improvement Program',
+  'Outreach',
+  'Paratransit',
+  'Pedestrian Safety',
+  'Plans and Programs',
+  'Safe routes to school (SRTS)',
+  'School transportation',
+  'Sidewalks',
+  'Stations/Stops',
+  'Street Resurfacing',
+  'Streets',
+  'Tracks/Guideways',
+  'Traffic Calming',
+  'Traffic Signals',
+  'Trains',
+  'Transit',
+  'Transit lanes',
+  'Transportation demand management',
+  'Trees',
+  'Trolleybuses',
+  'Vessels/Ferries',
+];
+
 let store = {
   filterComplete: false,
   filterUnderway: false,
@@ -170,6 +208,7 @@ let store = {
   terms: '',
   results: [],
   tagresults: [],
+  tags: _tagList,
 }
 
 let theme = 'light';
@@ -284,51 +323,6 @@ const API_SERVER = 'https://api.sfcta.org/api/';
 
 // hard code the giant areas so they stay on the bottom layer of the map
 const _bigAreas = [407, 477, 79, 363, 366, 17];
-
-let _tagList = [
-  'ADA/Accessibility',
-  'Bicycle/Bike Facilities',
-  'Bicycle/Bike Lanes',
-  'Bicycle/Bike Projects',
-  'Bicycle/Bike Safety',
-  'Bulb-outs/Curb Extension/Curb ramps',
-  'Bus Rapid Transit (BRT)',
-  'Buses',
-  'Citywide Plan',
-  'Community-based transportation plans',
-  'Corridor plan',
-  'Countdown signals',
-  'Elevators/Escalators',
-  'Facilities',
-  'Freeway or Congestion Management',
-  'Freeways/Ramps',
-  'Heavy rail',
-  'Historic streetcar',
-  'Light rail',
-  'Motor coaches',
-  'Neighborhood Plan',
-  'Neighborhood Transportation Improvement Program (NTIP)',
-  'Outreach',
-  'Paratransit',
-  'Pedestrian Safety',
-  'Plans and Programs',
-  'Safe routes to school (SRTS)',
-  'School transportation',
-  'Sidewalks',
-  'Stations/Stops',
-  'Street Resurfacing',
-  'Streets',
-  'Tracks/Guideways',
-  'Traffic Calming',
-  'Traffic Signals',
-  'Trains',
-  'Transit',
-  'Transit lanes',
-  'Transportation demand management',
-  'Trees',
-  'Trolleybuses',
-  'Vessels/Ferries',
-];
 
 let _selectedProject, _selectedStyle;
 let _hoverProject, _hoverStyle;
@@ -634,7 +628,6 @@ function clickedDistrict (district) {
 }
 
 function updateFilters () {
-  console.log('BOOP')
   let transit = store.filterTransit;
   let streets = store.filterStreets;
   let areas = store.filterAreas;
@@ -989,6 +982,7 @@ h4 {
   grid-template-columns: 350px 1fr 400px;
   grid-template-rows: auto 1fr auto;
   height: 100%;
+  max-height: 100%;
   margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
 }
@@ -998,12 +992,20 @@ h4 {
   border-color: transparent;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   color: #fff;
-  display: table;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  max-height: 100%;
   grid-row: 1 / 4;
   grid-column: 3 / 4;
-  height: 100%;
   padding: 0px 15px 0px 15px;
   z-index: 5;
+}
+
+#preheader {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
 }
 
 #mymap {
@@ -1037,7 +1039,8 @@ h4 {
 }
 
 .information-panel {
-  max-height: 100%;
+  grid-row: 2 / 3;
+  grid-column: 1 / 2;
   overflow-y: auto;
 }
 
@@ -1060,14 +1063,15 @@ h4 {
   outline: 1px solid slategrey;
 }
 
-.bottom-panel {
+#bottom-panel {
+  grid-row: 3 / 4;
+  grid-column: 1 / 2;
   display: table-row;
   text-align: right;
   vertical-align: bottom;
   margin-left: 10px;
   margin-right: 10px;
   margin-bottom: 0px;
-  height: 80px;
 }
 
 .agency a {
@@ -1139,8 +1143,8 @@ h5 {
 
 .details-link {
   text-align: right;
-  margin-top: 5px;
-  margin-right: 10px;
+  margin-top: 10px;
+  margin-right: 0px;
 }
 
 p {
@@ -1183,5 +1187,7 @@ td {
 .fade-leave-to {
   opacity: 0;
 }
+
+.narrow-dropdown { width: 165px;}
 
 </style>

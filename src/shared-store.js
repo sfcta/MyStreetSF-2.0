@@ -2,8 +2,8 @@
 
 // shared event bus for cross-component communication
 // see https://alligator.io/vuejs/global-event-bus/
-import Vue from 'vue';
-export const EventBus = new Vue();
+// import Vue from 'vue';
+// export const EventBus = new Vue();
 
 // Shared common state storage. state object should ONLY be read.
 // Use methods to modify state.

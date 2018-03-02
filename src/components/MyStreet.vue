@@ -50,6 +50,15 @@
                v-bind:class="{ active: filterComplete, yellow: filterComplete}"
         ) Closed
 
+        h5 BY FUNDING SOURCE:
+
+        .ui.selection.dropdown
+          .text: div(v-cloak) All sources&hellip;
+          i.dropdown.icon
+          .menu
+            .item(@click="clickedFunds" :data-fund="null") All sources
+            .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
+
         h5 BY DISTRICT:
 
         .ui.selection.bottom.pointing.dropdown
@@ -138,7 +147,7 @@
 import 'babel-polyfill';
 
 // Shared stuff across all components
-import { EventBus, BigStore } from '../shared-store.js';
+import { BigStore } from '../shared-store.js';
 
 let L = require('leaflet');
 let keywordExtractor = require('keyword-extractor');
@@ -151,6 +160,8 @@ let store = {
   filterStreets: false,
   filterAreas: false,
   filterDistrict: 0,
+  filterFund: null,
+  fundSources: [],
   hoverPanelHide: false,
   hoverPanelText: '',
   infoTitle: 'Select any project to learn more about it.',
@@ -178,6 +189,13 @@ let lightStyles = {
   popup: { color: '#36f', weight: 10, opacity: 1.0 },
 };
 let styles = theme === 'dark' ? darkStyles : lightStyles;
+
+function clickedFunds (e) {
+  store.filterFund = e.target.dataset.fund;
+  if (BigStore.debug) console.log({FUND: store.filterFund});
+
+  updateFilters();
+}
 
 function clickedFilter (e) {
   let id = e.target.id;
@@ -248,6 +266,7 @@ export default {
   },
   methods: {
     clickedFilter: clickedFilter,
+    clickedFunds: clickedFunds,
     clickedDistrict: clickedDistrict,
     clickedSearch: clickedSearch,
     clickedSearchTag: clickedSearchTag,
@@ -329,10 +348,16 @@ async function queryServer () {
 
 // add segments to the map by using metric data to color
 function mapSegments (cmpsegJson) {
+
+  let fundStrings = [];
+
   for (let segment of cmpsegJson) {
     if (segment['geometry'] == null) continue;
 
     let id = segment['project_number'];
+
+    // slurp up all the funding sources
+    if (segment.funding_sources) fundStrings.push(...segment.funding_sources.split(', '));
 
     // TODO:  Fake project types, for now
     if (segment.sponsor && segment.sponsor === 'MUNI') { segment.new_project_type = 'Transit'; }
@@ -386,10 +411,14 @@ function mapSegments (cmpsegJson) {
     }
   }
 
-  // Hard-coded giant polygons -- send to back.
+  // TODO Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {
     if (BigStore.state.layers[giantArea]) BigStore.sendLayerBack(giantArea);
   }
+
+  // convert funding source to a unique set
+  let funds = Array.from(new Set(fundStrings));
+  store.fundSources = funds.sort();
 }
 
 function styleByMetricColor (iconName, polygon) {
@@ -605,6 +634,7 @@ function clickedDistrict (district) {
 }
 
 function updateFilters () {
+  console.log('BOOP')
   let transit = store.filterTransit;
   let streets = store.filterStreets;
   let areas = store.filterAreas;
@@ -637,20 +667,23 @@ function updateFilters () {
       }
     }
 
+    // now check FUNDING SOURCE
+    let funds = store.filterFund;
+    let isCorrectFund = !funds || prj.funding_sources.includes(funds);
+
     // now check STATUS
     let isCorrectStatus = (complete === underway); // true if both or neither are checked
     if (complete && prj.status.includes('Closed')) isCorrectStatus = true;
     if (underway && prj.status.includes('Active')) isCorrectStatus = true;
 
-    // now check district
+    // now check DISTRICT
     let district = store.filterDistrict;
     let districtColName = 'district' + district;
-
     let isCorrectDistrict =
       district === 0 || (district > 0 && prj[districtColName] === 1);
 
     // the final word
-    let passedAllTests = show && isCorrectDistrict && isCorrectStatus;
+    let passedAllTests = show && isCorrectFund && isCorrectDistrict && isCorrectStatus;
 
     if (passedAllTests && !mymap.hasLayer(layer)) {
       mymap.addLayer(layer);

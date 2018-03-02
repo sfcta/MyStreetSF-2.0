@@ -2,32 +2,28 @@
 #project-page
   #zoom-map
   h1 {{ project_name }}
-  h4(style="color:#444;") Project ID:
+  h4(style="color:#444;") Project ID: {{ project_number }}
+  br
 
-  hr
   h3.project-subtitle Brief Project Description
+  p.project-description {{ description }}
 
-  b {{ description }}
-
-  hr
   br
 
   table
     tr.project-subtitle
-      td: h3 Detailed Project Information
+      td(colspan=2): h3 Detailed Project Information
     tr.project-details(v-for="row in details")
-      td.project-details: b {{ row.desc }}
-      td.project-details.col2(v-if="row.url")
-        a(v-bind:href="row.field") {{ row.field }}
-      td.project-details.col2(v-else) {{ row.field }}
+      td.project-details: b {{ row[0] }}
+      td.project-details.col2 {{ row[1] }}
   br
   table
     tr.project-subtitle
-      td.td-project-subtitle: h3 For More Information
+      td.td-project-subtitle(colspan=2): h3 For More Information
     tr.project-details
-      td.project-details: b {{ description }}
+      td.project-details: b Link to Project
       td.project-details.col2
-        a(v-bind:href="project_number") {{ project_number }}
+        a(v-bind:href="geojson.project_details_page" target="_blank") {{ geojson.project_details_page }}
   br
   br
   br
@@ -39,6 +35,9 @@
 // use npm and babel to support IE11/Safari
 import 'babel-polyfill';
 import 'isomorphic-fetch';
+
+// Shared stuff across all components
+import { BigStore } from '../shared-store.js';
 
 let L = require('leaflet');
 let omnivore = require('leaflet-omnivore');
@@ -52,11 +51,13 @@ let attribution = '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
                  '<a href="http://mapbox.com">Mapbox</a>';
 
 let store = {
+  description: '',
   details: [],
+  geojson: {},
   project: '',
   project_name: '',
   project_number: '',
-  description: '',
+  sharedState: BigStore.state,
 };
 
 export default {
@@ -70,13 +71,13 @@ export default {
   methods: {
   },
   watch: {
-  }
+  },
 }
 
-function mounted (component) {
-  console.log({route: component.$route});
+async function mounted (component) {
+  let id = component.$route.params.id;
+  if (BigStore.debug) console.log({project_id: id});
 
-  // ---- start running things here:
   mymap = L.map('zoom-map', {
     attributionControl: false,
     clickable: false,
@@ -98,16 +99,62 @@ function mounted (component) {
     maxZoom: 18,
   }).addTo(mymap);
 
-  // add the layer data
-  /*
-  let thisScript = $('script[src*="project-page.bundle.js"]');
-  let project = thisScript.attr('project_id');
-  let geometry = thisScript.attr('geometry');
-  let shape = thisScript.attr('feature_shape');
-  let icon = thisScript.attr('icon');
+  // add project KML
+  store.geojson = await fetchProjectInfo(id);
+  setProjectDetails();
+  addProjectMapLayer(id);
+}
 
-  if (project) addProjectLayer(project, geometry, shape, icon);
-  */
+function setProjectDetails () {
+  store.description = store.geojson['description'];
+  store.project_name = store.geojson['project_name'];
+  store.project_number = store.geojson['project_number'];
+
+  store.details.push(
+    ['Status', store.geojson['status']]);
+  store.details.push(
+    ['Current Phase', store.geojson['current_phase']]);
+  store.details.push(
+    ['% Complete', store.geojson['percent_complete']]);
+  store.details.push(
+    ['Location', store.geojson['project_location']]);
+  store.details.push(
+    ['Districts', store.geojson['districts']]);
+  store.details.push(
+    ['Cost Estimate', store.geojson['project_cost_estimate']]);
+  store.details.push(
+    ['Project Expected Completion', store.geojson['project_expected_completion']]);
+  store.details.push(
+    ['Funding Sources', store.geojson['funding_sources']]);
+  store.details.push(
+    ['Lead Agency', store.geojson['sponsor']]);
+  store.details.push(
+    ['Tags', store.geojson['project_tags']]);
+}
+
+async function fetchProjectInfo (id) {
+  // might already be in cache:
+  if (store.sharedState.prjCache[id]) return store.sharedState.prjCache[id];
+  id = id.toUpperCase();
+
+  const API_SERVER = 'https://api.sfcta.org/api/';
+  const GEO_VIEW = 'mystreet2_all';
+  const FILTER = '?project_number=eq.' + id;
+
+  const geoUrl = API_SERVER + GEO_VIEW + FILTER;
+  if (BigStore.debug) console.log(geoUrl);
+
+  try {
+    let resp = await fetch(geoUrl);
+    let jsonData = await resp.json();
+
+    if (jsonData[0]) return jsonData[0];
+  } catch (error) {
+    console.log('map error: ' + error);
+  }
+  //  TODO throw a 404 here?
+  console.log('Project ID not found', id);
+  return {};
 }
 
 function styleByMetricColor (iconName, polygon) {
@@ -147,7 +194,13 @@ function generateColorFromDb (iconName) {
   }
 }
 
-function addProjectLayer (id, geometry, shape, icon) {
+function addProjectMapLayer (id) {
+  let geometry = store.geojson['geometry'];
+  let shape = store.geojson['feature_shape'];
+  let icon = store.geojson['icon'];
+
+  if (!geometry) return;
+
   let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">' +
              '<Placemark>' + geometry + '</Placemark></kml>';
 
@@ -160,10 +213,6 @@ function addProjectLayer (id, geometry, shape, icon) {
       return L.circleMarker(latlng, {id: id});
     },
   });
-
-  // hang onto the data
-  geoLayer.options.id = id;
-  // _cache[id] = segment;
 
   // validate KML
   var oParser = new DOMParser();
@@ -297,107 +346,15 @@ h4 {
   box-shadow: 0 0 3px #00000060;
 }
 
-.search-item {
-  height: 80px;
-  border-top: 1px solid #eee;
-  color: black;
-  cursor: pointer;
-  padding: 5px 5px;
-}
-
-.search-item h4 {
-  color: #226;
-  font-size: 16px;
-  margin: 0px 0px;
-}
-.search-item p {
-  color: #666;
-  font-size: 13px;
-}
-.search-item hr {
-  margin-top: 0px;
-  margin-bottom: 3px;
-}
-.search-item:hover {
-  background-color: #eee;
-}
-
-.search-category p {
-  padding-left: 5px;
-  padding-top: 10px;
-  color: #882;
-}
-
-#search-tags {
-  margin-left: 5px;
-  margin-top: 5px;
-}
-
-#search-tags.button {
-  padding: 7px 8px;
-}
-
-#search-panel {
-  background-color: white;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  color: black;
-  grid-row: 1 / 2;
-  grid-column: 1 / 2;
-  margin: 10px 20px 10px 10px;
-  z-index: 5;
-}
-
-#search-panel input {
-  padding: 10px 10px;
-  width: 100%;
-}
-
-#search-results {
-  background-color: white;
-  max-height: 500px;
-  overflow-y: auto;
-  padding-bottom: 10px;
-}
-#search-results::-webkit-scrollbar {
-  width: 0.3em;
-}
-
-#search-results::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
-}
-
-#search-results::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
-  outline: 1px solid slategrey;
-}
-
-#container {
-  background-color: #ccc;
-  display: grid;
-  grid-template-columns: 350px 1fr 400px;
-  grid-template-rows: auto 1fr auto;
+#project-page {
   height: 100%;
-  margin: 0px 0px 0px 0px;
-  padding: 0px 0px 0px 0px;
-}
-
-#panel {
-  background-color: #444;
-  border-color: transparent;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  color: #fff;
-  display: table;
-  grid-row: 1 / 4;
-  grid-column: 3 / 4;
-  height: 100%;
-  padding: 0px 15px 0px 15px;
-  z-index: 5;
+  max-width: 1100px;
+  margin: 0px auto;
+  padding: 20px 20px;
 }
 
 #mymap {
-  grid-row: 1 / 4;
-  grid-column: 1 / 3;
+  margin: 10px 10px;
   z-index: 1;
 }
 
@@ -850,4 +807,20 @@ td {
   color: #888;
 }
 
+.project-description {
+  line-height: normal;
+  font-size: 16px;
+  color: black;
+  font-weight: bold;
+  padding-top: 10px;
+  padding-left: 10px;
+}
+
+h3.project-subtitle {
+  padding: 10px;
+}
+
+a {
+  color: #33c;
+}
 </style>

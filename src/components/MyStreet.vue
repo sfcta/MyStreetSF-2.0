@@ -342,7 +342,6 @@ async function queryServer () {
 
 // add segments to the map by using metric data to color
 function mapSegments (cmpsegJson) {
-
   let fundStrings = [];
 
   for (let segment of cmpsegJson) {
@@ -1069,8 +1068,6 @@ h4 {
   display: table-row;
   text-align: right;
   vertical-align: bottom;
-  margin-left: 10px;
-  margin-right: 10px;
   margin-bottom: 0px;
 }
 

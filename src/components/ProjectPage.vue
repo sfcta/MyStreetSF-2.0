@@ -45,11 +45,6 @@ let omnivore = require('leaflet-omnivore');
 let mymap;
 let theme = 'light';
 
-let url = 'https://api.mapbox.com/styles/v1/mapbox/' + theme + '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
-let token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
-let attribution = '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-                 '<a href="http://mapbox.com">Mapbox</a>';
-
 let store = {
   description: '',
   details: [],
@@ -78,30 +73,11 @@ async function mounted (component) {
   let id = component.$route.params.id;
   if (BigStore.debug) console.log({project_id: id});
 
-  mymap = L.map('zoom-map', {
-    attributionControl: false,
-    clickable: false,
-    doubleClickZoom: false,
-    dragging: false,
-    interactive: false,
-    scrollWheelZoom: false,
-    zoomAnimation: false,
-    zoomControl: false,
-    zooming: false,
-  }).setView([37.77, -122.42], 11);
-
-  L.tileLayer(url, {
-    accessToken: token,
-    attribution: attribution,
-    bubblingMouseEvents: true,
-    clickable: false,
-    interactive: false,
-    maxZoom: 18,
-  }).addTo(mymap);
-
   // add project KML
   store.geojson = await fetchProjectInfo(id);
   setProjectDetails();
+
+  addBaseMap();
   addProjectMapLayer(id);
 }
 
@@ -192,6 +168,34 @@ function generateColorFromDb (iconName) {
     case 'measle_turquoise': return '#369';
     default: return defaultColor;
   }
+}
+
+function addBaseMap () {
+  let url = 'https://api.mapbox.com/styles/v1/mapbox/' + theme + '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+  let token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
+  let attribution = '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
+                   '<a href="http://mapbox.com">Mapbox</a>';
+
+  mymap = L.map('zoom-map', {
+    attributionControl: false,
+    clickable: false,
+    doubleClickZoom: false,
+    dragging: false,
+    interactive: false,
+    scrollWheelZoom: false,
+    zoomAnimation: false,
+    zoomControl: false,
+    zooming: false,
+  }).setView([37.77, -122.42], 11);
+
+  L.tileLayer(url, {
+    accessToken: token,
+    attribution: attribution,
+    bubblingMouseEvents: true,
+    clickable: false,
+    interactive: false,
+    maxZoom: 18,
+  }).addTo(mymap);
 }
 
 function addProjectMapLayer (id) {

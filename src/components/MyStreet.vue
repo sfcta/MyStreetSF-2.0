@@ -1,10 +1,28 @@
 <template lang="pug">
 #container
-  #panel
+  #layer-widgets
+    button#btn-start.ui.tiny.grey.icon.button(
+           v-on:click="clickedShowMainPanel"
+           v-bind:class="{ blue: showingMainPanel}"
+    ): i.list.icon
+    br
+    button#btn-layers.ui.tiny.grey.icon.button(
+           v-on:click="clickedShowLayerSelector"
+           v-bind:class="{ blue: showingLayerPanel}"
+    ): i.clone.outline.icon
+    br
+    br
+    button#btn-showhide.ui.tiny.green.icon.button(
+           data-tooltip="Show/Hide Panel"
+           v-on:click="clickedShowHide"
+    ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
+
+  #panel(v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr
       h3.apptitle MyStreet SF
       hr
+
     .information-panel(v-cloak)
         br
         h2 {{ infoTitle }}
@@ -32,29 +50,29 @@
 
         h5 STATUS:
 
-        button#btn-underway.small.ui.grey.button(
+        button#btn-underway.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterUnderway, yellow: filterUnderway}"
         ) Active
 
-        button#btn-complete.small.ui.grey.button(
+        button#btn-complete.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterComplete, yellow: filterComplete}"
         ) Closed
 
         h5 CATEGORY:
 
-        button#btn-streets.small.ui.grey.button(
+        button#btn-streets.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterStreets, yellow: filterStreets}"
         ) Streets
 
-        button#btn-transit.small.ui.grey.button(
+        button#btn-transit.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterTransit, yellow: filterTransit}"
         ) Transit
 
-        button#btn-areas.small.ui.grey.button(
+        button#btn-areas.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterAreas, yellow: filterAreas}"
         ) Plans &amp; Studies
@@ -205,6 +223,9 @@ let store = {
   infoTitle: 'Select any project to learn more about it.',
   infoDetails: '',
   infoUrl: '',
+  showingLayerPanel: false,
+  showingMainPanel: true,
+  isPanelHidden: false,
   terms: '',
   results: [],
   tagresults: [],
@@ -236,6 +257,20 @@ function clickedFunds (e) {
   updateFilters();
 }
 
+function clickedShowHide (e) {
+  store.isPanelHidden = !store.isPanelHidden;
+  setTimeout(function(){ mymap.invalidateSize()}, 500);}
+
+function clickedShowMainPanel (e) {
+  store.showingMainPanel = true;
+  store.showingLayerPanel = false;
+}
+
+function clickedShowLayerSelector (e) {
+  store.showingMainPanel = false;
+  store.showingLayerPanel = true;
+}
+
 function clickedFilter (e) {
   let id = e.target.id;
 
@@ -258,7 +293,7 @@ function clickedFilter (e) {
 function mounted () {
   mymap = L.map('mymap', { zoomSnap: 0.5 });
   mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]]);
-  mymap.zoomControl.setPosition('bottomright');
+  mymap.zoomControl.setPosition('bottomleft');
 
   let url =
     'https://api.mapbox.com/styles/v1/mapbox/' +
@@ -306,6 +341,9 @@ export default {
   methods: {
     clickedFilter: clickedFilter,
     clickedFunds: clickedFunds,
+    clickedShowHide: clickedShowHide,
+    clickedShowMainPanel: clickedShowMainPanel,
+    clickedShowLayerSelector: clickedShowLayerSelector,
     clickedDistrict: clickedDistrict,
     clickedSearch: clickedSearch,
     clickedSearchTag: clickedSearchTag,
@@ -978,12 +1016,23 @@ h4 {
 #container {
   background-color: #ccc;
   display: grid;
-  grid-template-columns: 350px 1fr 400px;
-  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 350px 1fr auto auto;
+  grid-template-rows: auto 1fr auto auto;
   height: 100%;
   max-height: 100%;
   margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
+}
+
+#layer-widgets {
+  border-radius: 7px 0px 0px 7px;
+  background-color: #555;
+  grid-row: 3 / 5;
+  grid-column: 3 / 4;
+  z-index: 7;
+}
+#layer-widgets button {
+  margin: 5px 5px 5px 5px;
 }
 
 #panel {
@@ -996,10 +1045,16 @@ h4 {
   grid-template-rows: auto 1fr auto;
   height: 100%;
   max-height: 100%;
-  grid-row: 1 / 4;
-  grid-column: 3 / 4;
+  width: 400px;
+  grid-row: 1 / 5;
+  grid-column: 4 / 5;
   padding: 0px 15px 0px 15px;
   z-index: 5;
+  transition: width 0.5s;
+}
+
+#panel.shrunken {
+  width: 0px;
 }
 
 #preheader {
@@ -1008,13 +1063,13 @@ h4 {
 }
 
 #mymap {
-  grid-row: 1 / 4;
-  grid-column: 1 / 3;
+  grid-row: 1 / 5;
+  grid-column: 1 / 4;
   z-index: 1;
 }
 
 #hover-panel {
-  grid-row: 3 / 4;
+  grid-row: 4 / 5;
   grid-column: 1 / 3;
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
@@ -1097,6 +1152,7 @@ td.agency-logo {
 .apptitle {
   font-size: 22px;
   margin: 0px 0px;
+  margin-top: 0px;
   text-align: center;
 }
 
@@ -1134,8 +1190,8 @@ h5 {
 }
 
 .pickers h5 {
-  margin-bottom: 4px;
-  margin-top: 25px;
+  margin-bottom: 3px;
+  margin-top: 15px;
 }
 
 .details-link {

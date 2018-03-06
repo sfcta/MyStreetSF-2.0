@@ -53,12 +53,12 @@
         button#btn-underway.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterUnderway, yellow: filterUnderway}"
-        ) Active
+        ) Underway
 
         button#btn-complete.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterComplete, yellow: filterComplete}"
-        ) Closed
+        ) Completed
 
         h5 CATEGORY:
 
@@ -75,7 +75,7 @@
         button#btn-areas.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterAreas, yellow: filterAreas}"
-        ) Plans &amp; Studies
+        ) Plans &amp; Programs
 
         #dropdowns
           .narrow-dropdown(style="float:left;")

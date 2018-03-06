@@ -2,13 +2,15 @@
 #container
   #layer-widgets
     button#btn-start.ui.tiny.grey.icon.button(
-           v-on:click="clickedShowMainPanel"
-           v-bind:class="{ blue: showingMainPanel}"
+      data-tooltip="Projects"
+      v-on:click="clickedShowMainPanel"
+      v-bind:class="{ blue: showingMainPanel}"
     ): i.list.icon
     br
     button#btn-layers.ui.tiny.grey.icon.button(
-           v-on:click="clickedShowLayerSelector"
-           v-bind:class="{ blue: showingLayerPanel}"
+      data-tooltip="Map Layers"
+      v-on:click="clickedShowLayerSelector"
+      v-bind:class="{ blue: showingLayerPanel}"
     ): i.clone.outline.icon
     br
     br
@@ -17,7 +19,29 @@
            v-on:click="clickedShowHide"
     ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
 
-  #panel(v-bind:class="{ shrunken: isPanelHidden}")
+  #layer-panel.sidepanel(v-if="showingLayerPanel" v-bind:class="{ shrunken: isPanelHidden}")
+    #preheader
+      hr
+      h3.apptitle MyStreet SF
+      hr
+      br
+      h5 MAP LAYERS:
+      p: i Additional geographic data that you may find useful.
+      br
+
+      .ui.checkbox.layer-selectors
+        input(name="layer-sup-districts" type="checkbox")
+        label Supervisorial District Boundaries
+      br
+      .ui.checkbox.layer-selectors
+        input(name="layer-cupcakes" type="checkbox")
+        label Cupcake Restaurants
+      br
+      .ui.checkbox.layer-selectors
+        input(name="layer-parks" type="checkbox")
+        label Pedestrian Fatalities
+
+  #panel.sidepanel(v-if="showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr
       h3.apptitle MyStreet SF
@@ -259,7 +283,11 @@ function clickedFunds (e) {
 
 function clickedShowHide (e) {
   store.isPanelHidden = !store.isPanelHidden;
-  setTimeout(function(){ mymap.invalidateSize()}, 500);}
+  // leaflet map needs to be force-recentered, and it is slow.
+  for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
+    setTimeout(function () { mymap.invalidateSize() }, delay);
+  }
+}
 
 function clickedShowMainPanel (e) {
   store.showingMainPanel = true;
@@ -986,6 +1014,7 @@ h4 {
   grid-row: 1 / 2;
   grid-column: 1 / 2;
   margin: 10px 20px 10px 10px;
+  position: relative;
   z-index: 5;
 }
 
@@ -1029,32 +1058,36 @@ h4 {
   background-color: #555;
   grid-row: 3 / 5;
   grid-column: 3 / 4;
+  position: relative;
+  margin-bottom: 25px;
   z-index: 7;
 }
+
 #layer-widgets button {
   margin: 5px 5px 5px 5px;
 }
 
-#panel {
+.sidepanel {
   background-color: #444;
   border-color: transparent;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   color: #fff;
   display: grid;
+  grid-row: 1 / 5;
+  grid-column: 4 / 5;
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto;
   height: 100%;
+  margin-right: 0px;
   max-height: 100%;
-  width: 400px;
-  grid-row: 1 / 5;
-  grid-column: 4 / 5;
   padding: 0px 15px 0px 15px;
+  transition: margin 0.4s;
+  width: 400px;
   z-index: 5;
-  transition: width 0.5s;
 }
 
-#panel.shrunken {
-  width: 0px;
+.shrunken {
+  margin-right: -394px;
 }
 
 #preheader {
@@ -1077,6 +1110,7 @@ h4 {
   margin: 0px auto;
   margin-bottom: 25px;
   padding: 1px 10px;
+  position: relative;
   z-index: 2;
 }
 
@@ -1242,5 +1276,12 @@ td {
 }
 
 .narrow-dropdown { width: 165px;}
+
+#preheader label {
+  color: white;
+  font-size: 16px;
+}
+
+.layer-selectors {padding: 5px 0px;}
 
 </style>

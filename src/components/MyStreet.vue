@@ -381,6 +381,10 @@ export default {
   },
   watch: {
     terms: termChanged,
+    showingMainPanel: function () {
+      // initialize dropdowns if main panel is showing
+      setTimeout(function () { $('.ui.dropdown').dropdown() }, 250);
+    }
   },
 }
 

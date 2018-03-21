@@ -24,22 +24,15 @@
       hr
       h3.apptitle MyStreet SF
       hr
+
       br
       h5 MAP LAYERS:
       p: i Additional geographic data that you may find useful.
       br
 
       .ui.checkbox.layer-selectors
-        input(name="layer-sup-districts" type="checkbox")
+        input(@click="clickedToggleLayer" name="layer-sup-districts" type="checkbox")
         label Supervisorial District Boundaries
-      br
-      .ui.checkbox.layer-selectors
-        input(name="layer-cupcakes" type="checkbox")
-        label Cupcake Restaurants
-      br
-      .ui.checkbox.layer-selectors
-        input(name="layer-parks" type="checkbox")
-        label Pedestrian Fatalities
 
   #panel.sidepanel(v-if="showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
@@ -188,6 +181,13 @@ let L = require('leaflet');
 let keywordExtractor = require('keyword-extractor');
 let omnivore = require('leaflet-omnivore');
 
+let _extraLayers = {
+  'layer-sup-districts': {
+    name: 'Supervisorial District Boundaries',
+    geojson: 'https://api.sfcta.org/api/sup_district_boundaries',
+  },
+}
+
 let _tagList = [
   'ADA/Accessibility',
   'Bicycle/Bike Facilities',
@@ -289,6 +289,55 @@ function clickedShowHide (e) {
   }
 }
 
+function clickedToggleLayer (e) {
+    if (BigStore.debug) console.log('toggle layer', e.target.name)
+    let layer = _extraLayers[e.target.name]
+
+    if (mymap.hasLayer(layer.id)) {
+      mymap.removeLayer(layer.id)
+    } else {
+      addExtraMapLayer(layer)
+    }
+}
+
+async function addExtraMapLayer (extraLayer) {
+  let url = extraLayer.geojson
+  if (BigStore.debug) console.log('fetching', url)
+
+  let params = {style: {
+    color: '#bb44bb' + 'c0', // this is the "unselected" color -- same for all projects
+    weight: 6,
+    fillOpacity: 0.0,
+  }}
+
+  try {
+    let resp = await fetch(url)
+    let jsonData = await resp.json()
+    if (BigStore.debug) console.log(jsonData)
+
+    for (let district of jsonData) {
+      var geojsonFeature = {
+        type: "Feature",
+        geometry: JSON.parse(district.geometry),
+        properties: {
+            name: "Coors Field",
+            amenity: "Baseball Stadium",
+            popupContent: "This is where the Rockies play!"
+        },
+      };
+
+      console.log(geojsonFeature)
+      let geoLayer = L.geoJSON(geojsonFeature, params )
+      extraLayer.id = geoLayer.id // save for lookups later
+      geoLayer.addTo(mymap)
+      geoLayer.bringToBack();
+    }
+
+  } catch (error) {
+    console.log('map error: ' + error);
+  }
+}
+
 function clickedShowMainPanel (e) {
   store.showingMainPanel = true;
   store.showingLayerPanel = false;
@@ -344,6 +393,7 @@ function mounted () {
   $('.ui.dropdown').dropdown();
 
   queryServer();
+  loadSupervisorDistricts();
 }
 
 function updateHoverPanel (id) {
@@ -372,6 +422,7 @@ export default {
     clickedShowHide: clickedShowHide,
     clickedShowMainPanel: clickedShowMainPanel,
     clickedShowLayerSelector: clickedShowLayerSelector,
+    clickedToggleLayer: clickedToggleLayer,
     clickedDistrict: clickedDistrict,
     clickedSearch: clickedSearch,
     clickedSearchTag: clickedSearchTag,
@@ -405,6 +456,66 @@ async function queryServer () {
     let resp = await fetch(geoUrl);
     let jsonData = await resp.json();
     mapSegments(jsonData);
+  } catch (error) {
+    console.log('map error: ' + error);
+  }
+}
+
+let _districts = {}
+let _districtOverlay;
+
+function showDistrictOverlay (district) {
+    if (_districtOverlay) {
+      mymap.removeLayer(_districtOverlay)
+      _districtOverlay = null
+    }
+    // that's it if user chose citywide
+    if (district===0) return
+
+    let params = {style: {
+      color: '#446',
+      weight: 1,
+      fillOpacity: 0.4,
+    }}
+
+    _districtOverlay = L.geoJSON(_districts[district], params).addTo(mymap)
+}
+
+async function loadSupervisorDistricts () {
+  const DISTRICT_VIEW = 'sup_district_boundaries';
+  const geoUrl = API_SERVER + DISTRICT_VIEW;
+
+  try {
+    let resp = await fetch(geoUrl);
+    let jsonData = await resp.json();
+
+    for (let district of jsonData) {
+      let id = district.district
+      var feature = {
+        type: "Feature",
+        geometry: JSON.parse(district.geometry),
+        properties: {
+            id: district.district
+        },
+      };
+
+      // the supes json is super janky: array of arrays, only one of which is needed
+      let mainOutline = 0
+      if (id==3) mainOutline = 14
+      if (id==6) mainOutline = 1
+
+      // draw a giant box around all of SF as first array entry
+      let invertGeometry = [
+        [
+          [ [-120, 30], [-130,30], [-130,40], [-120,40], [-120,30] ],
+        ],
+        feature.geometry.coordinates[mainOutline]
+      ]
+
+      feature.geometry.coordinates = invertGeometry
+
+      _districts[district.district] = feature;
+    }
   } catch (error) {
     console.log('map error: ' + error);
   }
@@ -690,10 +801,11 @@ function hoverFeature (e) {
 }
 
 function clickedDistrict (district) {
-  console.log('Chose District' + district);
-  store.filterDistrict = parseInt(district);
+  if (BigStore.debug) console.log('Chose District', district)
+  store.filterDistrict = parseInt(district)
 
-  updateFilters();
+  updateFilters()
+  showDistrictOverlay(district)
 }
 
 function updateFilters () {
@@ -1190,7 +1302,7 @@ td.agency-logo {
 .apptitle {
   font-size: 22px;
   margin: 0px 0px;
-  margin-top: 0px;
+  margin-top: -5px;
   text-align: center;
 }
 

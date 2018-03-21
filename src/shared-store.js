@@ -16,12 +16,12 @@ export const BigStore = {
   },
 
   addCacheItem (key, value) {
-    if (this.debug) console.log('addCache triggered:', key)
+    // if (this.debug) console.log('addCache triggered:', key)
     this.state.prjCache[key] = value;
   },
 
   addLayer (key, value) {
-    if (this.debug) console.log('addLayer triggered:', key)
+    // if (this.debug) console.log('addLayer triggered:', key)
     this.state.layers[key] = value;
   },
 

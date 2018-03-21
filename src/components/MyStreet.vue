@@ -293,22 +293,41 @@ function clickedToggleLayer (e) {
     if (BigStore.debug) console.log('toggle layer', e.target.name)
     let layer = _extraLayers[e.target.name]
 
-    if (mymap.hasLayer(layer.id)) {
-      mymap.removeLayer(layer.id)
-    } else {
+    if (!layer.id) {
       addExtraMapLayer(layer)
+    } else {
+      if (mymap.hasLayer(layer.id)) {
+        mymap.removeLayer(layer.id)
+      } else {
+        mymap.addLayer(layer.id)
+        layer.id.bringToBack()
+      }
     }
 }
+
+let _colors = [
+ '#e62','#fd0','#8b3','#0f9','#38c','#2e3','#8c5','#1e6','#e22','#00f','#a3c'
+]
 
 async function addExtraMapLayer (extraLayer) {
   let url = extraLayer.geojson
   if (BigStore.debug) console.log('fetching', url)
+  let group = L.featureGroup()
 
-  let params = {style: {
-    color: '#bb44bb' + 'c0', // this is the "unselected" color -- same for all projects
-    weight: 6,
-    fillOpacity: 0.0,
-  }}
+  let params = {
+    style: function (feature) {
+      let fill = _colors[-1 + parseInt(feature.properties.name)]
+      let style = {
+        color: '#0000', // this is the "unselected" color -- same for all projects
+        opacity: 0.5,
+        weight: 0,
+        fillColor: fill,
+        fillOpacity: 0.2,
+        interactive: false,
+      }
+      return style
+    }
+  }
 
   try {
     let resp = await fetch(url)
@@ -316,23 +335,24 @@ async function addExtraMapLayer (extraLayer) {
     if (BigStore.debug) console.log(jsonData)
 
     for (let district of jsonData) {
+      if (district.district==='06') continue
       var geojsonFeature = {
         type: "Feature",
         geometry: JSON.parse(district.geometry),
         properties: {
-            name: "Coors Field",
-            amenity: "Baseball Stadium",
-            popupContent: "This is where the Rockies play!"
+            name: district.district
         },
       };
 
-      console.log(geojsonFeature)
-      let geoLayer = L.geoJSON(geojsonFeature, params )
-      extraLayer.id = geoLayer.id // save for lookups later
-      geoLayer.addTo(mymap)
-      geoLayer.bringToBack();
+      let layer = L.geoJSON(geojsonFeature, params)
+      group.addLayer(layer)
     }
 
+    group.addTo(mymap)
+    group.bringToBack();
+    extraLayer.id = group
+
+    console.log(group)
   } catch (error) {
     console.log('map error: ' + error);
   }
@@ -601,12 +621,12 @@ function styleByMetricColor (iconName, polygon) {
   if (iconName && iconName.startsWith('measle')) radius = 8;
 
   return {
-    color: '#444488' + 'c0', // this is the "unselected" color -- same for all projects
+    color: polygon ? '#063a' : '#448C', // this is the "unselected" color -- same for all projects
     truecolor: truecolor, // this is the "actual" project color
-    fillColor: polygon ? '#448844' + '90' : truecolor,
-    weight: polygon ? 1 : 2,
+    fillColor: polygon ? '#4463' : truecolor, // '#448844' + '90' : truecolor,
+    weight: polygon ? 3 : 1,
     fillOpacity: 0.7,
-    opacity: 1.0,
+    opacity: polygon ? 0.4 : 1.0,
     radius: radius,
   };
 }
@@ -788,7 +808,7 @@ function hoverFeature (e) {
 
   // the 15ms timeout keeps the highlight from flashing too much on mouse movement
   // the 300ms timeout keeps the highlight from selecting areas every time
-  let timeout = polygon ? 300 : 0;
+  let timeout = polygon ? 50 : 15;
 
   clearTimeout(popupTimeout);
   popupTimeout = setTimeout(function () {

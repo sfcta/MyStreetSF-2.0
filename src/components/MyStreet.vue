@@ -101,25 +101,16 @@
           .narrow-dropdown(style="float:left;")
             h5 DISTRICT:
             .ui.selection.fluid.dropdown
-              .text: div(v-cloak) Citywide
+              .text: div(v-cloak) {{ filterDistrict==0 ? "Citywide" : "District "+filterDistrict}}
               i.dropdown.icon
               .menu
-                .item(v-on:click="clickedDistrict(0)") Citywide
-                .item(v-on:click="clickedDistrict(1)") District 1
-                .item(v-on:click="clickedDistrict(2)") District 2
-                .item(v-on:click="clickedDistrict(3)") District 3
-                .item(v-on:click="clickedDistrict(4)") District 4
-                .item(v-on:click="clickedDistrict(5)") District 5
-                .item(v-on:click="clickedDistrict(6)") District 6
-                .item(v-on:click="clickedDistrict(7)") District 7
-                .item(v-on:click="clickedDistrict(8)") District 8
-                .item(v-on:click="clickedDistrict(9)") District 9
-                .item(v-on:click="clickedDistrict(10)") District 10
-                .item(v-on:click="clickedDistrict(11)") District 11
+                .item(v-for="i in [0,1,2,3,4,5,6,7,8,9,10,11]"
+                      v-on:click="clickedDistrict(i)"
+                      v-bind:selected="i==3") {{ i==0 ? "Citywide" : "District "+i}}
           .narrow-dropdown(style="float:right;")
             h5 FUNDING SOURCE:
             .ui.selection.fluid.dropdown
-              .text: div(v-cloak) All sources&hellip;
+              .text: div(v-cloak) {{ filterFund ? filterFund : "All sources&hellip;" }}
               i.dropdown.icon
               .menu
                 .item(@click="clickedFunds" v-bind:data-fund="null") All sources
@@ -313,7 +304,7 @@ function clickedToggleLayer (e) {
 }
 
 let _colors = [
- '#e62','#fd0','#8b3','#0f9','#38c','#2e3','#8c5','#1e6','#e22','#00f','#a3c'
+ '#e62','#fd0','#e62','#0f9','#38c','#2e3','#8c5','#1e6','#e22','#00f','#a3c'
 ]
 
 async function addExtraMapLayer (extraLayer) {
@@ -509,7 +500,7 @@ function showDistrictOverlay (district) {
 
     _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(mymap)
     // fancy flyover
-    mymap.flyToBounds(_districtLayers[district].getBounds())
+    // mymap.flyToBounds(_districtLayers[district].getBounds())
 }
 
 async function loadSupervisorDistricts () {

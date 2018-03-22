@@ -31,7 +31,10 @@
       br
 
       .ui.checkbox.layer-selectors
-        input(@click="clickedToggleLayer" name="layer-sup-districts" type="checkbox")
+        input(@click="clickedToggleLayer"
+              name="layer-sup-districts"
+              type="checkbox"
+              v-bind:checked="extraLayers['layer-sup-districts'].show")
         label Supervisorial District Boundaries
 
   #panel.sidepanel(v-if="showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
@@ -234,6 +237,7 @@ let _tagList = [
 ];
 
 let store = {
+  extraLayers: _extraLayers,
   filterComplete: false,
   filterUnderway: false,
   filterTransit: false,
@@ -293,6 +297,9 @@ function clickedToggleLayer (e) {
     if (BigStore.debug) console.log('toggle layer', e.target.name)
     let layer = _extraLayers[e.target.name]
 
+    if (!layer.show) layer.show = true
+    else layer.show = !layer.show
+
     if (!layer.id) {
       addExtraMapLayer(layer)
     } else {
@@ -318,8 +325,8 @@ async function addExtraMapLayer (extraLayer) {
     style: function (feature) {
       let fill = _colors[-1 + parseInt(feature.properties.name)]
       let style = {
-        color: '#0000', // this is the "unselected" color -- same for all projects
-        opacity: 0.5,
+        color: '#000', // this is the "unselected" color -- same for all projects
+        opacity: 0.0,
         weight: 0,
         fillColor: fill,
         fillOpacity: 0.2,
@@ -481,7 +488,8 @@ async function queryServer () {
   }
 }
 
-let _districts = {}
+let _districtLayersInverted = {}
+let _districtLayers = {}
 let _districtOverlay;
 
 function showDistrictOverlay (district) {
@@ -493,12 +501,15 @@ function showDistrictOverlay (district) {
     if (district===0) return
 
     let params = {style: {
-      color: '#446',
+      color: '#225',
+      fillOpacity: 0.5,
+      interactive: false,
       weight: 1,
-      fillOpacity: 0.4,
     }}
 
-    _districtOverlay = L.geoJSON(_districts[district], params).addTo(mymap)
+    _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(mymap)
+    // fancy flyover
+    mymap.flyToBounds(_districtLayers[district].getBounds())
 }
 
 async function loadSupervisorDistricts () {
@@ -519,6 +530,8 @@ async function loadSupervisorDistricts () {
         },
       };
 
+      _districtLayers[district.district] = L.geoJSON(feature);
+
       // the supes json is super janky: array of arrays, only one of which is needed
       let mainOutline = 0
       if (id==3) mainOutline = 14
@@ -534,7 +547,7 @@ async function loadSupervisorDistricts () {
 
       feature.geometry.coordinates = invertGeometry
 
-      _districts[district.district] = feature;
+      _districtLayersInverted[district.district] = feature;
     }
   } catch (error) {
     console.log('map error: ' + error);

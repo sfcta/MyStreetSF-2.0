@@ -576,12 +576,6 @@ function mapSegments (cmpsegJson) {
     // slurp up all the funding sources
     if (segment.funding_sources) fundStrings.push(...segment.funding_sources.split(', '));
 
-    // TODO:  Fake project types, for now
-    if (segment.sponsor && segment.sponsor === 'MUNI') { segment.new_project_type = 'Transit'; }
-    if (segment.description && segment.description.includes('safety')) { segment.new_project_type = 'Streets'; }
-    if (segment.description && segment.description.includes('study')) { segment.new_project_type = 'Plans and Studies'; }
-    if (segment.name && segment.name.includes('Planning')) { segment.new_project_type = 'Plans and Studies'; }
-
     let kml =
       '<kml xmlns="http://www.opengis.net/kml/2.2">' +
       '<Placemark>' +
@@ -875,7 +869,7 @@ function updateFilters () {
 
   // if none are clicked, then all are clicked! :-O
   let showAll = false;
-  if (((transit === streets) === areas) === false) {
+  if (!transit && !streets && !areas) {
     showAll = true;
   }
 
@@ -888,16 +882,15 @@ function updateFilters () {
     if (showAll) {
       show = true;
     } else {
-      if (!prj || !prj.new_project_type) {
+      if (!prj) {
         show = false;
       } else {
-        console.log(id + ' - ' + prj.new_project_type);
-        if (transit && prj.new_project_type.includes('Transit')) show = true;
-        if (streets && prj.new_project_type.includes('Streets')) show = true;
-        if (areas && prj.new_project_type.includes('Plans')) show = true;
+        if (transit && prj.project_group.includes('Transit')) show = true;
+        if (streets && prj.project_group.includes('Streets')) show = true;
+        if (areas && prj.project_group.includes('Plans and Programs')) show = true;
       }
     }
-
+    console.log({ID: id, show: show})
     // now check FUNDING SOURCE
     let funds = store.filterFund;
     let isCorrectFund = !funds || prj.funding_sources.includes(funds);

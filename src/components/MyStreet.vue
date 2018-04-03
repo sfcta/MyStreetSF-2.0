@@ -101,12 +101,11 @@
           .narrow-dropdown(style="float:left;")
             h5 DISTRICT:
             .ui.selection.fluid.dropdown
-              .text: div(v-cloak) {{ filterDistrict==0 ? "Citywide" : "District "+filterDistrict}}
+              .text: div(v-cloak) {{ nameOfFilterDistrict(filterDistrict) }}
               i.dropdown.icon
               .menu
-                .item(v-for="i in [0,1,2,3,4,5,6,7,8,9,10,11]"
-                      v-on:click="clickedDistrict(i)"
-                      v-bind:selected="i==3") {{ i==0 ? "Citywide" : "District "+i}}
+                .item(v-for="i in [-1,0,1,2,3,4,5,6,7,8,9,10,11]"
+                      v-on:click="clickedDistrict(i)") {{ nameOfFilterDistrict(i) }}
           .narrow-dropdown(style="float:right;")
             h5 FUNDING SOURCE:
             .ui.selection.fluid.dropdown
@@ -116,9 +115,12 @@
                 .item(@click="clickedFunds" v-bind:data-fund="null") All sources
                 .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
         br
-        br
-        br
-        br
+        .ui.checkbox.layer-selectors
+          input(@click="devClickedToggleDistrictOption"
+                name="dev-sup-districts"
+                type="checkbox"
+                v-bind:checked="devDistrictOption")
+          label (TEST) Show all projects on map, even when a district is chosen
         br
 
       // logo panel
@@ -228,13 +230,14 @@ let _tagList = [
 ];
 
 let store = {
+  devDistrictOption: true,
   extraLayers: _extraLayers,
   filterComplete: false,
   filterUnderway: false,
   filterTransit: false,
   filterStreets: false,
   filterAreas: false,
-  filterDistrict: 0,
+  filterDistrict: -1,
   filterFund: null,
   fundSources: [],
   hoverPanelHide: false,
@@ -273,6 +276,12 @@ function clickedFunds (e) {
   store.filterFund = e.target.dataset.fund;
   if (BigStore.debug) console.log({FUND: store.filterFund});
 
+  updateFilters();
+}
+
+function devClickedToggleDistrictOption () {
+  store.devDistrictOption = !store.devDistrictOption
+  if (BigStore.debug) console.log({DEVCLICKED: store.devDistrictOption})
   updateFilters();
 }
 
@@ -426,10 +435,18 @@ function updateHoverPanel (id) {
   }, 2000);
 }
 
+function nameOfFilterDistrict (i) {
+  if (i == -1) return "All Projects..."
+  if (i == 0 ) return "Citywide"
+  return "District " + i
+}
+
 export default {
   name: 'MyStreet',
   data () {
     return store
+  },
+  computed: {
   },
   mounted: function () {
     mounted();
@@ -445,7 +462,9 @@ export default {
     clickedSearch: clickedSearch,
     clickedSearchTag: clickedSearchTag,
     clearSearchBox: clearSearchBox,
+    devClickedToggleDistrictOption: devClickedToggleDistrictOption,
     hoverSearch: hoverSearch,
+    nameOfFilterDistrict: nameOfFilterDistrict,
     termChanged: termChanged,
   },
   watch: {
@@ -583,7 +602,7 @@ function mapSegments (cmpsegJson) {
       },
       pointToLayer: function (feature, latlng) {
         // this turns 'points' into circles
-        return L.circleMarker(latlng, { id: id });
+        return L.circleMarker(latlng, { id: id});
       },
     });
 
@@ -695,6 +714,7 @@ function updatePanelDetails (id) {
 }
 
 function clickedOnFeature (e) {
+  console.log(e)
   let id;
   let target;
 
@@ -756,6 +776,15 @@ function isTargetAPolygon (target) {
   return false;
 }
 
+function isTargetAPoint (target) {
+    try {
+      if (target.feature.geometry.type === "Point") return true;
+      return target.feature.geometry.geometries[0].type === "Point"
+    } catch (error) {
+    }
+    return false;
+}
+
 function hoverFeature (e) {
   let target;
 
@@ -765,11 +794,11 @@ function hoverFeature (e) {
   } else {
     target = e.target;
   }
-
   // don't add a hover if the proj is already selected
   if (target === _selectedProject) return;
 
   let polygon = isTargetAPolygon(target);
+  let points = isTargetAPoint(target)
 
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
@@ -797,18 +826,22 @@ function hoverFeature (e) {
     };
   }
 
-  let weight = polygon ? 6 : 10;
-
   let style = {
-    color: _hoverStyle.truecolor,
+    color: points ? '#333' : _hoverStyle.truecolor,
     fillColor: _hoverStyle.fillColor,
-    weight: weight,
     opacity: 1.0,
+    radius: 8,
+    weight: points ? 1 : 6,
   };
-  if (polygon) {
-    style.fillColor = _hoverStyle.truecolor;
-    style.fillOpacity = 0.3;
-  }
+
+  let polygonStyle = {
+    color: _hoverStyle.truecolor,
+    fillColor: _hoverStyle.truecolor,
+    fillOpacity: 0.3,
+    opacity: 1.0,
+    radius: 10,
+    weight: 6,
+  };
 
   // the 15ms timeout keeps the highlight from flashing too much on mouse movement
   // the 300ms timeout keeps the highlight from selecting areas every time
@@ -816,7 +849,7 @@ function hoverFeature (e) {
 
   clearTimeout(popupTimeout);
   popupTimeout = setTimeout(function () {
-    target.setStyle(style);
+    target.setStyle( polygon ? polygonStyle: style);
   }, timeout);
 
   _hoverProject = target;
@@ -876,12 +909,18 @@ function updateFilters () {
 
     // now check DISTRICT
     let district = store.filterDistrict;
-    let districtColName = 'district' + district;
-    let isCorrectDistrict =
-      district === 0 || (district > 0 && prj[districtColName] === 1);
+    let isCorrectDistrict = true;
+    if (district == 0) isCorrectDistrict = (prj['districts'] === "Citywide")
+    /*  // Hide for now, so all projects show even when a district is selected */
+    if (!store.devDistrictOption) {
+      if (district > 0) {
+        let districtColName = 'district' + district;
+        isCorrectDistrict = (prj[districtColName] === 1);
+      }
+    }
 
     // the final word
-    let passedAllTests = show && isCorrectFund && isCorrectDistrict && isCorrectStatus;
+    let passedAllTests = show && isCorrectFund && isCorrectStatus && isCorrectDistrict
 
     if (passedAllTests && !mymap.hasLayer(layer)) {
       mymap.addLayer(layer);

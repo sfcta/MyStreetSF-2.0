@@ -149,8 +149,10 @@
       .ui.relaxed.list
         .search-category(v-if="tagresults.length")
           p TAGS
-        #search-tags.tiny.basic.pink.ui.button(
+        #search-tags.tiny.pink.ui.button(
           v-for="tag in tagresults"
+          v-bind:key="filterKey+tag"
+          v-bind:class="{ basic: !filterTags.has(tag) }"
           v-on:click='clickedSearchTag(tag)'
         ) {{ tag }}
         .search-category(v-if="results.length")
@@ -184,60 +186,19 @@ let _extraLayers = {
   },
 }
 
-let _tagList = [
-  'ADA/Accessibility',
-  'Bicycle/Bike Facilities',
-  'Bicycle/Bike Lanes',
-  'Bicycle/Bike Projects',
-  'Bicycle/Bike Safety',
-  'Bulb-outs/Curb Extension/Curb ramps',
-  'Bus Rapid Transit (BRT)',
-  'Buses',
-  'Citywide Plan',
-  'Community-based transportation plans',
-  'Corridor plan',
-  'Countdown signals',
-  'Elevators/Escalators',
-  'Facilities',
-  'Freeway or Congestion Management',
-  'Freeways/Ramps',
-  'Heavy rail',
-  'Historic streetcar',
-  'Light rail',
-  'Motor coaches',
-  'Neighborhood Plan',
-  'NTIP / Neighborhood Transportation Improvement Program',
-  'Outreach',
-  'Paratransit',
-  'Pedestrian Safety',
-  'Plans and Programs',
-  'Safe routes to school (SRTS)',
-  'School transportation',
-  'Sidewalks',
-  'Stations/Stops',
-  'Street Resurfacing',
-  'Streets',
-  'Tracks/Guideways',
-  'Traffic Calming',
-  'Traffic Signals',
-  'Trains',
-  'Transit',
-  'Transit lanes',
-  'Transportation demand management',
-  'Trees',
-  'Trolleybuses',
-  'Vessels/Ferries',
-];
+let _projectsByTag = {}
+let _tagList = []
 
 let store = {
   devDistrictOption: true,
   extraLayers: _extraLayers,
-  filterComplete: false,
-  filterUnderway: false,
-  filterTransit: false,
-  filterStreets: false,
   filterAreas: false,
+  filterComplete: false,
   filterDistrict: -1,
+  filterStreets: false,
+  filterTags: new Set(),
+  filterTransit: false,
+  filterUnderway: false,
   filterFund: null,
   fundSources: [],
   hoverPanelHide: false,
@@ -247,6 +208,7 @@ let store = {
   infoUrl: '',
   showingLayerPanel: false,
   showingMainPanel: true,
+  filterKey: 0,
   isPanelHidden: false,
   terms: '',
   results: [],
@@ -600,6 +562,24 @@ function mapSegments (cmpsegJson) {
       },
     });
 
+    // convert tag string to a set of TAGS
+    if (segment.project_tags) {
+      let tags = Array.from(new Set(segment.project_tags.split(', '))).sort()
+      if (tags[0] === '') tags.splice(0,1) // drop empty tags
+      segment.tag_list = tags
+
+      // create tag index for easy lookup later
+      _tagList.push(...tags) // this will have lots of duplicates
+      for (let tag of tags) {
+        if (!_projectsByTag[tag]) _projectsByTag[tag] = []
+        _projectsByTag[tag].push(id)
+      }
+
+      // remove all duplicates
+      _tagList = Array.from(new Set(_tagList)).sort()
+      store.tags = _tagList
+    }
+
     // hang onto the data
     geoLayer.options.id = id;
     BigStore.addCacheItem(id, segment);
@@ -913,8 +893,22 @@ function updateFilters () {
       }
     }
 
+    // now check TAGS
+    let isCorrectTags = true
+    if (store.filterTags.size) {
+      isCorrectTags = false
+      if (prj.tag_list) {
+        for (let tag of store.filterTags) {
+          if (prj.tag_list.indexOf(tag) > -1) {
+            isCorrectTags = true
+            break
+          }
+        }
+      }
+    }
+
     // the final word
-    let passedAllTests = show && isCorrectFund && isCorrectStatus && isCorrectDistrict
+    let passedAllTests = show && isCorrectFund && isCorrectStatus && isCorrectDistrict && isCorrectTags
 
     if (passedAllTests && !mymap.hasLayer(layer)) {
       mymap.addLayer(layer);
@@ -1013,11 +1007,14 @@ function clickedSearch (id) {
 }
 
 function clickedSearchTag (tag) {
-  alert(
-    'YOU CLICKED: ' +
-      tag +
-      '\nOnce the database has some tags in it, this will be more useful.'
-  );
+  if (store.filterTags.has(tag)) {
+    store.filterTags.delete(tag)
+  } else {
+    store.filterTags.add(tag)
+  }
+  console.log({ACTIVE_TAGS: store.filterTags})
+  store.filterKey++
+  updateFilters()
 }
 
 function clearSearchBox () {

@@ -630,6 +630,7 @@ function mapSegments (cmpsegJson) {
   // convert funding source to a unique set
   let funds = Array.from(new Set(fundStrings));
   store.fundSources = funds.sort();
+  if (store.fundSources[0] === "") store.fundSources.splice(0,1) // remove blanks at beginning
 }
 
 function styleByMetricColor (iconName, polygon) {
@@ -890,7 +891,7 @@ function updateFilters () {
         if (areas && prj.project_group.includes('Plans and Programs')) show = true;
       }
     }
-    console.log({ID: id, show: show})
+
     // now check FUNDING SOURCE
     let funds = store.filterFund;
     let isCorrectFund = !funds || prj.funding_sources.includes(funds);

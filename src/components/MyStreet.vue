@@ -398,16 +398,26 @@ function mounted() {
   loadSupervisorDistricts()
 }
 
-function updateHoverPanel(id) {
-  store.hoverPanelText = BigStore.state.prjCache[id].project_name
-  store.hoverPanelHide = false
+let _hoverPopup
+let _hoverPopupTimer
 
-  clearTimeout(hoverPanelTimeout)
-  hoverPanelTimeout = setTimeout(function() {
-    store.hoverPanelHide = true
-    // clear the hover too
-    // geoLayer.resetStyle(oldHoverTarget);
-  }, 2000)
+function updateHoverPopup(id, latlng) {
+  removeOldHoverPopup()
+  showHoverPopupAfterDelay(id, latlng, 400)
+}
+
+function removeOldHoverPopup() {
+  clearTimeout(_hoverPopupTimer)
+  mymap.closePopup()
+}
+
+function showHoverPopupAfterDelay(id, latlng, delay) {
+  _hoverPopupTimer = setTimeout(function() {
+    _hoverPopup = L.popup()
+      .setLatLng(latlng)
+      .setContent(BigStore.state.prjCache[id].project_name)
+    _hoverPopup.openOn(mymap)
+  }, delay)
 }
 
 function nameOfFilterDistrict(i) {
@@ -710,7 +720,7 @@ function updatePanelDetails(id) {
 }
 
 function clickedOnFeature(e) {
-  console.log(e)
+  if (BigStore.debug) console.log(e)
   let id
   let target
 
@@ -853,7 +863,7 @@ function hoverFeature(e) {
 
   _hoverProject = target
 
-  updateHoverPanel(id)
+  updateHoverPopup(id, e.latlng)
 }
 
 function clickedDistrict(district) {

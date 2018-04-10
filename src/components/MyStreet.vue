@@ -1049,6 +1049,8 @@ function clickedSearchTag(tag) {
 
 function clearSearchBox() {
   store.terms = ''
+  store.filterTags.clear()
+  updateFilters()
 }
 </script>
 

@@ -62,7 +62,7 @@
           .menu
             .ui.icon.search.input
               i.search.icon
-              input(type="text" placeholder="Search tags...")
+              input(type="text"  v-model="selectedTags" placeholder="Search tags...")
             .scrolling.menu(style="max-height: 230px")
               .item(v-for="tag in tags" v-bind:data-value="tag")
                 .ui.blue.empty.circular.label
@@ -170,14 +170,14 @@
 <script>
 'use strict'
 
-import 'babel-polyfill';
+import 'babel-polyfill'
 
 // Shared stuff across all components
-import { BigStore } from '../shared-store.js';
+import { BigStore } from '../shared-store.js'
 
-let L = require('leaflet');
-let keywordExtractor = require('keyword-extractor');
-let omnivore = require('leaflet-omnivore');
+let L = require('leaflet')
+let keywordExtractor = require('keyword-extractor')
+let omnivore = require('leaflet-omnivore')
 
 let _extraLayers = {
   'layer-sup-districts': {
@@ -206,6 +206,7 @@ let store = {
   infoTitle: 'Select any project to learn more about it.',
   infoDetails: '',
   infoUrl: '',
+  selectedTags: '',
   showingLayerPanel: false,
   showingMainPanel: true,
   filterKey: 0,
@@ -216,75 +217,87 @@ let store = {
   tags: _tagList,
 }
 
-let theme = 'light';
-let mymap;
+let theme = 'light'
+let mymap
 
-const GEO_VIEW = 'mystreet2_all';
+const GEO_VIEW = 'mystreet2_all'
 
 let darkStyles = {
   normal: { color: '#ff7800', weight: 4, opacity: 1.0 },
   selected: { color: '#39f', weight: 5, opacity: 1.0 },
   popup: { color: '#33f', weight: 10, opacity: 1.0 },
-};
+}
 
 let lightStyles = {
   normal: { color: '#3c6', weight: 6, opacity: 1.0 },
   selected: { color: '#39f', weight: 8, opacity: 1.0 },
   popup: { color: '#36f', weight: 10, opacity: 1.0 },
-};
-let styles = theme === 'dark' ? darkStyles : lightStyles;
+}
+let styles = theme === 'dark' ? darkStyles : lightStyles
 
-function clickedFunds (e) {
-  store.filterFund = e.target.dataset.fund;
-  if (BigStore.debug) console.log({FUND: store.filterFund});
+function clickedFunds(e) {
+  store.filterFund = e.target.dataset.fund
+  if (BigStore.debug) console.log({ FUND: store.filterFund })
 
-  updateFilters();
+  updateFilters()
 }
 
-function devClickedToggleDistrictOption () {
+function devClickedToggleDistrictOption() {
   store.devDistrictOption = !store.devDistrictOption
-  if (BigStore.debug) console.log({DEVCLICKED: store.devDistrictOption})
-  updateFilters();
+  if (BigStore.debug) console.log({ DEVCLICKED: store.devDistrictOption })
+  updateFilters()
 }
 
-function clickedShowHide (e) {
-  store.isPanelHidden = !store.isPanelHidden;
+function clickedShowHide(e) {
+  store.isPanelHidden = !store.isPanelHidden
   // leaflet map needs to be force-recentered, and it is slow.
   for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
-    setTimeout(function () { mymap.invalidateSize() }, delay);
+    setTimeout(function() {
+      mymap.invalidateSize()
+    }, delay)
   }
 }
 
-function clickedToggleLayer (e) {
-    if (BigStore.debug) console.log('toggle layer', e.target.name)
-    let layer = _extraLayers[e.target.name]
+function clickedToggleLayer(e) {
+  if (BigStore.debug) console.log('toggle layer', e.target.name)
+  let layer = _extraLayers[e.target.name]
 
-    if (!layer.show) layer.show = true
-    else layer.show = !layer.show
+  if (!layer.show) layer.show = true
+  else layer.show = !layer.show
 
-    if (!layer.id) {
-      addExtraMapLayer(layer)
+  if (!layer.id) {
+    addExtraMapLayer(layer)
+  } else {
+    if (mymap.hasLayer(layer.id)) {
+      mymap.removeLayer(layer.id)
     } else {
-      if (mymap.hasLayer(layer.id)) {
-        mymap.removeLayer(layer.id)
-      } else {
-        mymap.addLayer(layer.id)
-        layer.id.bringToBack()
-      }
+      mymap.addLayer(layer.id)
+      layer.id.bringToBack()
     }
+  }
 }
 
 let _colors = [
- '#e62','#fd0','#e62','#0f9','#38c','#2e3','#8c5','#1e6','#e22','#00f','#a3c'
+  '#e62',
+  '#fd0',
+  '#e62',
+  '#0f9',
+  '#38c',
+  '#2e3',
+  '#8c5',
+  '#1e6',
+  '#e22',
+  '#00f',
+  '#a3c',
 ]
 
-async function addExtraMapLayer (extraLayer) {
+async function addExtraMapLayer(extraLayer) {
   let url = extraLayer.geojson
   if (BigStore.debug) console.log('fetching', url)
   let group = L.featureGroup()
 
   let params = {
-    style: function (feature) {
+    style: function(feature) {
       let fill = _colors[-1 + parseInt(feature.properties.name)]
       let style = {
         color: '#000', // this is the "unselected" color -- same for all projects
@@ -295,7 +308,7 @@ async function addExtraMapLayer (extraLayer) {
         interactive: false,
       }
       return style
-    }
+    },
   }
 
   try {
@@ -304,114 +317,113 @@ async function addExtraMapLayer (extraLayer) {
     if (BigStore.debug) console.log(jsonData)
 
     for (let district of jsonData) {
-      if (district.district==='06') continue
+      if (district.district === '06') continue
       var geojsonFeature = {
-        type: "Feature",
+        type: 'Feature',
         geometry: JSON.parse(district.geometry),
         properties: {
-            name: district.district
+          name: district.district,
         },
-      };
+      }
 
       let layer = L.geoJSON(geojsonFeature, params)
       group.addLayer(layer)
     }
 
     group.addTo(mymap)
-    group.bringToBack();
+    group.bringToBack()
     extraLayer.id = group
 
     console.log(group)
   } catch (error) {
-    console.log('map error: ' + error);
+    console.log('map error: ' + error)
   }
 }
 
-function clickedShowMainPanel (e) {
-  store.showingMainPanel = true;
-  store.showingLayerPanel = false;
+function clickedShowMainPanel(e) {
+  store.showingMainPanel = true
+  store.showingLayerPanel = false
 }
 
-function clickedShowLayerSelector (e) {
-  store.showingMainPanel = false;
-  store.showingLayerPanel = true;
+function clickedShowLayerSelector(e) {
+  store.showingMainPanel = false
+  store.showingLayerPanel = true
 }
 
-function clickedFilter (e) {
-  let id = e.target.id;
+function clickedFilter(e) {
+  let id = e.target.id
 
-  if (id === 'btn-transit') store.filterTransit = !store.filterTransit;
-  if (id === 'btn-streets') store.filterStreets = !store.filterStreets;
-  if (id === 'btn-areas') store.filterAreas = !store.filterAreas;
+  if (id === 'btn-transit') store.filterTransit = !store.filterTransit
+  if (id === 'btn-streets') store.filterStreets = !store.filterStreets
+  if (id === 'btn-areas') store.filterAreas = !store.filterAreas
 
   if (id === 'btn-complete') {
-    store.filterComplete = !store.filterComplete;
-    if (store.filterComplete) store.filterUnderway = false;
+    store.filterComplete = !store.filterComplete
+    if (store.filterComplete) store.filterUnderway = false
   }
   if (id === 'btn-underway') {
-    store.filterUnderway = !store.filterUnderway;
-    if (store.filterUnderway) store.filterComplete = false;
+    store.filterUnderway = !store.filterUnderway
+    if (store.filterUnderway) store.filterComplete = false
   }
 
-  updateFilters();
+  updateFilters()
 }
 
-function mounted () {
-  mymap = L.map('mymap', { zoomSnap: 0.5 });
-  mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]]);
-  mymap.zoomControl.setPosition('bottomleft');
+function mounted() {
+  mymap = L.map('mymap', { zoomSnap: 0.5 })
+  mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]])
+  mymap.zoomControl.setPosition('bottomleft')
 
   let url =
     'https://api.mapbox.com/styles/v1/mapbox/' +
     theme +
-    '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+    '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}'
   let token =
-    'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
+    'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ'
   let attribution =
     '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-    '<a href="http://mapbox.com">Mapbox</a>';
+    '<a href="http://mapbox.com">Mapbox</a>'
   L.tileLayer(url, {
     attribution: attribution,
     maxZoom: 18,
     accessToken: token,
-  }).addTo(mymap);
+  }).addTo(mymap)
 
   // semantic requires this line for dropdowns to work
   // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
   // eslint-disable-next-line
-  $('.ui.dropdown').dropdown();
+  $('.ui.dropdown').dropdown()
 
-  queryServer();
-  loadSupervisorDistricts();
+  queryServer()
+  loadSupervisorDistricts()
 }
 
-function updateHoverPanel (id) {
-  store.hoverPanelText = BigStore.state.prjCache[id].project_name;
-  store.hoverPanelHide = false;
+function updateHoverPanel(id) {
+  store.hoverPanelText = BigStore.state.prjCache[id].project_name
+  store.hoverPanelHide = false
 
-  clearTimeout(hoverPanelTimeout);
-  hoverPanelTimeout = setTimeout(function () {
-    store.hoverPanelHide = true;
+  clearTimeout(hoverPanelTimeout)
+  hoverPanelTimeout = setTimeout(function() {
+    store.hoverPanelHide = true
     // clear the hover too
     // geoLayer.resetStyle(oldHoverTarget);
-  }, 2000);
+  }, 2000)
 }
 
-function nameOfFilterDistrict (i) {
-  if (i == -1) return "All Projects..."
-  if (i == 0 ) return "Citywide"
-  return "District " + i
+function nameOfFilterDistrict(i) {
+  if (i == -1) return 'All Projects...'
+  if (i == 0) return 'Citywide'
+  return 'District ' + i
 }
 
 export default {
   name: 'MyStreet',
-  data () {
+  data() {
     return store
   },
-  computed: {
-  },
-  mounted: function () {
-    mounted();
+  computed: {},
+  mounted: function() {
+    mounted()
   },
   methods: {
     clickedFilter: clickedFilter,
@@ -431,141 +443,153 @@ export default {
   },
   watch: {
     terms: termChanged,
-    showingMainPanel: function () {
+    selectedTags: selectedTagsChanged,
+    showingMainPanel: function() {
       // initialize dropdowns if main panel is showing
-      setTimeout(function () { $('.ui.dropdown').dropdown() }, 250);
-    }
+      setTimeout(function() {
+        $('.ui.dropdown').dropdown()
+      }, 250)
+    },
   },
 }
 
 // some important global variables.
-const API_SERVER = 'https://api.sfcta.org/api/';
+const API_SERVER = 'https://api.sfcta.org/api/'
 
 // hard code the giant areas so they stay on the bottom layer of the map
-const _bigAreas = [407, 477, 79, 363, 366, 17];
+const _bigAreas = [407, 477, 79, 363, 366, 17]
 
-let _selectedProject, _selectedStyle;
-let _hoverProject, _hoverStyle;
-let hoverPanelTimeout;
+let _selectedProject, _selectedStyle
+let _hoverProject, _hoverStyle
+let hoverPanelTimeout
 
-async function queryServer () {
-  const geoUrl = API_SERVER + GEO_VIEW;
+function selectedTagsChanged() {
+  console.log(store.selectedTags)
+}
+
+async function queryServer() {
+  const geoUrl = API_SERVER + GEO_VIEW
 
   try {
-    let resp = await fetch(geoUrl);
-    let jsonData = await resp.json();
-    mapSegments(jsonData);
+    let resp = await fetch(geoUrl)
+    let jsonData = await resp.json()
+    mapSegments(jsonData)
   } catch (error) {
-    console.log('map error: ' + error);
+    console.log('map error: ' + error)
   }
 }
 
 let _districtLayersInverted = {}
 let _districtLayers = {}
-let _districtOverlay;
+let _districtOverlay
 
-function showDistrictOverlay (district) {
-    if (_districtOverlay) {
-      mymap.removeLayer(_districtOverlay)
-      _districtOverlay = null
-    }
-    // that's it if user chose citywide
-    if (district===0) return
+function showDistrictOverlay(district) {
+  if (_districtOverlay) {
+    mymap.removeLayer(_districtOverlay)
+    _districtOverlay = null
+  }
+  // that's it if user chose citywide
+  if (district === 0) return
 
-    let params = {style: {
+  let params = {
+    style: {
       color: '#225',
       fillOpacity: 0.5,
       interactive: false,
       weight: 1,
-    }}
+    },
+  }
 
-    _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(mymap)
-    // fancy flyover
-    // mymap.flyToBounds(_districtLayers[district].getBounds())
+  _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(
+    mymap
+  )
+  // fancy flyover
+  // mymap.flyToBounds(_districtLayers[district].getBounds())
 }
 
-async function loadSupervisorDistricts () {
-  const DISTRICT_VIEW = 'sup_district_boundaries';
-  const geoUrl = API_SERVER + DISTRICT_VIEW;
+async function loadSupervisorDistricts() {
+  const DISTRICT_VIEW = 'sup_district_boundaries'
+  const geoUrl = API_SERVER + DISTRICT_VIEW
 
   try {
-    let resp = await fetch(geoUrl);
-    let jsonData = await resp.json();
+    let resp = await fetch(geoUrl)
+    let jsonData = await resp.json()
 
     for (let district of jsonData) {
       let id = district.district
       var feature = {
-        type: "Feature",
+        type: 'Feature',
         geometry: JSON.parse(district.geometry),
         properties: {
-            id: district.district
+          id: district.district,
         },
-      };
+      }
 
-      _districtLayers[district.district] = L.geoJSON(feature);
+      _districtLayers[district.district] = L.geoJSON(feature)
 
       // the supes json is super janky: array of arrays, only one of which is needed
       let mainOutline = 0
-      if (id==3) mainOutline = 14
-      if (id==6) mainOutline = 1
+      if (id == 3) mainOutline = 14
+      if (id == 6) mainOutline = 1
 
       // draw a giant box around all of SF as first array entry
       let invertGeometry = [
-        [
-          [ [-120, 30], [-130,30], [-130,40], [-120,40], [-120,30] ],
-        ],
-        feature.geometry.coordinates[mainOutline]
+        [[[-120, 30], [-130, 30], [-130, 40], [-120, 40], [-120, 30]]],
+        feature.geometry.coordinates[mainOutline],
       ]
 
       feature.geometry.coordinates = invertGeometry
 
-      _districtLayersInverted[district.district] = feature;
+      _districtLayersInverted[district.district] = feature
     }
   } catch (error) {
-    console.log('map error: ' + error);
+    console.log('map error: ' + error)
   }
 }
 
 // add segments to the map by using metric data to color
-function mapSegments (cmpsegJson) {
-  let fundStrings = [];
+function mapSegments(cmpsegJson) {
+  let fundStrings = []
 
   for (let segment of cmpsegJson) {
-    if (segment['geometry'] == null) continue;
+    if (segment['geometry'] == null) continue
 
-    let id = segment['project_number'];
+    let id = segment['project_number']
 
     // slurp up all the funding sources
-    if (segment.funding_sources) fundStrings.push(...segment.funding_sources.split(', '));
+    if (segment.funding_sources)
+      fundStrings.push(...segment.funding_sources.split(', '))
 
     let kml =
       '<kml xmlns="http://www.opengis.net/kml/2.2">' +
       '<Placemark>' +
       segment['geometry'] +
-      '</Placemark></kml>';
+      '</Placemark></kml>'
 
-    let polygon = false;
-    if (segment['shape'] && segment['shape'].includes('Polygon')) { polygon = true; }
+    let polygon = false
+    if (segment['shape'] && segment['shape'].includes('Polygon')) {
+      polygon = true
+    }
 
     let geoLayer = L.geoJSON(null, {
       style: styleByMetricColor(segment['icon_name'], polygon),
-      onEachFeature: function (feature, layer) {
+      onEachFeature: function(feature, layer) {
         layer.on({
           mouseover: hoverFeature,
           mouseout: unHoverFeature,
           click: clickedOnFeature,
-        });
+        })
       },
-      pointToLayer: function (feature, latlng) {
+      pointToLayer: function(feature, latlng) {
         // this turns 'points' into circles
-        return L.circleMarker(latlng, { id: id});
+        return L.circleMarker(latlng, { id: id })
       },
-    });
+    })
 
     // convert tag string to a set of TAGS
     if (segment.project_tags) {
       let tags = Array.from(new Set(segment.project_tags.split(', '))).sort()
-      if (tags[0] === '') tags.splice(0,1) // drop empty tags
+      if (tags[0] === '') tags.splice(0, 1) // drop empty tags
       segment.tag_list = tags
 
       // create tag index for easy lookup later
@@ -581,42 +605,44 @@ function mapSegments (cmpsegJson) {
     }
 
     // hang onto the data
-    geoLayer.options.id = id;
-    BigStore.addCacheItem(id, segment);
+    geoLayer.options.id = id
+    BigStore.addCacheItem(id, segment)
 
     // validate KML
-    var oParser = new DOMParser();
-    var oDOM = oParser.parseFromString(kml, 'text/xml');
+    var oParser = new DOMParser()
+    var oDOM = oParser.parseFromString(kml, 'text/xml')
     // print the name of the root element or error message
-    if (oDOM.documentElement.nodeName === 'parsererror') { console.log('## Error while parsing row id ' + id); }
+    if (oDOM.documentElement.nodeName === 'parsererror') {
+      console.log('## Error while parsing row id ' + id)
+    }
 
     // add KML to the map
     try {
-      let layer = omnivore.kml.parse(kml, null, geoLayer);
-      layer.addTo(mymap);
-      if (polygon) layer.bringToBack();
-      BigStore.addLayer(id, layer);
+      let layer = omnivore.kml.parse(kml, null, geoLayer)
+      layer.addTo(mymap)
+      if (polygon) layer.bringToBack()
+      BigStore.addLayer(id, layer)
     } catch (e) {
-      console.log('couldnt: ' + id);
-      console.log(segment);
+      console.log('couldnt: ' + id)
+      console.log(segment)
     }
   }
 
   // TODO Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {
-    if (BigStore.state.layers[giantArea]) BigStore.sendLayerBack(giantArea);
+    if (BigStore.state.layers[giantArea]) BigStore.sendLayerBack(giantArea)
   }
 
   // convert funding source to a unique set
-  let funds = Array.from(new Set(fundStrings));
-  store.fundSources = funds.sort();
-  if (store.fundSources[0] === "") store.fundSources.splice(0,1) // remove blanks at beginning
+  let funds = Array.from(new Set(fundStrings))
+  store.fundSources = funds.sort()
+  if (store.fundSources[0] === '') store.fundSources.splice(0, 1) // remove blanks at beginning
 }
 
-function styleByMetricColor (iconName, polygon) {
-  let truecolor = generateColorFromDb(iconName); // actual project color;
-  let radius = 4;
-  if (iconName && iconName.startsWith('measle')) radius = 8;
+function styleByMetricColor(iconName, polygon) {
+  let truecolor = generateColorFromDb(iconName) // actual project color;
+  let radius = 4
+  if (iconName && iconName.startsWith('measle')) radius = 8
 
   return {
     color: polygon ? '#063a' : '#448C', // this is the "unselected" color -- same for all projects
@@ -626,179 +652,182 @@ function styleByMetricColor (iconName, polygon) {
     fillOpacity: 0.7,
     opacity: polygon ? 0.4 : 1.0,
     radius: radius,
-  };
+  }
 }
 
-function generateColorFromDb (iconName) {
-  let defaultColor = '#44c';
+function generateColorFromDb(iconName) {
+  let defaultColor = '#44c'
 
   // no color? use blue.
-  if (!iconName) return defaultColor;
+  if (!iconName) return defaultColor
 
   // color code in db? use it.
-  if (iconName.startsWith('#')) return iconName;
+  if (iconName.startsWith('#')) return iconName
 
   // icon name in db? convert to a color code.
   switch (iconName) {
     case 'small_blue':
-      return '#44f';
+      return '#44f'
     case 'small_green':
-      return '#4f4';
+      return '#4f4'
     case 'small_purple':
-      return '#63c';
+      return '#63c'
     case 'small_red':
-      return '#f44';
+      return '#f44'
     case 'small_yellow':
-      return '#aa3';
+      return '#aa3'
     case 'measle_turquoise':
-      return '#369';
+      return '#369'
     default:
-      return defaultColor;
+      return defaultColor
   }
 }
 
-function updatePanelDetails (id) {
-  let prj = BigStore.state.prjCache[id];
+function updatePanelDetails(id) {
+  let prj = BigStore.state.prjCache[id]
 
-  let district = '';
-  if (prj['district1']) district += '1, ';
-  if (prj['district2']) district += '2, ';
-  if (prj['district3']) district += '3, ';
-  if (prj['district4']) district += '4, ';
-  if (prj['district5']) district += '5, ';
-  if (prj['district6']) district += '6, ';
-  if (prj['district7']) district += '7, ';
-  if (prj['district8']) district += '8, ';
-  if (prj['district9']) district += '9, ';
-  if (prj['district10']) district += '10, ';
-  if (prj['district11']) district += '11, ';
+  let district = ''
+  if (prj['district1']) district += '1, '
+  if (prj['district2']) district += '2, '
+  if (prj['district3']) district += '3, '
+  if (prj['district4']) district += '4, '
+  if (prj['district5']) district += '5, '
+  if (prj['district6']) district += '6, '
+  if (prj['district7']) district += '7, '
+  if (prj['district8']) district += '8, '
+  if (prj['district9']) district += '9, '
+  if (prj['district10']) district += '10, '
+  if (prj['district11']) district += '11, '
   if (district) {
-    district = 'District ' + district.slice(0, -2);
+    district = 'District ' + district.slice(0, -2)
   } else {
-    district = 'Citywide';
+    district = 'Citywide'
   }
 
   // generate permalink
-  let permalink = prj['project_number'].toLowerCase();
+  let permalink = prj['project_number'].toLowerCase()
 
-  let url = `/projects/${permalink}/`;
+  let url = `/projects/${permalink}/`
 
-  store.infoTitle = prj['project_name'];
-  store.infoDetails = prj['description'];
-  store.infoUrl = url;
+  store.infoTitle = prj['project_name']
+  store.infoDetails = prj['description']
+  store.infoUrl = url
 }
 
-function clickedOnFeature (e) {
+function clickedOnFeature(e) {
   console.log(e)
-  let id;
-  let target;
+  let id
+  let target
 
   if (e in BigStore.state.layers) {
     // search box!
-    id = e;
-    target = BigStore.state.layers[id];
+    id = e
+    target = BigStore.state.layers[id]
   } else {
     // For some reason, Leaflet handles points and polygons
     // differently, hence the weirdness for fetching the id of the selected feature.
-    target = e.target;
-    if (target) id = target.options.id;
-    if (!id) id = e.layer.options.id;
+    target = e.target
+    if (target) id = target.options.id
+    if (!id) id = e.layer.options.id
   }
 
   // Remove highlight from previous selection
-  if (_selectedProject) _selectedProject.setStyle(_selectedStyle);
+  if (_selectedProject) _selectedProject.setStyle(_selectedStyle)
 
   // Remember what the thing looked like before we hovered or clicked on it
-  _selectedStyle = _hoverStyle;
+  _selectedStyle = _hoverStyle
 
   try {
-    if (!_selectedStyle) _selectedStyle = e.layer.options.style;
-    if (!_selectedStyle) { _selectedStyle = JSON.parse(JSON.stringify(e.layer.options)); }
+    if (!_selectedStyle) _selectedStyle = e.layer.options.style
+    if (!_selectedStyle) {
+      _selectedStyle = JSON.parse(JSON.stringify(e.layer.options))
+    }
   } catch (err) {
     // hmm
-    let z = target.options;
+    let z = target.options
     _selectedStyle = {
       color: z.color,
       fillColor: z.fillColor,
       radius: z.radius,
       weight: z.weight,
       truecolor: z.truecolor,
-    };
+    }
   }
 
   // save this project as the selected project; it's no longer just being hovered over!
-  _hoverProject = null;
-  _selectedProject = target;
+  _hoverProject = null
+  _selectedProject = target
 
-  let clickedStyle = JSON.parse(JSON.stringify(styles.popup));
-  clickedStyle['fillColor'] = _selectedStyle.truecolor;
-  target.setStyle(clickedStyle);
+  let clickedStyle = JSON.parse(JSON.stringify(styles.popup))
+  clickedStyle['fillColor'] = _selectedStyle.truecolor
+  target.setStyle(clickedStyle)
 
-  updatePanelDetails(id);
+  updatePanelDetails(id)
 }
 
-let popupTimeout;
+let popupTimeout
 
-function isTargetAPolygon (target) {
+function isTargetAPolygon(target) {
   try {
-    if (target.feature.geometry.type.includes('Polygon')) return true;
+    if (target.feature.geometry.type.includes('Polygon')) return true
   } catch (e) {}
 
   try {
-    if (target.feature.geometry.geometries[0].type.includes('Polygon')) { return true; }
-  } catch (e) {}
-
-  return false;
-}
-
-function isTargetAPoint (target) {
-    try {
-      if (target.feature.geometry.type === "Point") return true;
-      return target.feature.geometry.geometries[0].type === "Point"
-    } catch (error) {
+    if (target.feature.geometry.geometries[0].type.includes('Polygon')) {
+      return true
     }
-    return false;
+  } catch (e) {}
+
+  return false
 }
 
-function hoverFeature (e) {
-  let target;
+function isTargetAPoint(target) {
+  try {
+    if (target.feature.geometry.type === 'Point') return true
+    return target.feature.geometry.geometries[0].type === 'Point'
+  } catch (error) {}
+  return false
+}
+
+function hoverFeature(e) {
+  let target
 
   // deal w search clicks first
   if (e in BigStore.state.layers) {
-    target = BigStore.state.layers[e];
+    target = BigStore.state.layers[e]
   } else {
-    target = e.target;
+    target = e.target
   }
   // don't add a hover if the proj is already selected
-  if (target === _selectedProject) return;
+  if (target === _selectedProject) return
 
-  let polygon = isTargetAPolygon(target);
+  let polygon = isTargetAPolygon(target)
   let points = isTargetAPoint(target)
 
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
-  let id = target.options.id;
-  if (!id) id = e.layer.options.id;
+  let id = target.options.id
+  if (!id) id = e.layer.options.id
 
   // Remove highlight from previous selection
-  if (_hoverProject) _hoverProject.setStyle(_hoverStyle);
+  if (_hoverProject) _hoverProject.setStyle(_hoverStyle)
 
   // save real style info
-  _hoverStyle = target.options.style;
+  _hoverStyle = target.options.style
 
   try {
-    if (!_hoverStyle) _hoverStyle = e.layer.options.style;
-    if (!_hoverStyle) _hoverStyle = JSON.parse(JSON.stringify(e.layer.options));
+    if (!_hoverStyle) _hoverStyle = e.layer.options.style
+    if (!_hoverStyle) _hoverStyle = JSON.parse(JSON.stringify(e.layer.options))
   } catch (err) {
     // hmm
-    let z = target.options;
+    let z = target.options
     _hoverStyle = {
       color: z.color,
       fill: z.fill,
       radius: z.radius,
       weight: z.weight,
       truecolor: z.truecolor,
-    };
+    }
   }
 
   let style = {
@@ -807,7 +836,7 @@ function hoverFeature (e) {
     opacity: 1.0,
     radius: 8,
     weight: points ? 1 : 6,
-  };
+  }
 
   let polygonStyle = {
     color: _hoverStyle.truecolor,
@@ -816,23 +845,23 @@ function hoverFeature (e) {
     opacity: 1.0,
     radius: 10,
     weight: 6,
-  };
+  }
 
   // the 15ms timeout keeps the highlight from flashing too much on mouse movement
   // the 300ms timeout keeps the highlight from selecting areas every time
-  let timeout = polygon ? 50 : 15;
+  let timeout = polygon ? 50 : 15
 
-  clearTimeout(popupTimeout);
-  popupTimeout = setTimeout(function () {
-    target.setStyle( polygon ? polygonStyle: style);
-  }, timeout);
+  clearTimeout(popupTimeout)
+  popupTimeout = setTimeout(function() {
+    target.setStyle(polygon ? polygonStyle : style)
+  }, timeout)
 
-  _hoverProject = target;
+  _hoverProject = target
 
-  updateHoverPanel(id);
+  updateHoverPanel(id)
 }
 
-function clickedDistrict (district) {
+function clickedDistrict(district) {
   if (BigStore.debug) console.log('Chose District', district)
   store.filterDistrict = parseInt(district)
 
@@ -840,56 +869,57 @@ function clickedDistrict (district) {
   showDistrictOverlay(district)
 }
 
-function updateFilters () {
-  let transit = store.filterTransit;
-  let streets = store.filterStreets;
-  let areas = store.filterAreas;
+function updateFilters() {
+  let transit = store.filterTransit
+  let streets = store.filterStreets
+  let areas = store.filterAreas
 
-  let complete = store.filterComplete;
-  let underway = store.filterUnderway;
+  let complete = store.filterComplete
+  let underway = store.filterUnderway
 
   // if none are clicked, then all are clicked! :-O
-  let showAll = false;
+  let showAll = false
   if (!transit && !streets && !areas) {
-    showAll = true;
+    showAll = true
   }
 
   for (let id in BigStore.state.layers) {
-    let layer = BigStore.state.layers[id];
-    let prj = BigStore.state.prjCache[id];
+    let layer = BigStore.state.layers[id]
+    let prj = BigStore.state.prjCache[id]
 
-    let show = false;
+    let show = false
 
     if (showAll) {
-      show = true;
+      show = true
     } else {
       if (!prj) {
-        show = false;
+        show = false
       } else {
-        if (transit && prj.project_group.includes('Transit')) show = true;
-        if (streets && prj.project_group.includes('Streets')) show = true;
-        if (areas && prj.project_group.includes('Plans and Programs')) show = true;
+        if (transit && prj.project_group.includes('Transit')) show = true
+        if (streets && prj.project_group.includes('Streets')) show = true
+        if (areas && prj.project_group.includes('Plans and Programs'))
+          show = true
       }
     }
 
     // now check FUNDING SOURCE
-    let funds = store.filterFund;
-    let isCorrectFund = !funds || prj.funding_sources.includes(funds);
+    let funds = store.filterFund
+    let isCorrectFund = !funds || prj.funding_sources.includes(funds)
 
     // now check STATUS
-    let isCorrectStatus = (complete === underway); // true if both or neither are checked
-    if (complete && prj.status.includes('Closed')) isCorrectStatus = true;
-    if (underway && prj.status.includes('Active')) isCorrectStatus = true;
+    let isCorrectStatus = complete === underway // true if both or neither are checked
+    if (complete && prj.status.includes('Closed')) isCorrectStatus = true
+    if (underway && prj.status.includes('Active')) isCorrectStatus = true
 
     // now check DISTRICT
-    let district = store.filterDistrict;
-    let isCorrectDistrict = true;
-    if (district == 0) isCorrectDistrict = (prj['districts'] === "Citywide")
+    let district = store.filterDistrict
+    let isCorrectDistrict = true
+    if (district == 0) isCorrectDistrict = prj['districts'] === 'Citywide'
     /*  // Hide for now, so all projects show even when a district is selected */
     if (!store.devDistrictOption) {
       if (district > 0) {
-        let districtColName = 'district' + district;
-        isCorrectDistrict = (prj[districtColName] === 1);
+        let districtColName = 'district' + district
+        isCorrectDistrict = prj[districtColName] === 1
       }
     }
 
@@ -908,124 +938,127 @@ function updateFilters () {
     }
 
     // the final word
-    let passedAllTests = show && isCorrectFund && isCorrectStatus && isCorrectDistrict && isCorrectTags
+    let passedAllTests =
+      show &&
+      isCorrectFund &&
+      isCorrectStatus &&
+      isCorrectDistrict &&
+      isCorrectTags
 
     if (passedAllTests && !mymap.hasLayer(layer)) {
-      mymap.addLayer(layer);
-      continue;
+      mymap.addLayer(layer)
+      continue
     }
     if (!passedAllTests && mymap.hasLayer(layer)) {
-      mymap.removeLayer(layer);
-      continue;
+      mymap.removeLayer(layer)
+      continue
     }
   }
 }
 
-function unHoverFeature (e) {
+function unHoverFeature(e) {
   // Remove highlight from previous selection
   if (_hoverProject) {
-    _hoverProject.setStyle(_hoverStyle);
+    _hoverProject.setStyle(_hoverStyle)
   }
 }
 
 // ---------- SEARCH PANEL ----------------------
-let _queryString;
+let _queryString
 
-async function fetchTagResults (terms) {
-  let answer = [];
-  let termsLower = terms.toLowerCase();
+async function fetchTagResults(terms) {
+  let answer = []
+  let termsLower = terms.toLowerCase()
   for (let tag of _tagList) {
-    let cleaned = tag.replace(/\//g, ' ');
-    let keywords = keywordExtractor.extract(cleaned);
+    let cleaned = tag.replace(/\//g, ' ')
+    let keywords = keywordExtractor.extract(cleaned)
     for (let word of keywords) {
       if (word.startsWith(termsLower)) {
-        answer.push(tag);
-        break;
+        answer.push(tag)
+        break
       }
     }
   }
-  store.tagresults = answer;
+  store.tagresults = answer
 }
 
-async function fetchSearchResults (terms) {
-  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search';
+async function fetchSearchResults(terms) {
+  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search'
 
-  let fancySearch = searchAPI + '?terms=@@.{';
-  fancySearch += terms + '}';
-  fancySearch = fancySearch.replace(/ /g, ',');
+  let fancySearch = searchAPI + '?terms=@@.{'
+  fancySearch += terms + '}'
+  fancySearch = fancySearch.replace(/ /g, ',')
 
-  let simpleSearch = searchAPI + '?select=id,name&name=ilike.';
-  let query = terms.replace(/ /g, '*');
-  simpleSearch += `*${query}*`;
+  let simpleSearch = searchAPI + '?select=id,name&name=ilike.'
+  let query = terms.replace(/ /g, '*')
+  simpleSearch += `*${query}*`
 
   try {
     // first try smart keyword search
-    console.log(fancySearch);
-    let resp = await fetch(fancySearch);
-    let jsonData = await resp.json();
+    console.log(fancySearch)
+    let resp = await fetch(fancySearch)
+    let jsonData = await resp.json()
 
     // if no results, try simple text search
     if (terms === _queryString && jsonData.length === 0) {
-      console.log('nuthin');
-      console.log(simpleSearch);
-      resp = await fetch(simpleSearch);
-      jsonData = await resp.json();
+      console.log('nuthin')
+      console.log(simpleSearch)
+      resp = await fetch(simpleSearch)
+      jsonData = await resp.json()
     }
 
     // update list ONLY if query has not changed while we were fetching
     if (terms === _queryString) {
-      store.results = jsonData;
+      store.results = jsonData
     }
   } catch (error) {
-    console.log('search error');
-    console.log(error);
+    console.log('search error')
+    console.log(error)
   }
 }
 
-function termChanged () {
-  console.log(store.terms);
-  _queryString = store.terms.trim();
+function termChanged() {
+  console.log(store.terms)
+  _queryString = store.terms.trim()
 
-  if (_queryString) fetchTagResults(_queryString);
-  else store.tagresults = [];
+  if (_queryString) fetchTagResults(_queryString)
+  else store.tagresults = []
 
-  if (_queryString) fetchSearchResults(_queryString);
-  else store.results = [];
+  if (_queryString) fetchSearchResults(_queryString)
+  else store.results = []
 }
 
-let _hoverSearchLastId;
+let _hoverSearchLastId
 
-function hoverSearch (id) {
-  if (id === _hoverSearchLastId) return;
+function hoverSearch(id) {
+  if (id === _hoverSearchLastId) return
 
-  _hoverSearchLastId = id;
-  hoverFeature(id);
+  _hoverSearchLastId = id
+  hoverFeature(id)
 }
 
-function clickedSearch (id) {
-  clickedOnFeature(id);
+function clickedSearch(id) {
+  clickedOnFeature(id)
 }
 
-function clickedSearchTag (tag) {
+function clickedSearchTag(tag) {
   if (store.filterTags.has(tag)) {
     store.filterTags.delete(tag)
   } else {
     store.filterTags.add(tag)
   }
-  console.log({ACTIVE_TAGS: store.filterTags})
+  console.log({ ACTIVE_TAGS: store.filterTags })
   store.filterKey++
   updateFilters()
 }
 
-function clearSearchBox () {
-  store.terms = '';
+function clearSearchBox() {
+  store.terms = ''
 }
-
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 [v-cloak] {
   display: none;
 }
@@ -1445,13 +1478,16 @@ td {
   opacity: 0;
 }
 
-.narrow-dropdown { width: 165px;}
+.narrow-dropdown {
+  width: 165px;
+}
 
 #preheader label {
   color: white;
   font-size: 16px;
 }
 
-.layer-selectors {padding: 5px 0px;}
-
+.layer-selectors {
+  padding: 5px 0px;
+}
 </style>

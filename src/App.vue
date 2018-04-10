@@ -11,8 +11,14 @@ export default {
 </script>
 
 <style>
-
-body,p,h1,h2,h3,h4,h5,h6 {
+body,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Lato', Helvetica, Arial, sans-serif;
   margin: 0px 0px;
   padding: 0px 0px;
@@ -24,5 +30,4 @@ body,p,h1,h2,h3,h4,h5,h6 {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
 </style>

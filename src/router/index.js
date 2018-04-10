@@ -18,10 +18,11 @@ export default new Router({
       name: 'ProjectPage',
       component: ProjectPage,
     },
-    { // catch-all for mispelled URLs. Maybe add a 404 page...
+    {
+      // catch-all for mispelled URLs. Maybe add a 404 page...
       path: '*',
       name: 'MyStreet',
       component: MyStreet,
     },
-  ]
+  ],
 })

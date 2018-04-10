@@ -33,17 +33,17 @@
 'use strict'
 
 // use npm and babel to support IE11/Safari
-import 'babel-polyfill';
-import 'isomorphic-fetch';
+import 'babel-polyfill'
+import 'isomorphic-fetch'
 
 // Shared stuff across all components
-import { BigStore } from '../shared-store.js';
+import { BigStore } from '../shared-store.js'
 
-let L = require('leaflet');
-let omnivore = require('leaflet-omnivore');
+let L = require('leaflet')
+let omnivore = require('leaflet-omnivore')
 
-let mymap;
-let theme = 'light';
+let mymap
+let theme = 'light'
 
 let store = {
   description: '',
@@ -53,128 +53,131 @@ let store = {
   project_name: '',
   project_number: '',
   sharedState: BigStore.state,
-};
+}
 
 export default {
   name: 'ProjectPage',
-  data () {
+  data() {
     return store
   },
-  mounted: function () {
-    mounted(this); // 'this' is the VueComponent
+  mounted: function() {
+    mounted(this) // 'this' is the VueComponent
   },
-  methods: {
-  },
-  watch: {
-  },
+  methods: {},
+  watch: {},
 }
 
-async function mounted (component) {
-  let id = component.$route.params.id;
-  if (BigStore.debug) console.log({project_id: id});
+async function mounted(component) {
+  let id = component.$route.params.id
+  if (BigStore.debug) console.log({ project_id: id })
 
   // add project KML
-  store.geojson = await fetchProjectInfo(id);
-  setProjectDetails();
+  store.geojson = await fetchProjectInfo(id)
+  setProjectDetails()
 
-  addBaseMap();
-  addProjectMapLayer(id);
+  addBaseMap()
+  addProjectMapLayer(id)
 }
 
-function setProjectDetails () {
-  store.description = store.geojson['description'];
-  store.project_name = store.geojson['project_name'];
-  store.project_number = store.geojson['project_number'];
+function setProjectDetails() {
+  store.description = store.geojson['description']
+  store.project_name = store.geojson['project_name']
+  store.project_number = store.geojson['project_number']
 
-  store.details.push(
-    ['Status', store.geojson['status']]);
-  store.details.push(
-    ['Current Phase', store.geojson['current_phase']]);
-  store.details.push(
-    ['% Complete', store.geojson['percent_complete']]);
-  store.details.push(
-    ['Location', store.geojson['project_location']]);
-  store.details.push(
-    ['Districts', store.geojson['districts']]);
-  store.details.push(
-    ['Cost Estimate', store.geojson['project_cost_estimate']]);
-  store.details.push(
-    ['Project Expected Completion', store.geojson['project_expected_completion']]);
-  store.details.push(
-    ['Funding Sources', store.geojson['funding_sources']]);
-  store.details.push(
-    ['Lead Agency', store.geojson['sponsor']]);
-  store.details.push(
-    ['Tags', store.geojson['project_tags']]);
+  store.details.push(['Status', store.geojson['status']])
+  store.details.push(['Current Phase', store.geojson['current_phase']])
+  store.details.push(['% Complete', store.geojson['percent_complete']])
+  store.details.push(['Location', store.geojson['project_location']])
+  store.details.push(['Districts', store.geojson['districts']])
+  store.details.push(['Cost Estimate', store.geojson['project_cost_estimate']])
+  store.details.push([
+    'Project Expected Completion',
+    store.geojson['project_expected_completion'],
+  ])
+  store.details.push(['Funding Sources', store.geojson['funding_sources']])
+  store.details.push(['Lead Agency', store.geojson['sponsor']])
+  store.details.push(['Tags', store.geojson['project_tags']])
 }
 
-async function fetchProjectInfo (id) {
+async function fetchProjectInfo(id) {
   // might already be in cache:
-  if (store.sharedState.prjCache[id]) return store.sharedState.prjCache[id];
-  id = id.toUpperCase();
+  if (store.sharedState.prjCache[id]) return store.sharedState.prjCache[id]
+  id = id.toUpperCase()
 
-  const API_SERVER = 'https://api.sfcta.org/api/';
-  const GEO_VIEW = 'mystreet2_all';
-  const FILTER = '?project_number=eq.' + id;
+  const API_SERVER = 'https://api.sfcta.org/api/'
+  const GEO_VIEW = 'mystreet2_all'
+  const FILTER = '?project_number=eq.' + id
 
-  const geoUrl = API_SERVER + GEO_VIEW + FILTER;
-  if (BigStore.debug) console.log(geoUrl);
+  const geoUrl = API_SERVER + GEO_VIEW + FILTER
+  if (BigStore.debug) console.log(geoUrl)
 
   try {
-    let resp = await fetch(geoUrl);
-    let jsonData = await resp.json();
+    let resp = await fetch(geoUrl)
+    let jsonData = await resp.json()
 
-    if (jsonData[0]) return jsonData[0];
+    if (jsonData[0]) return jsonData[0]
   } catch (error) {
-    console.log('map error: ' + error);
+    console.log('map error: ' + error)
   }
   //  TODO throw a 404 here?
-  console.log('Project ID not found', id);
-  return {};
+  console.log('Project ID not found', id)
+  return {}
 }
 
-function styleByMetricColor (iconName, polygon) {
-  let xcolor = generateColorFromDb(iconName);
-  let radius = 4;
-  if (iconName && iconName.startsWith('measle')) radius = 8;
+function styleByMetricColor(iconName, polygon) {
+  let xcolor = generateColorFromDb(iconName)
+  let radius = 4
+  if (iconName && iconName.startsWith('measle')) radius = 8
 
   return {
     color: xcolor,
-    fillColor: (polygon ? xcolor : '#88e'),
+    fillColor: polygon ? xcolor : '#88e',
     fillOpacity: 0.5,
     opacity: 1.0,
     radius: radius,
-    weight: (polygon ? 0 : 4),
-  };
-}
-
-function generateColorFromDb (iconName) {
-  console.log(iconName);
-  let defaultColor = '#44c';
-
-  // no color? use blue.
-  if (!iconName) return defaultColor;
-
-  // color code in db? use it.
-  if (iconName.startsWith('#')) return iconName;
-
-  // icon name in db? convert to a color code.
-  switch (iconName) {
-    case 'small_blue': return '#44f';
-    case 'small_green': return '#4f4';
-    case 'small_purple': return '#63c';
-    case 'small_red': return '#f44';
-    case 'small_yellow': return '#aa3';
-    case 'measle_turquoise': return '#369';
-    default: return defaultColor;
+    weight: polygon ? 0 : 4,
   }
 }
 
-function addBaseMap () {
-  let url = 'https://api.mapbox.com/styles/v1/mapbox/' + theme + '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
-  let token = 'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ';
-  let attribution = '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-                   '<a href="http://mapbox.com">Mapbox</a>';
+function generateColorFromDb(iconName) {
+  console.log(iconName)
+  let defaultColor = '#44c'
+
+  // no color? use blue.
+  if (!iconName) return defaultColor
+
+  // color code in db? use it.
+  if (iconName.startsWith('#')) return iconName
+
+  // icon name in db? convert to a color code.
+  switch (iconName) {
+    case 'small_blue':
+      return '#44f'
+    case 'small_green':
+      return '#4f4'
+    case 'small_purple':
+      return '#63c'
+    case 'small_red':
+      return '#f44'
+    case 'small_yellow':
+      return '#aa3'
+    case 'measle_turquoise':
+      return '#369'
+    default:
+      return defaultColor
+  }
+}
+
+function addBaseMap() {
+  let url =
+    'https://api.mapbox.com/styles/v1/mapbox/' +
+    theme +
+    '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}'
+  let token =
+    'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ'
+  let attribution =
+    '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
+    '<a href="http://mapbox.com">Mapbox</a>'
 
   mymap = L.map('zoom-map', {
     attributionControl: false,
@@ -186,7 +189,7 @@ function addBaseMap () {
     zoomAnimation: false,
     zoomControl: false,
     zooming: false,
-  }).setView([37.77, -122.42], 11);
+  }).setView([37.77, -122.42], 11)
 
   L.tileLayer(url, {
     accessToken: token,
@@ -195,51 +198,54 @@ function addBaseMap () {
     clickable: false,
     interactive: false,
     maxZoom: 18,
-  }).addTo(mymap);
+  }).addTo(mymap)
 }
 
-function addProjectMapLayer (id) {
-  let geometry = store.geojson['geometry'];
-  let shape = store.geojson['feature_shape'];
-  let icon = store.geojson['icon'];
+function addProjectMapLayer(id) {
+  let geometry = store.geojson['geometry']
+  let shape = store.geojson['feature_shape']
+  let icon = store.geojson['icon']
 
-  if (!geometry) return;
+  if (!geometry) return
 
-  let kml = '<kml xmlns="http://www.opengis.net/kml/2.2">' +
-             '<Placemark>' + geometry + '</Placemark></kml>';
+  let kml =
+    '<kml xmlns="http://www.opengis.net/kml/2.2">' +
+    '<Placemark>' +
+    geometry +
+    '</Placemark></kml>'
 
-  let polygon = false;
-  if (shape && shape.includes('Polygon')) polygon = true;
+  let polygon = false
+  if (shape && shape.includes('Polygon')) polygon = true
 
   let geoLayer = L.geoJSON(null, {
     style: styleByMetricColor(icon, polygon),
-    pointToLayer: function (feature, latlng) { // this turns 'points' into circles
-      return L.circleMarker(latlng, {id: id});
+    pointToLayer: function(feature, latlng) {
+      // this turns 'points' into circles
+      return L.circleMarker(latlng, { id: id })
     },
-  });
+  })
 
   // validate KML
-  var oParser = new DOMParser();
-  var oDOM = oParser.parseFromString(kml, 'text/xml');
+  var oParser = new DOMParser()
+  var oDOM = oParser.parseFromString(kml, 'text/xml')
   // print the name of the root element or error message
-  if (oDOM.documentElement.nodeName === 'parsererror') console.log('## Error while parsing row id ' + id);
+  if (oDOM.documentElement.nodeName === 'parsererror')
+    console.log('## Error while parsing row id ' + id)
 
   // add KML to the map
   try {
-    let layer = omnivore.kml.parse(kml, null, geoLayer);
-    mymap.fitBounds(layer.getBounds(), {padding: [10, 10], maxZoom: 15});
-    layer.addTo(mymap);
-    if (polygon) layer.bringToBack();
+    let layer = omnivore.kml.parse(kml, null, geoLayer)
+    mymap.fitBounds(layer.getBounds(), { padding: [10, 10], maxZoom: 15 })
+    layer.addTo(mymap)
+    if (polygon) layer.bringToBack()
   } catch (e) {
-    console.log('couldnt: ' + e);
+    console.log('couldnt: ' + e)
   }
 }
-
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 [v-cloak] {
   display: none;
 }

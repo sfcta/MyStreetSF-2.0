@@ -15,21 +15,20 @@ export const BigStore = {
     prjCache: {},
   },
 
-  addCacheItem (key, value) {
+  addCacheItem(key, value) {
     // if (this.debug) console.log('addCache triggered:', key)
-    this.state.prjCache[key] = value;
+    this.state.prjCache[key] = value
   },
 
-  addLayer (key, value) {
+  addLayer(key, value) {
     // if (this.debug) console.log('addLayer triggered:', key)
-    this.state.layers[key] = value;
+    this.state.layers[key] = value
   },
 
-  sendLayerBack (layer) {
+  sendLayerBack(layer) {
     if (this.debug) console.log('sendLayerBack triggered:')
-    this.state.layers[layer].bringToBack();
+    this.state.layers[layer].bringToBack()
   },
-
 }
 
 if (BigStore.debug) console.log('BigStore initialized')

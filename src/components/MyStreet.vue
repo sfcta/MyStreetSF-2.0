@@ -84,12 +84,12 @@
 
         button#btn-streets.tiny.ui.grey.button(
                v-on:click="clickedFilter"
-               v-bind:class="{ active: filterStreets, yellow: filterStreets}"
+               v-bind:class="{ active: filterStreets, green: filterStreets}"
         ) Streets
 
         button#btn-transit.tiny.ui.grey.button(
                v-on:click="clickedFilter"
-               v-bind:class="{ active: filterTransit, yellow: filterTransit}"
+               v-bind:class="{ active: filterTransit, blue: filterTransit}"
         ) Transit
 
         button#btn-areas.tiny.ui.grey.button(
@@ -277,7 +277,7 @@ function clickedToggleLayer(e) {
   }
 }
 
-let _colors = [
+let _districtColors = [
   '#e62',
   '#fd0',
   '#e62',
@@ -298,7 +298,7 @@ async function addExtraMapLayer(extraLayer) {
 
   let params = {
     style: function(feature) {
-      let fill = _colors[-1 + parseInt(feature.properties.name)]
+      let fill = _districtColors[-1 + parseInt(feature.properties.name)]
       let style = {
         color: '#000', // this is the "unselected" color -- same for all projects
         opacity: 0.0,
@@ -572,7 +572,7 @@ function mapSegments(cmpsegJson) {
     }
 
     let geoLayer = L.geoJSON(null, {
-      style: styleByMetricColor(segment['icon_name'], polygon),
+      style: styleByMetricColor(segment, polygon),
       onEachFeature: function(feature, layer) {
         layer.on({
           mouseover: hoverFeature,
@@ -639,13 +639,14 @@ function mapSegments(cmpsegJson) {
   if (store.fundSources[0] === '') store.fundSources.splice(0, 1) // remove blanks at beginning
 }
 
-function styleByMetricColor(iconName, polygon) {
-  let truecolor = generateColorFromDb(iconName) // actual project color;
+function styleByMetricColor(segment, polygon) {
+  let iconName = segment.icon_name
+  let truecolor = generateColorForSegment(segment) // actual project color;
   let radius = 4
   if (iconName && iconName.startsWith('measle')) radius = 8
 
   return {
-    color: polygon ? '#063a' : '#448C', // this is the "unselected" color -- same for all projects
+    color: polygon ? '#333a' : '#448C', // this is the "unselected" color -- same for all projects
     truecolor: truecolor, // this is the "actual" project color
     fillColor: polygon ? '#4463' : truecolor, // '#448844' + '90' : truecolor,
     weight: polygon ? 3 : 1,
@@ -655,29 +656,23 @@ function styleByMetricColor(iconName, polygon) {
   }
 }
 
-function generateColorFromDb(iconName) {
-  let defaultColor = '#44c'
+function generateColorForSegment(segment) {
+  let defaultColor = '#26f'
 
-  // no color? use blue.
-  if (!iconName) return defaultColor
+  let iconName = segment.icon_name
+  let projectCategory = segment.project_group
 
-  // color code in db? use it.
-  if (iconName.startsWith('#')) return iconName
+  // no category? use blue.
+  if (!projectCategory) return defaultColor
 
   // icon name in db? convert to a color code.
-  switch (iconName) {
-    case 'small_blue':
-      return '#44f'
-    case 'small_green':
-      return '#4f4'
-    case 'small_purple':
-      return '#63c'
-    case 'small_red':
-      return '#f44'
-    case 'small_yellow':
-      return '#aa3'
-    case 'measle_turquoise':
-      return '#369'
+  switch (projectCategory) {
+    case 'Transit':
+      return '#26f'
+    case 'Streets':
+      return '#4d6'
+    case 'Plans and Programs':
+      return '#fc4'
     default:
       return defaultColor
   }
@@ -1074,6 +1069,7 @@ body {
   -moz-transition: none !important;
   -ms-transition: none !important;
   -o-transition: none !important;
+  transition: none !important;
 }
 
 .text-muted {
@@ -1238,6 +1234,7 @@ h4 {
 
 #search-results::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
 #search-results::-webkit-scrollbar-thumb {
@@ -1347,6 +1344,7 @@ h4 {
 
 .information-panel::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 .information-panel::-webkit-scrollbar-thumb {

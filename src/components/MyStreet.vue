@@ -281,14 +281,14 @@ let _districtColors = [
   '#e62',
   '#fd0',
   '#e62',
-  '#0f9',
-  '#38c',
-  '#2e3',
-  '#8c5',
-  '#1e6',
-  '#e22',
+  '#fd0',
   '#00f',
-  '#a3c',
+  '#2e3',
+  '#2e3',
+  '#fd0',
+  '#e22',
+  '#fd0',
+  '#00f',
 ]
 
 async function addExtraMapLayer(extraLayer) {

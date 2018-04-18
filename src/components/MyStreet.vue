@@ -405,8 +405,7 @@ let _hoverPopup
 let _hoverPopupTimer
 
 function updateHoverPopup(id, nearbyProjects, latlng) {
-  removeOldHoverPopup()
-  showHoverPopupAfterDelay(id, nearbyProjects, latlng, 400)
+  showHoverPopupAfterDelay(id, nearbyProjects, latlng, 600)
 }
 
 function removeOldHoverPopup() {
@@ -416,7 +415,9 @@ function removeOldHoverPopup() {
 
 function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, delay) {
   let content = buildPopupContent(id, nearbyProjectIDs)
+
   _hoverPopupTimer = setTimeout(function() {
+    removeOldHoverPopup()
     _hoverPopup = L.popup({ className: 'project-list-popup' })
       .setLatLng(latlng)
       .setContent(content)
@@ -425,7 +426,7 @@ function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, delay) {
 }
 
 function buildPopupContent(id, nearbyProjectIDs) {
-  let html = `<a href="">${BigStore.state.prjCache[id].project_name}</a>`
+  let html = `<b>${BigStore.state.prjCache[id].project_name}</b>`
 
   for (let nearby of nearbyProjectIDs) {
     if (nearby === id) continue
@@ -648,6 +649,7 @@ function mapSegments(cmpsegJson) {
       layer.addTo(mymap)
       if (polygon) layer.bringToBack()
       BigStore.addLayer(id, layer)
+      _projectIdsCurrentlyOnMap[id] = true
     } catch (e) {
       console.log('couldnt: ' + id)
       console.log(segment)
@@ -799,7 +801,11 @@ function getLayersNearLatLng(latlng) {
 function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
   let insideLayers = []
 
-  for (let key in BigStore.state.layers) {
+  let numLayers = Object.keys(_projectIdsCurrentlyOnMap).length
+  console.log(numLayers)
+  let keys = numLayers === 0 ? BigStore.state.layers : _projectIdsCurrentlyOnMap
+
+  for (let key in keys) {
     let layer = BigStore.state.layers[key]
     let geoJson = layer.toGeoJSON()
     let features = geoJson.features
@@ -814,8 +820,6 @@ function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
       }
     }
   }
-  console.log(insideLayers.length)
-  console.log(insideLayers)
   return insideLayers
 }
 
@@ -956,6 +960,8 @@ function clickedDistrict(district) {
   showDistrictOverlay(district)
 }
 
+let _projectIdsCurrentlyOnMap = {}
+
 function updateFilters() {
   let transit = store.filterTransit
   let streets = store.filterStreets
@@ -1035,10 +1041,12 @@ function updateFilters() {
 
     if (passedAllTests && !mymap.hasLayer(layer)) {
       mymap.addLayer(layer)
+      _projectIdsCurrentlyOnMap[id] = true
       continue
     }
     if (!passedAllTests && mymap.hasLayer(layer)) {
       mymap.removeLayer(layer)
+      if (id in _projectIdsCurrentlyOnMap) delete _projectIdsCurrentlyOnMap[id]
       continue
     }
   }

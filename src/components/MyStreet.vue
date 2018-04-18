@@ -163,7 +163,7 @@
             .search-item
               h4 {{ result.name }}
               p Project ID: {{ result.id }}
-  #mymap
+  #mymap.custom-popup
   #hover-panel(v-bind:class="{ 'hover-panel-hide': hoverPanelHide }"): p {{ hoverPanelText }}
 </template>
 
@@ -171,6 +171,7 @@
 'use strict'
 
 import 'babel-polyfill'
+import * as turf from '@turf/turf'
 
 // Shared stuff across all components
 import { BigStore } from '../shared-store.js'
@@ -178,6 +179,8 @@ import { BigStore } from '../shared-store.js'
 let L = require('leaflet')
 let keywordExtractor = require('keyword-extractor')
 let omnivore = require('leaflet-omnivore')
+
+let BUFFER_DISTANCE_METERS = 25
 
 let _extraLayers = {
   'layer-sup-districts': {
@@ -401,9 +404,9 @@ function mounted() {
 let _hoverPopup
 let _hoverPopupTimer
 
-function updateHoverPopup(id, latlng) {
+function updateHoverPopup(id, nearbyProjects, latlng) {
   removeOldHoverPopup()
-  showHoverPopupAfterDelay(id, latlng, 400)
+  showHoverPopupAfterDelay(id, nearbyProjects, latlng, 400)
 }
 
 function removeOldHoverPopup() {
@@ -411,18 +414,30 @@ function removeOldHoverPopup() {
   mymap.closePopup()
 }
 
-function showHoverPopupAfterDelay(id, latlng, delay) {
+function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, delay) {
+  let content = buildPopupContent(id, nearbyProjectIDs)
   _hoverPopupTimer = setTimeout(function() {
-    _hoverPopup = L.popup()
+    _hoverPopup = L.popup({ className: 'project-list-popup' })
       .setLatLng(latlng)
-      .setContent(BigStore.state.prjCache[id].project_name)
+      .setContent(content)
     _hoverPopup.openOn(mymap)
   }, delay)
 }
 
+function buildPopupContent(id, nearbyProjectIDs) {
+  let html = `<a href="">${BigStore.state.prjCache[id].project_name}</a>`
+
+  for (let nearby of nearbyProjectIDs) {
+    if (nearby === id) continue
+    html += `<hr>${BigStore.state.prjCache[nearby].project_name}`
+  }
+
+  return html
+}
+
 function nameOfFilterDistrict(i) {
-  if (i == -1) return 'All Projects...'
-  if (i == 0) return 'Citywide'
+  if (i === -1) return 'All Projects...'
+  if (i === 0) return 'Citywide'
   return 'District ' + i
 }
 
@@ -457,6 +472,7 @@ export default {
     showingMainPanel: function() {
       // initialize dropdowns if main panel is showing
       setTimeout(function() {
+        // eslint-disable-next-line
         $('.ui.dropdown').dropdown()
       }, 250)
     },
@@ -471,7 +487,6 @@ const _bigAreas = [407, 477, 79, 363, 366, 17]
 
 let _selectedProject, _selectedStyle
 let _hoverProject, _hoverStyle
-let hoverPanelTimeout
 
 function selectedTagsChanged() {
   console.log(store.selectedTags)
@@ -669,7 +684,6 @@ function styleByMetricColor(segment, polygon) {
 function generateColorForSegment(segment) {
   let defaultColor = '#26f'
 
-  let iconName = segment.icon_name
   let projectCategory = segment.project_group
 
   // no category? use blue.
@@ -748,7 +762,6 @@ function clickedOnFeature(e) {
       _selectedStyle = JSON.parse(JSON.stringify(e.layer.options))
     }
   } catch (err) {
-    // hmm
     let z = target.options
     _selectedStyle = {
       color: z.color,
@@ -768,6 +781,72 @@ function clickedOnFeature(e) {
   target.setStyle(clickedStyle)
 
   updatePanelDetails(id)
+}
+
+function getLayersNearLatLng(latlng) {
+  let lat = latlng.lat
+  let lng = latlng.lng
+
+  let clickPoint = turf.point([lng, lat]) // turf uses long-lat, leaflet uses lat-long :-O
+  let clickBuffer = turf.buffer(clickPoint, BUFFER_DISTANCE_METERS, {
+    units: 'meters',
+  })
+
+  return getLayersNearBufferedPoint(clickPoint, clickBuffer)
+}
+
+function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
+  let insideLayers = []
+
+  for (let key in BigStore.state.layers) {
+    let layer = BigStore.state.layers[key]
+    let geoJson = layer.toGeoJSON()
+    let features = geoJson.features
+
+    for (let feature of features) {
+      try {
+        if (isPointInsideFeature(clickPoint, clickBuffer, feature)) {
+          insideLayers.push(key) // BigStore.state.layers[key])
+        }
+      } catch (e) {
+        console.log({ msg: 'feature failed', feature: feature })
+      }
+    }
+  }
+  console.log(insideLayers.length)
+  console.log(insideLayers)
+  return insideLayers
+}
+
+function isPointInsideFeature(clickPoint, clickBuffer, feature) {
+  let featureType = turf.getType(feature)
+  try {
+    switch (featureType) {
+      case 'Point':
+      case 'MultiPoint':
+        return turf.booleanPointInPolygon(feature, clickBuffer)
+      case 'LineString':
+      case 'MultiLineString':
+        return turf.booleanCrosses(feature, clickBuffer)
+      case 'Polygon':
+      case 'MultiPolygon':
+        return turf.booleanContains(feature, clickPoint)
+      case 'GeometryCollection':
+        for (let subfeature of feature.geometry.geometries) {
+          if (isPointInsideFeature(clickPoint, clickBuffer, subfeature)) {
+            return true
+          }
+        }
+        return false
+      default:
+        console.log('what? ' + featureType)
+        console.log(feature)
+        return false
+    }
+  } catch (e) {
+    console.log({ feature: feature, error: e })
+  }
+  return false
 }
 
 let popupTimeout
@@ -796,6 +875,8 @@ function isTargetAPoint(target) {
 
 function hoverFeature(e) {
   let target
+
+  let nearbyProjects = getLayersNearLatLng(e.latlng)
 
   // deal w search clicks first
   if (e in BigStore.state.layers) {
@@ -863,7 +944,7 @@ function hoverFeature(e) {
 
   _hoverProject = target
 
-  updateHoverPopup(id, e.latlng)
+  updateHoverPopup(id, nearbyProjects, e.latlng)
 }
 
 function clickedDistrict(district) {
@@ -1065,7 +1146,7 @@ function clearSearchBox() {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
 [v-cloak] {
   display: none;
 }
@@ -1499,5 +1580,12 @@ td {
 
 .layer-selectors {
   padding: 5px 0px;
+}
+
+.project-list-popup .leaflet-popup-content {
+  margin: 8px 20px 8px 10px;
+}
+.project-list-popup .leaflet-popup-content-wrapper {
+  border-radius: 5px !important;
 }
 </style>

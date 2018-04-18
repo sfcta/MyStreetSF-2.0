@@ -554,8 +554,8 @@ async function loadSupervisorDistricts() {
 
       // the supes json is super janky: array of arrays, only one of which is needed
       let mainOutline = 0
-      if (id == 3) mainOutline = 14
-      if (id == 6) mainOutline = 1
+      if (id === 3) mainOutline = 14
+      if (id === 6) mainOutline = 1
 
       // draw a giant box around all of SF as first array entry
       let invertGeometry = [
@@ -582,8 +582,9 @@ function mapSegments(cmpsegJson) {
     let id = segment['project_number']
 
     // slurp up all the funding sources
-    if (segment.funding_sources)
+    if (segment.funding_sources) {
       fundStrings.push(...segment.funding_sources.split(', '))
+    }
 
     let kml =
       '<kml xmlns="http://www.opengis.net/kml/2.2">' +
@@ -933,8 +934,8 @@ function hoverFeature(e) {
     weight: 6,
   }
 
-  // the 15ms timeout keeps the highlight from flashing too much on mouse movement
-  // the 300ms timeout keeps the highlight from selecting areas every time
+  // the long timeout keeps the highlight from selecting areas every time
+  // the short timeout keeps the highlight from flashing too much on mouse movement
   let timeout = polygon ? 50 : 15
 
   clearTimeout(popupTimeout)
@@ -983,8 +984,9 @@ function updateFilters() {
       } else {
         if (transit && prj.project_group.includes('Transit')) show = true
         if (streets && prj.project_group.includes('Streets')) show = true
-        if (areas && prj.project_group.includes('Plans and Programs'))
+        if (areas && prj.project_group.includes('Plans and Programs')) {
           show = true
+        }
       }
     }
 
@@ -1000,7 +1002,7 @@ function updateFilters() {
     // now check DISTRICT
     let district = store.filterDistrict
     let isCorrectDistrict = true
-    if (district == 0) isCorrectDistrict = prj['districts'] === 'Citywide'
+    if (district === 0) isCorrectDistrict = prj['districts'] === 'Citywide'
     /*  // Hide for now, so all projects show even when a district is selected */
     if (!store.devDistrictOption) {
       if (district > 0) {

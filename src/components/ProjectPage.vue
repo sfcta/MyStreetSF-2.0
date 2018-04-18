@@ -229,8 +229,9 @@ function addProjectMapLayer(id) {
   var oParser = new DOMParser()
   var oDOM = oParser.parseFromString(kml, 'text/xml')
   // print the name of the root element or error message
-  if (oDOM.documentElement.nodeName === 'parsererror')
+  if (oDOM.documentElement.nodeName === 'parsererror') {
     console.log('## Error while parsing row id ' + id)
+  }
 
   // add KML to the map
   try {

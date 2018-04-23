@@ -685,7 +685,7 @@ function generateColorForSegment(segment) {
     case 'Transit':
       return '#26f'
     case 'Streets':
-      return '#4d6'
+      return '#21ba45'
     case 'Plans and Programs':
       return '#fc4'
     default:

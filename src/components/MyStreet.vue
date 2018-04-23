@@ -673,7 +673,7 @@ function styleByMetricColor(segment, polygon) {
 }
 
 function generateColorForSegment(segment) {
-  let defaultColor = '#26f'
+  let defaultColor = '#0071c6'
 
   let projectCategory = segment.project_group
 
@@ -683,7 +683,7 @@ function generateColorForSegment(segment) {
   // icon name in db? convert to a color code.
   switch (projectCategory) {
     case 'Transit':
-      return '#26f'
+      return '#0071c6'
     case 'Streets':
       return '#21ba45'
     case 'Plans and Programs':

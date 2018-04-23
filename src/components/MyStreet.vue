@@ -384,7 +384,8 @@ let _hoverPopup
 let _hoverPopupTimer
 
 function updateHoverPopup(id, nearbyProjects, latlng) {
-  showHoverPopupAfterDelay(id, nearbyProjects, latlng, 600)
+  removeOldHoverPopup()
+  showHoverPopupAfterDelay(id, nearbyProjects, latlng, 1000)
 }
 
 function removeOldHoverPopup() {
@@ -396,7 +397,6 @@ function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, delay) {
   let content = buildPopupContent(id, nearbyProjectIDs)
 
   _hoverPopupTimer = setTimeout(function() {
-    removeOldHoverPopup()
     _hoverPopup = L.popup({ className: 'project-list-popup' })
       .setLatLng(latlng)
       .setContent(content)

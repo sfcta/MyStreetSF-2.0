@@ -53,21 +53,6 @@
         a(v-bind:href="infoUrl" target="_blank") &raquo; MORE DETAILS&hellip;
       .pickers
         hr
-        h5 TAGS:
-
-        .ui.multiple.dropdown
-          input(type="hidden" name="filters")
-          i.filter.icon
-          span.text Select some tags:
-          .menu
-            .ui.icon.search.input
-              i.search.icon
-              input(type="text"  v-model="selectedTags" placeholder="Search tags...")
-            .scrolling.menu(style="max-height: 230px")
-              .item(v-for="tag in tags" v-bind:data-value="tag")
-                .ui.blue.empty.circular.label
-                | {{ tag.substring(0,35) }}
-
         h5 STATUS:
 
         button#btn-underway.tiny.ui.grey.button(
@@ -145,16 +130,16 @@
             placeholder="Search by project name, topic...")
       i.search.icon(v-if="!terms")
       i.remove.link.icon(v-if="terms" v-on:click="clearSearchBox")
-    #search-results(v-cloak v-if="results.length + tagresults.length")
+    #search-results(v-cloak v-if="results.length + tagresults.length + filterTags.size")
       .ui.relaxed.list
-        .search-category(v-if="tagresults.length")
-          p TAGS
+        .search-category(v-if="terms && (tagresults.length + filterTags.size)"): p TAGS
         #search-tags.tiny.pink.ui.button(
-          v-for="tag in tagresults"
-          v-bind:key="filterKey+tag"
-          v-bind:class="{ basic: !filterTags.has(tag) }"
-          v-on:click='clickedSearchTag(tag)'
+          v-for="tag in tagsActiveOrMatchingSearch"
+          @click='clickedSearchTag(tag)'
+          :key="filterKey+tag"
+          :class="{ basic: !filterTags.has(tag) }"
         ) {{ tag }}
+
         .search-category(v-if="results.length")
           p PROJECTS
         template(v-for="result in results")
@@ -447,7 +432,16 @@ export default {
   data() {
     return store
   },
-  computed: {},
+  computed: {
+    tagsActiveOrMatchingSearch: function() {
+      let a = new Set(store.tagresults)
+      let union = Array.from(a)
+      for (let activeTag of store.filterTags) {
+        if (!a.has(activeTag)) union.push(activeTag)
+      }
+      return union
+    },
+  },
   mounted: function() {
     mounted()
   },
@@ -1150,8 +1144,8 @@ function clickedSearchTag(tag) {
 
 function clearSearchBox() {
   store.terms = ''
-  store.filterTags.clear()
-  updateFilters()
+  // store.filterTags.clear()
+  // updateFilters()
 }
 </script>
 

@@ -162,6 +162,7 @@ import * as turf from '@turf/turf'
 import { BigStore } from '../shared-store.js'
 
 let L = require('leaflet')
+let Color = require('color')
 let keywordExtractor = require('keyword-extractor')
 let omnivore = require('leaflet-omnivore')
 
@@ -210,18 +211,11 @@ let mymap
 
 const GEO_VIEW = 'mystreet2_all'
 
-let darkStyles = {
-  normal: { color: '#ff7800', weight: 4, opacity: 1.0 },
-  selected: { color: '#39f', weight: 5, opacity: 1.0 },
-  popup: { color: '#33f', weight: 10, opacity: 1.0 },
-}
-
-let lightStyles = {
+let styles = {
   normal: { color: '#3c6', weight: 6, opacity: 1.0 },
   selected: { color: '#39f', weight: 8, opacity: 1.0 },
   popup: { color: '#36f', weight: 10, opacity: 1.0 },
 }
-let styles = theme === 'dark' ? darkStyles : lightStyles
 
 function clickedFunds(e) {
   store.filterFund = e.target.dataset.fund
@@ -774,7 +768,10 @@ function clickedOnFeature(e) {
   _selectedProject = target
 
   let clickedStyle = JSON.parse(JSON.stringify(styles.popup))
-  clickedStyle['fillColor'] = _selectedStyle.truecolor
+  clickedStyle.color = Color(_selectedStyle.truecolor).darken(0.4)
+  clickedStyle.fillColor = _selectedStyle.truecolor
+  clickedStyle.radius = 15
+  clickedStyle.weight = 8
   target.setStyle(clickedStyle)
 
   updatePanelDetails(id)

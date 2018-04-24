@@ -45,7 +45,7 @@
 
     .information-panel(v-cloak)
         br
-        h2 {{ infoTitle }}
+        h2(:class="{noSelection: !infoDetails}" v-html="infoTitle")
         p  {{ infoDetails }}
 
     #bottom-panel(v-cloak)
@@ -178,6 +178,8 @@ let _extraLayers = {
 let _projectsByTag = {}
 let _tagList = []
 
+let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
+
 let store = {
   devDistrictOption: true,
   extraLayers: _extraLayers,
@@ -192,7 +194,7 @@ let store = {
   fundSources: [],
   hoverPanelHide: false,
   hoverPanelText: '',
-  infoTitle: 'Select any project to learn more about it.',
+  infoTitle: defaultPanelTitle,
   infoDetails: '',
   infoUrl: '',
   selectedTags: '',
@@ -351,6 +353,16 @@ function clickedFilter(e) {
   updateFilters()
 }
 
+function clickedAnywhereOnMap(map) {
+  // undo selection, if user clicked on base map
+  if (map.originalEvent.srcElement.id === 'mymap') {
+    store.infoTitle = defaultPanelTitle
+    store.infoDetails = ''
+    store.infoUrl = ''
+    removeHighlightFromPreviousSelection()
+  }
+}
+
 function mounted() {
   mymap = L.map('mymap', { zoomSnap: 0.5 })
   mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]])
@@ -365,6 +377,9 @@ function mounted() {
   let attribution =
     '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
     '<a href="http://mapbox.com">Mapbox</a>'
+
+  mymap.on('click', clickedAnywhereOnMap)
+
   L.tileLayer(url, {
     attribution: attribution,
     maxZoom: 18,
@@ -724,6 +739,10 @@ function updatePanelDetails(id) {
   store.infoUrl = url
 }
 
+function removeHighlightFromPreviousSelection() {
+  if (_selectedProject) _selectedProject.setStyle(_selectedStyle)
+}
+
 function clickedOnFeature(e) {
   if (BigStore.debug) console.log(e)
   let id
@@ -741,8 +760,7 @@ function clickedOnFeature(e) {
     if (!id) id = e.layer.options.id
   }
 
-  // Remove highlight from previous selection
-  if (_selectedProject) _selectedProject.setStyle(_selectedStyle)
+  removeHighlightFromPreviousSelection()
 
   // Remember what the thing looked like before we hovered or clicked on it
   _selectedStyle = _hoverStyle
@@ -770,7 +788,7 @@ function clickedOnFeature(e) {
   let clickedStyle = JSON.parse(JSON.stringify(styles.popup))
   clickedStyle.color = Color(_selectedStyle.truecolor).darken(0.4)
   clickedStyle.fillColor = _selectedStyle.truecolor
-  clickedStyle.radius = 15
+  clickedStyle.radius = 12
   clickedStyle.weight = 8
   target.setStyle(clickedStyle)
 
@@ -1588,5 +1606,9 @@ td {
 }
 .project-list-popup .leaflet-popup-content-wrapper {
   border-radius: 5px !important;
+}
+
+h2.noSelection {
+  text-align: center;
 }
 </style>

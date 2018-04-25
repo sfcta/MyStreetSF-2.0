@@ -355,7 +355,7 @@ function clickedFilter(e) {
 
 function clickedAnywhereOnMap(map) {
   // undo selection, if user clicked on base map
-  if (map.originalEvent.srcElement.id === 'mymap') {
+  if (map.originalEvent.target.id === 'mymap') {
     store.infoTitle = defaultPanelTitle
     store.infoDetails = ''
     store.infoUrl = ''

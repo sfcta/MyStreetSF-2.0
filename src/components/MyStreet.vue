@@ -40,7 +40,18 @@
   #panel.sidepanel(v-if="showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr
-      h3.apptitle MyStreet SF
+      h4.apptitle MyStreet SF
+
+      .helpbar
+        button.ui.right.labeled.icon.violet.tiny.button(
+          @click="clickedWhatIsThis")
+          i.icon.info
+          | What is this?
+        |&nbsp;&nbsp;
+        button.ui.right.labeled.icon.violet.tiny.button(
+          @click="clickedLearnMore")
+          i.icon.right.arrow
+          | Learn More
       hr
 
     .information-panel(v-cloak)
@@ -472,6 +483,7 @@ export default {
     clickedAddress: clickedAddress,
     clickedFilter: clickedFilter,
     clickedFunds: clickedFunds,
+    clickedLearnMore: clickedLearnMore,
     clickedShowHide: clickedShowHide,
     clickedShowMainPanel: clickedShowMainPanel,
     clickedShowLayerSelector: clickedShowLayerSelector,
@@ -479,6 +491,7 @@ export default {
     clickedDistrict: clickedDistrict,
     clickedSearch: clickedSearch,
     clickedSearchTag: clickedSearchTag,
+    clickedWhatIsThis: clickedWhatIsThis,
     clearSearchBox: clearSearchBox,
     devClickedToggleDistrictOption: devClickedToggleDistrictOption,
     hoverAddress: hoverAddress,
@@ -758,6 +771,12 @@ function updatePanelDetails(id) {
 function removeHighlightFromPreviousSelection() {
   if (_selectedProject) _selectedProject.setStyle(_selectedStyle)
 }
+
+function clickedLearnMore() {
+  window.open('https://www.sfcta.org/mystreetsf-projects-map', '_blank')
+}
+
+function clickedWhatIsThis() {}
 
 function clickedOnFeature(e) {
   if (BigStore.debug) console.log(e)
@@ -1713,5 +1732,10 @@ td {
 
 h2.noSelection {
   text-align: center;
+}
+
+.helpbar {
+  text-align: center;
+  margin-top: 5px;
 }
 </style>

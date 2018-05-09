@@ -45,8 +45,8 @@
 
     .information-panel(v-cloak)
         br
-        h2(:class="{noSelection: !infoDetails}" v-html="infoTitle")
-        p  {{ infoDetails }}
+        h2(v-html="infoTitle"  :class="{noSelection: !infoDetails}" )
+        p(v-html="infoDetails || defaultPanelDetails"  :class="{noSelection: !infoDetails}" )
 
     #bottom-panel(v-cloak)
       .details-link(v-if="infoUrl")
@@ -189,9 +189,12 @@ let _projectsByTag = {}
 let _tagList = []
 
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
+let defaultPanelDetails =
+  '<br/>Or explore the list of <a href="/citywide">citywide projects</a>.'
 
 let store = {
   addressSearchResults: [],
+  defaultPanelDetails: defaultPanelDetails,
   devDistrictOption: true,
   extraLayers: _extraLayers,
   filterAreas: false,
@@ -1711,7 +1714,7 @@ td {
   border-radius: 5px !important;
 }
 
-h2.noSelection {
+.noSelection {
   text-align: center;
 }
 </style>

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import CitywideProjects from '@/components/CitywideProjects'
 import MyStreet from '@/components/MyStreet'
 import ProjectPage from '@/components/ProjectPage'
 
@@ -12,6 +13,11 @@ export default new Router({
       path: '/',
       name: 'MyStreet',
       component: MyStreet,
+    },
+    {
+      path: '/citywide',
+      name: 'CitywideProjects',
+      component: CitywideProjects,
     },
     {
       path: '/projects/:id',

@@ -388,7 +388,7 @@ function mounted() {
     '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
     '<a href="http://mapbox.com">Mapbox</a>'
 
-  let geocodeExtraParams = '&bbox=-122.55,37.7,-122.36,37.85'
+  let geocodeExtraParams = '&limit=3&bbox=-122.55,37.7,-122.36,37.85'
   geocoding.setAccessToken(token + geocodeExtraParams)
 
   mymap.on('click', clickedAnywhereOnMap)
@@ -1205,7 +1205,7 @@ function removeAddressMarker() {
 
 function clickedAddress(address) {
   console.log({ clickedAddress: address })
-  let lon = address.center[0]
+  let lng = address.center[0]
   let lat = address.center[1]
 
   for (let a of store.addressSearchResults) a.red = false
@@ -1216,23 +1216,37 @@ function clickedAddress(address) {
 
   removeAddressMarker()
 
-  _addressMarker = L.circle([lat, lon], {
+  _addressMarker = L.circle([lat, lng], {
     color: 'red',
     fillColor: '#f63',
     fillOpacity: 0.6,
     radius: 200,
   })
   _addressMarker.addTo(mymap)
+
+  showProjectsNearAddress({ lat: lat, lng: lng })
 }
 
 function hoverAddress(address) {
   // console.log(address)
 }
 
+function showProjectsNearAddress(latlng) {
+  let projects = getLayersNearLatLng(latlng)
+  console.log(projects)
+  let z = []
+  for (let project of projects) {
+    z.push({ id: project, name: BigStore.state.prjCache[project].project_name })
+  }
+  store.results = z
+}
+
 function clearSearchBox() {
   store.terms = ''
   // store.filterTags.clear()
   // updateFilters()
+  store.addressSearchResults = []
+  removeAddressMarker()
 }
 </script>
 

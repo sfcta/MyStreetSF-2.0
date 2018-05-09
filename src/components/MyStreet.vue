@@ -175,7 +175,8 @@ let keywordExtractor = require('keyword-extractor')
 let omnivore = require('leaflet-omnivore')
 let geocoding = require('mapbox-geocoding')
 
-let BUFFER_DISTANCE_METERS = 25
+let BUFFER_DISTANCE_METERS_SHORT = 25
+let BUFFER_DISTANCE_METERS_LONG = 275
 
 let _extraLayers = {
   'layer-sup-districts': {
@@ -810,12 +811,12 @@ function clickedOnFeature(e) {
   updatePanelDetails(id)
 }
 
-function getLayersNearLatLng(latlng) {
+function getLayersNearLatLng(latlng, distanceInMeters) {
   let lat = latlng.lat
   let lng = latlng.lng
 
   let clickPoint = turf.point([lng, lat]) // turf uses long-lat, leaflet uses lat-long :-O
-  let clickBuffer = turf.buffer(clickPoint, BUFFER_DISTANCE_METERS, {
+  let clickBuffer = turf.buffer(clickPoint, distanceInMeters, {
     units: 'meters',
   })
 
@@ -905,7 +906,10 @@ function isTargetAPoint(target) {
 function hoverFeature(e) {
   let target
 
-  let nearbyProjects = getLayersNearLatLng(e.latlng)
+  let nearbyProjects = getLayersNearLatLng(
+    e.latlng,
+    BUFFER_DISTANCE_METERS_SHORT
+  )
 
   // deal w search clicks first
   if (e in BigStore.state.layers) {
@@ -1220,7 +1224,7 @@ function clickedAddress(address) {
     color: 'red',
     fillColor: '#f63',
     fillOpacity: 0.6,
-    radius: 200,
+    radius: 250,
   })
   _addressMarker.addTo(mymap)
 
@@ -1232,13 +1236,16 @@ function hoverAddress(address) {
 }
 
 function showProjectsNearAddress(latlng) {
-  let projects = getLayersNearLatLng(latlng)
-  console.log(projects)
-  let z = []
+  let projects = getLayersNearLatLng(latlng, BUFFER_DISTANCE_METERS_LONG)
+
+  let results = []
   for (let project of projects) {
-    z.push({ id: project, name: BigStore.state.prjCache[project].project_name })
+    results.push({
+      id: project,
+      name: BigStore.state.prjCache[project].project_name,
+    })
   }
-  store.results = z
+  store.results = results
 }
 
 function clearSearchBox() {

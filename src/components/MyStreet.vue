@@ -140,6 +140,14 @@
           :class="{ basic: !filterTags.has(tag) }"
         ) {{ tag }}
 
+        .search-category(v-if="terms && addressSearchResults")
+          p ADDRESS SEARCH
+        template(v-if="addressSearchResults")
+          div(v-on:click="clickedSearch(result.id)"
+              v-on:mouseover="hoverSearch(result.id)")
+            .search-item
+              h4 {{ result }}
+
         .search-category(v-if="results.length")
           p PROJECTS
         template(v-for="result in results")
@@ -165,6 +173,7 @@ let L = require('leaflet')
 let Color = require('color')
 let keywordExtractor = require('keyword-extractor')
 let omnivore = require('leaflet-omnivore')
+let geocoding = require('mapbox-geocoding')
 
 let BUFFER_DISTANCE_METERS = 25
 
@@ -181,6 +190,7 @@ let _tagList = []
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
 
 let store = {
+  addressSearchResults: undefined,
   devDistrictOption: true,
   extraLayers: _extraLayers,
   filterAreas: false,
@@ -377,6 +387,9 @@ function mounted() {
   let attribution =
     '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
     '<a href="http://mapbox.com">Mapbox</a>'
+
+  let geocodeExtraParams = '&bbox=-122.55,37.7,-122.36,37.85'
+  geocoding.setAccessToken(token + geocodeExtraParams)
 
   mymap.on('click', clickedAnywhereOnMap)
 
@@ -1111,6 +1124,14 @@ async function fetchSearchResults(terms) {
       resp = await fetch(simpleSearch)
       jsonData = await resp.json()
     }
+
+    // address search
+    geocoding.geocode('mapbox.places', terms, function(err, geoData) {
+      console.log(geoData)
+      if (geoData.features) {
+        store.addressSearchResults = geoData.features[0]
+      }
+    })
 
     // update list ONLY if query has not changed while we were fetching
     if (terms === _queryString) {

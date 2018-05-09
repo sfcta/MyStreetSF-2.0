@@ -155,7 +155,7 @@
               v-on:mouseover="hoverSearch(result.id)")
             .search-item
               h4 {{ result.name }}
-              p Project ID: {{ result.id }}
+
   #mymap.custom-popup
   #hover-panel(v-bind:class="{ 'hover-panel-hide': hoverPanelHide }"): p {{ hoverPanelText }}
 </template>
@@ -1371,7 +1371,7 @@ h4 {
 }
 
 .search-item {
-  height: 80px;
+  height: 55px;
   border-top: 1px solid #eee;
   color: black;
   cursor: pointer;
@@ -1390,8 +1390,8 @@ h4 {
 
 .search-item h4 {
   color: #226;
-  font-size: 16px;
-  margin: 0px 0px;
+  font-size: 14px;
+  margin: -5px 0px 0px 0px;
 }
 .search-item p {
   color: #666;

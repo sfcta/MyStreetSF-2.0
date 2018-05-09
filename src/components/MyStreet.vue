@@ -145,7 +145,7 @@
         template(v-for="address in addressSearchResults")
           div(v-on:click="clickedAddress(address)"
               v-on:mouseover="hoverAddress(address)")
-            .search-item.address-item
+            .search-item.address-item(:class="{ red: address.red==true }")
               h4 {{ address.place_name }}
 
         .search-category(v-if="results.length")
@@ -1208,13 +1208,19 @@ function clickedAddress(address) {
   let lon = address.center[0]
   let lat = address.center[1]
 
+  for (let a of store.addressSearchResults) a.red = false
+
+  address.red = true
+  store.addressSearchResults.push([])
+  store.addressSearchResults.pop()
+
   removeAddressMarker()
 
   _addressMarker = L.circle([lat, lon], {
     color: 'red',
     fillColor: '#f63',
     fillOpacity: 0.6,
-    radius: 250,
+    radius: 200,
   })
   _addressMarker.addTo(mymap)
 }
@@ -1353,6 +1359,12 @@ h4 {
 
 .address-item {
   height: 40px;
+  border-left: 2px solid white;
+}
+
+.address-item.red {
+  border-left: 2px solid red;
+  background-color: #f4f4f4;
 }
 
 .search-item h4 {

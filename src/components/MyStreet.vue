@@ -1,5 +1,31 @@
 <template lang="pug">
 #container
+  #helpbox.ui.segment(v-show="showHelp" class="ui segment")
+    h2(style="margin-bottom:0px;") MyStreet SF
+    hr(style="margin-bottom:5px")
+    |SF staff need to tell me what to add here!
+
+    ul
+     li Color legend?
+     i.right.arrow.green.icon
+     i.right.arrow.blue.icon
+     i.right.arrow.yellow.icon
+     li Other infoes?
+
+    h2(style="margin-top:10px") How to use this map
+
+    hr(style="margin-bottom:5px")
+    | Click any project for info,
+    | etc
+
+    div(style="margin-top:20px;")
+      button.small.ui.right.floated.violet.button(@click="clickedToggleHelp") OK, GOT IT
+      |&nbsp;&nbsp;
+      button.small.ui.right.floated.basic.violet.button(
+        @click="clickedLearnMore"
+        style="margin-right:5px"
+      ) Learn more about MyStreet SF&hellip;
+
   #layer-widgets
     button#btn-start.ui.tiny.grey.icon.button(
       data-tooltip="Projects"
@@ -44,7 +70,7 @@
 
       .helpbar
         button.ui.right.labeled.icon.violet.tiny.button(
-          @click="clickedWhatIsThis")
+          @click="clickedToggleHelp")
           i.icon.info
           | What is this?
         |&nbsp;&nbsp;
@@ -220,6 +246,7 @@ let store = {
   infoDetails: '',
   infoUrl: '',
   selectedTags: '',
+  showHelp: false,
   showingLayerPanel: false,
   showingMainPanel: true,
   filterKey: 0,
@@ -487,11 +514,11 @@ export default {
     clickedShowHide: clickedShowHide,
     clickedShowMainPanel: clickedShowMainPanel,
     clickedShowLayerSelector: clickedShowLayerSelector,
+    clickedToggleHelp: clickedToggleHelp,
     clickedToggleLayer: clickedToggleLayer,
     clickedDistrict: clickedDistrict,
     clickedSearch: clickedSearch,
     clickedSearchTag: clickedSearchTag,
-    clickedWhatIsThis: clickedWhatIsThis,
     clearSearchBox: clearSearchBox,
     devClickedToggleDistrictOption: devClickedToggleDistrictOption,
     hoverAddress: hoverAddress,
@@ -772,11 +799,13 @@ function removeHighlightFromPreviousSelection() {
   if (_selectedProject) _selectedProject.setStyle(_selectedStyle)
 }
 
+function clickedToggleHelp() {
+  store.showHelp = !store.showHelp
+}
+
 function clickedLearnMore() {
   window.open('https://www.sfcta.org/mystreetsf-projects-map', '_blank')
 }
-
-function clickedWhatIsThis() {}
 
 function clickedOnFeature(e) {
   if (BigStore.debug) console.log(e)
@@ -1737,5 +1766,15 @@ h2.noSelection {
 .helpbar {
   text-align: center;
   margin-top: 5px;
+}
+
+#helpbox {
+  box-shadow: 0px 5px 10px 10px rgba(0, 0, 0, 0.4);
+  grid-row: 2 / 3;
+  grid-column: 1 / 4;
+  z-index: 2;
+  width: minmax(min-content, 100px);
+  margin: auto auto;
+  padding: 20px 20px;
 }
 </style>

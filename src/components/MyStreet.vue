@@ -130,7 +130,7 @@
             placeholder="Search by project name, topic...")
       i.search.icon(v-if="!terms")
       i.remove.link.icon(v-if="terms" v-on:click="clearSearchBox")
-    #search-results(v-cloak v-if="results.length + tagresults.length + filterTags.size")
+    #search-results(v-cloak v-if="addressSearchResults.length + results.length + tagresults.length + filterTags.size")
       .ui.relaxed.list
         .search-category(v-if="terms && (tagresults.length + filterTags.size)"): p TAGS
         #search-tags.tiny.pink.ui.button(
@@ -140,13 +140,13 @@
           :class="{ basic: !filterTags.has(tag) }"
         ) {{ tag }}
 
-        .search-category(v-if="terms && addressSearchResults")
-          p ADDRESS SEARCH
-        template(v-if="addressSearchResults")
-          div(v-on:click="clickedSearch(result.id)"
-              v-on:mouseover="hoverSearch(result.id)")
-            .search-item
-              h4 {{ result }}
+        .search-category(v-if="addressSearchResults.length")
+          p ADDRESSES
+        template(v-for="address in addressSearchResults")
+          div(v-on:click="clickedAddress(address)"
+              v-on:mouseover="hoverAddress(address)")
+            .search-item.address-item
+              h4 {{ address.place_name }}
 
         .search-category(v-if="results.length")
           p PROJECTS
@@ -190,7 +190,7 @@ let _tagList = []
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
 
 let store = {
-  addressSearchResults: undefined,
+  addressSearchResults: [],
   devDistrictOption: true,
   extraLayers: _extraLayers,
   filterAreas: false,
@@ -468,6 +468,7 @@ export default {
     mounted()
   },
   methods: {
+    clickedAddress: clickedAddress,
     clickedFilter: clickedFilter,
     clickedFunds: clickedFunds,
     clickedShowHide: clickedShowHide,
@@ -479,6 +480,7 @@ export default {
     clickedSearchTag: clickedSearchTag,
     clearSearchBox: clearSearchBox,
     devClickedToggleDistrictOption: devClickedToggleDistrictOption,
+    hoverAddress: hoverAddress,
     hoverSearch: hoverSearch,
     nameOfFilterDistrict: nameOfFilterDistrict,
     termChanged: termChanged,
@@ -1125,14 +1127,6 @@ async function fetchSearchResults(terms) {
       jsonData = await resp.json()
     }
 
-    // address search
-    geocoding.geocode('mapbox.places', terms, function(err, geoData) {
-      console.log(geoData)
-      if (geoData.features) {
-        store.addressSearchResults = geoData.features[0]
-      }
-    })
-
     // update list ONLY if query has not changed while we were fetching
     if (terms === _queryString) {
       store.results = jsonData
@@ -1152,6 +1146,24 @@ function termChanged() {
 
   if (_queryString) fetchSearchResults(_queryString)
   else store.results = []
+
+  if (_queryString) fetchAddressResults(_queryString)
+  else store.addressSearchResults = []
+}
+
+function fetchAddressResults(_queryString) {
+  geocoding.geocode('mapbox.places', _queryString, function(err, geoData) {
+    console.log({ err: err, data: geoData })
+    if (geoData.features.length) {
+      for (let address of geoData.features) {
+        let i = address.place_name.indexOf(', San Francisco')
+        if (i > 0) address.place_name = address.place_name.substring(0, i)
+      }
+      store.addressSearchResults = geoData['features']
+    } else {
+      store.addressSearchResults = []
+    }
+  })
 }
 
 let _hoverSearchLastId
@@ -1176,6 +1188,39 @@ function clickedSearchTag(tag) {
   console.log({ ACTIVE_TAGS: store.filterTags })
   store.filterKey++
   updateFilters()
+}
+
+let _addressMarker
+
+function removeAddressMarker() {
+  if (_addressMarker) {
+    try {
+      mymap.removeLayer(_addressMarker)
+    } catch (e) {
+      // oh well
+    }
+  }
+  _addressMarker = null
+}
+
+function clickedAddress(address) {
+  console.log({ clickedAddress: address })
+  let lon = address.center[0]
+  let lat = address.center[1]
+
+  removeAddressMarker()
+
+  _addressMarker = L.circle([lat, lon], {
+    color: 'red',
+    fillColor: '#f63',
+    fillOpacity: 0.6,
+    radius: 250,
+  })
+  _addressMarker.addTo(mymap)
+}
+
+function hoverAddress(address) {
+  // console.log(address)
 }
 
 function clearSearchBox() {
@@ -1304,6 +1349,10 @@ h4 {
   color: black;
   cursor: pointer;
   padding: 5px 5px;
+}
+
+.address-item {
+  height: 40px;
 }
 
 .search-item h4 {

@@ -1,9 +1,11 @@
 <template lang="pug">
 #container
   #helpbox.ui.segment(v-show="showHelp" class="ui segment")
-    h2(style="margin-bottom:0px;") MyStreet SF
+    h3.black(style="margin-bottom:0px;") MyStreet SF
     hr(style="margin-bottom:5px")
-    |SF staff need to tell me what to add here!
+    p.black Use this map to explore the many transportation investments happening all across San Francisco.
+    br
+    p.black SF staff need to tell me what to add here!
 
     ul
      li Color legend?
@@ -12,7 +14,7 @@
      i.right.arrow.yellow.icon
      li Other infoes?
 
-    h2(style="margin-top:10px") How to use this map
+    h3.black(style="margin-top:10px") How to use this map
 
     hr(style="margin-bottom:5px")
     | Click any project for info,
@@ -1769,12 +1771,17 @@ h2.noSelection {
 }
 
 #helpbox {
-  box-shadow: 0px 5px 10px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 0px 20px 10px rgba(0, 0, 0, 0.4);
   grid-row: 2 / 3;
   grid-column: 1 / 4;
   z-index: 2;
   width: minmax(min-content, 100px);
+  max-width: 500px;
   margin: auto auto;
-  padding: 20px 20px;
+  padding: 10px 10px;
+}
+
+.black {
+  color: black;
 }
 </style>

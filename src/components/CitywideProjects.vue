@@ -1,5 +1,9 @@
 <template lang="pug">
 #project-page
+  router-link(to='/') &laquo; To the map
+  br
+  br
+
   h1 Citywide Projects
   h4(style="color:#444;") A list of projects which are citywide in nature, or which can't be easily placed on the map.
   br
@@ -70,9 +74,9 @@ async function mounted(component) {
   // add project KML
   let allProjects = await fetchCitywideProjects()
 
-  store.transitProjects = allProjects.filter(allProjects => allProjects.project_group === 'Transit');
-  store.streetProjects = allProjects.filter(allProjects => allProjects.project_group === 'Streets');
-  store.plans = allProjects.filter(allProjects => allProjects.project_group === 'Plans and Programs');
+  store.transitProjects = allProjects.filter(allProjects => allProjects.project_group === 'Transit')
+  store.streetProjects = allProjects.filter(allProjects => allProjects.project_group === 'Streets')
+  store.plans = allProjects.filter(allProjects => allProjects.project_group === 'Plans and Programs')
 }
 
 async function fetchCitywideProjects() {
@@ -93,7 +97,6 @@ async function fetchCitywideProjects() {
     let jsonData = await resp.json()
     if (BigStore.debug) console.log({CITYWIDE: jsonData})
     return jsonData
-
   } catch (error) {
     console.log({ERROR: error})
   }

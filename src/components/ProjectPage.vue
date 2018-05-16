@@ -1,6 +1,11 @@
 <template lang="pug">
 #project-page
   #zoom-map
+  router-link(v-if='"Citywide" === geojson.districts' to='/citywide') &laquo; Back to citywide projects
+  router-link(v-if='geojson.districts && "Citywide" !== geojson.districts' to='/') &laquo; Back to map
+  br
+  br
+
   h1 {{ project_name }}
   h4(style="color:#444;") Project ID: {{ project_number }}
   br

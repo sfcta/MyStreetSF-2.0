@@ -86,6 +86,9 @@
         br
         h2(:class="{noSelection: !infoDetails}" v-html="infoTitle")
         p  {{ infoDetails }}
+        p(v-if="!infoDetails" style="text-align: center")
+          | or browse the list of&nbsp;
+          router-link(to="citywide") citywide projects&hellip;
 
     #bottom-panel(v-cloak)
       .details-link(v-if="infoUrl")
@@ -556,6 +559,7 @@ function selectedTagsChanged() {
 
 async function queryServer() {
   const geoUrl = API_SERVER + GEO_VIEW
+  // const geoUrl = '/static/mystreet2_all.json'
 
   try {
     let resp = await fetch(geoUrl)

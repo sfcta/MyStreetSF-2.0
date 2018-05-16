@@ -1,10 +1,7 @@
 #!/bin/bash
 set -ex
 
-cd ~/mystreet2
-
-cp site/_data/projects-all.yml site/_data/projects.yml
 npm run build
-surge ./dist
-cp site/_data/projects-sample.yml site/_data/projects.yml
+cp _dist/index.html _dist/200.html
+surge -d mystreet2.surge.sh _dist
 

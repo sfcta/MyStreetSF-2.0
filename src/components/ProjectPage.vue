@@ -7,7 +7,6 @@
   br
 
   h1 {{ project_name }}
-  h4(style="color:#444;") Project ID: {{ project_number }}
   br
 
   h3.project-subtitle Brief Project Description

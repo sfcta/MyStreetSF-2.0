@@ -88,16 +88,24 @@ function setProjectDetails() {
   store.project_name = store.geojson['project_name']
   store.project_number = store.geojson['project_number']
 
-  store.details.push(['Status', store.geojson['status']])
-  store.details.push(['Current Phase', store.geojson['current_phase']])
-  store.details.push(['% Complete', store.geojson['percent_complete']])
+  let phase = store.geojson['current_phase']
+  if (phase.endsWith(' ()')) phase = phase.substring(0, phase.length - 3)
+  store.details.push(['Current Phase', phase])
+
+  store.details.push([
+    'Percent Complete of Funded Phase',
+    store.geojson['percent_complete'],
+  ])
+
   store.details.push(['Location', store.geojson['project_location']])
   store.details.push(['Districts', store.geojson['districts']])
   store.details.push(['Cost Estimate', store.geojson['project_cost_estimate']])
-  store.details.push([
-    'Project Expected Completion',
-    store.geojson['project_expected_completion'],
-  ])
+
+  let openForUse = store.geojson['project_expected_completion']
+  if (store.geojson['project_group'] === 'Plans and Programs')
+    openForUse = 'N/A'
+  store.details.push(['Open for Use', openForUse])
+
   store.details.push(['Funding Sources', store.geojson['funding_sources']])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Tags', store.geojson['project_tags']])
@@ -826,7 +834,7 @@ td {
   line-height: normal;
   font-size: 16px;
   color: black;
-  font-weight: bold;
+  font-weight: normal;
   padding-top: 10px;
   padding-left: 10px;
 }

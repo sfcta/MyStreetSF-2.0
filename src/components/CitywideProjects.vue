@@ -25,7 +25,7 @@
       td.project-details: b {{ prj.project_name }}
       td.project-details.col2
         | {{ prj.description }}
-        a(href="/") &nbsp;&nbsp;&raquo;more&nbsp;info&hellip;
+        router-link(:to="'/projects/' + prj.project_number") &nbsp;&nbsp;&raquo;more&nbsp;info&hellip;
     tr.project-details
       td &nbsp;
 
@@ -35,7 +35,7 @@
       td.project-details: b {{ prj.project_name }}
       td.project-details.col2
         | {{ prj.description }}
-        a(href="/") &nbsp;&nbsp;&raquo;more&nbsp;info&hellip;
+        router-link(:to="'/projects/' + prj.project_number") &nbsp;&nbsp;&raquo;more&nbsp;info&hellip;
     tr.project-details
       td &nbsp;
   br
@@ -74,9 +74,15 @@ async function mounted(component) {
   // add project KML
   let allProjects = await fetchCitywideProjects()
 
-  store.transitProjects = allProjects.filter(allProjects => allProjects.project_group === 'Transit')
-  store.streetProjects = allProjects.filter(allProjects => allProjects.project_group === 'Streets')
-  store.plans = allProjects.filter(allProjects => allProjects.project_group === 'Plans and Programs')
+  store.transitProjects = allProjects.filter(
+    allProjects => allProjects.project_group === 'Transit'
+  )
+  store.streetProjects = allProjects.filter(
+    allProjects => allProjects.project_group === 'Streets'
+  )
+  store.plans = allProjects.filter(
+    allProjects => allProjects.project_group === 'Plans and Programs'
+  )
 }
 
 async function fetchCitywideProjects() {
@@ -95,16 +101,15 @@ async function fetchCitywideProjects() {
   try {
     let resp = await fetch(geoUrl)
     let jsonData = await resp.json()
-    if (BigStore.debug) console.log({CITYWIDE: jsonData})
+    if (BigStore.debug) console.log({ CITYWIDE: jsonData })
     return jsonData
   } catch (error) {
-    console.log({ERROR: error})
+    console.log({ ERROR: error })
   }
   //  TODO throw a 404 here?
   console.log('Something wrong here')
   return []
 }
-
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

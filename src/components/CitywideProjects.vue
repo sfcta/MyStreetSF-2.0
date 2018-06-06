@@ -5,39 +5,40 @@
   br
 
   h1 Citywide Projects
-  h4(style="color:#444;") A list of projects which are citywide in nature, or which can't be easily placed on the map.
+  h4(style="color:#888;") A list of projects which are citywide in nature, or which can't be easily placed on the map.
   br
 
-  table
-    tr.project-subtitle(style="background-color: #0071c6")
-      td(colspan=2): h3 Transit Projects
-    tr.project-details(v-for="prj in transitProjects")
-      td.project-details: b {{ prj.project_name }}
-      td.project-details.col2
-        | {{ prj.description }}
-        router-link(:to="'/projects/' + prj.project_number") &nbsp;&nbsp;&raquo;more&nbsp;info&hellip;
-    tr.project-details
-      td &nbsp;
+  h3.project-heading(style="background-color: #21ba45") STREET PROJECTS
+  ul.visualizations
+    li.viz-thumbnail(v-for="prj in streetProjects")
+      router-link(:to="'/projects/' + prj.project_number")
+        .image-text-box
+          img.thumbnail-image(src="/static/sfstreets.jpg")
+          h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
+      p.footnote {{prj.sponsor}}
 
-    tr.project-subtitle(style="background-color: #21ba45")
-      td(colspan=2): h3 Street Projects
-    tr.project-details(v-for="prj in streetProjects")
-      td.project-details: b {{ prj.project_name }}
-      td.project-details.col2
-        | {{ prj.description }}
-        router-link(:to="'/projects/' + prj.project_number") &nbsp;&nbsp;&raquo;more&nbsp;info&hellip;
-    tr.project-details
-      td &nbsp;
+  br
 
-    tr.project-subtitle(style="background-color: #fc4")
-      td(colspan=2): h3 Plans and Studies
-    tr.project-details(v-for="prj in plans")
-      td.project-details: b {{ prj.project_name }}
-      td.project-details.col2
-        | {{ prj.description }}
-        router-link(:to="'/projects/' + prj.project_number") &nbsp;&nbsp;&raquo;more&nbsp;info&hellip;
-    tr.project-details
-      td &nbsp;
+  h3.project-heading TRANSIT PROJECTS
+  ul.visualizations
+    li.viz-thumbnail(v-for="prj in transitProjects")
+      router-link(:to="'/projects/' + prj.project_number")
+        .image-text-box
+          img.thumbnail-image(src="/static/bus.jpg")
+          h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
+        p.footnote {{prj.sponsor}}
+
+  br
+
+  h3.project-heading(style="background-color: #db4") PLANS AND STUDIES
+  ul.visualizations
+    li.viz-thumbnail(v-for="prj in plans")
+      router-link(:to="'/projects/' + prj.project_number")
+        .image-text-box
+          img.thumbnail-image(src="/static/blur.jpg")
+          h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
+      p.footnote {{prj.sponsor}}
+
   br
 </template>
 
@@ -46,7 +47,6 @@
 
 // use npm and babel to support IE11/Safari
 import 'babel-polyfill'
-import 'isomorphic-fetch'
 
 // Shared stuff across all components
 import { BigStore } from '../shared-store.js'
@@ -73,13 +73,18 @@ export default {
 async function mounted(component) {
   // add project KML
   let allProjects = await fetchCitywideProjects()
+  allProjects = allProjects.sort(function(a, b) {
+    return ('' + a.project_name).localeCompare(b.project_name)
+  })
 
   store.transitProjects = allProjects.filter(
     allProjects => allProjects.project_group === 'Transit'
   )
+
   store.streetProjects = allProjects.filter(
     allProjects => allProjects.project_group === 'Streets'
   )
+
   store.plans = allProjects.filter(
     allProjects => allProjects.project_group === 'Plans and Programs'
   )
@@ -700,5 +705,98 @@ h3.project-subtitle {
 
 a {
   color: #33c;
+}
+
+.visualizations {
+  display: grid;
+  grid-gap: 35px;
+  grid-template-columns: repeat(auto-fill, 20rem);
+  list-style: none;
+  margin-top: 20px;
+  padding-left: 0px;
+}
+
+.viz-thumbnail {
+  background: #dde8ff;
+  background-color: #fff;
+  border-style: solid;
+  border-width: 1px 1px;
+  border-color: #aaa;
+  display: table-cell;
+  opacity: 0.9;
+  padding: 0 0 0 0;
+  box-shadow: 0px 2px 7px rgba(0, 0, 0, 0.2);
+  vertical-align: top;
+  width: 20rem;
+}
+
+.viz-thumbnail:hover {
+  background-color: #fff;
+  opacity: 1;
+  box-shadow: 3px 3px 10px rgba(0, 40, 100, 0.7);
+  transition: all ease 0.2s;
+  transform: translateY(-1px);
+  border-color: #999;
+}
+
+.viz-thumbnail:active {
+  opacity: 1;
+  box-shadow: 3px 3px 6px rgba(0, 0, 80, 0.4);
+  transform: translateY(1px);
+}
+
+.thumbnail-image {
+  background-color: #aac;
+  height: 10rem;
+  padding-right: 2px;
+  vertical-align: top;
+  width: 20rem;
+}
+
+.thumbnail-title {
+  color: #3333aa;
+  margin-top: 0px;
+  padding-bottom: 0px;
+  padding-left: 5px;
+  padding-right: 2px;
+}
+
+.image-text-box {
+  position: relative;
+  color: white;
+}
+
+.bottom-left {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  line-height: 1.35;
+  color: white;
+  font-size: 19px;
+}
+
+.bottom-left span {
+  background-color: #0071c6dd;
+}
+.bottom-left.streets span {
+  background-color: #00aa33dd;
+}
+.bottom-left.plans span {
+  background-color: #ca4;
+}
+
+.project-heading {
+  background-color: #0071c6;
+  padding-bottom: 5px;
+  padding-left: 5px;
+}
+
+.footnote {
+  background-color: #ccd;
+  padding-left: 5px;
+  margin-top: -2px;
+  margin-bottom: -2px;
+  color: #888;
+  font-size: 12px;
 }
 </style>

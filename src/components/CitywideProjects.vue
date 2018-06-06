@@ -1,6 +1,6 @@
 <template lang="pug">
 #project-page
-  router-link(to='/') &laquo; To the map
+  router-link(to='/') &laquo; Back to the map
   br
   br
 
@@ -13,9 +13,9 @@
     li.viz-thumbnail(v-for="prj in streetProjects")
       router-link(:to="'/projects/' + prj.project_number")
         .image-text-box
-          img.thumbnail-image(src="/static/sfstreets.jpg")
+          img.thumbnail-image(src="/static/asphalt.jpg")
           h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
-      p.footnote {{prj.sponsor}}
+        p.footnote {{prj.sponsor}}
 
   br
 
@@ -24,7 +24,7 @@
     li.viz-thumbnail(v-for="prj in transitProjects")
       router-link(:to="'/projects/' + prj.project_number")
         .image-text-box
-          img.thumbnail-image(src="/static/bus.jpg")
+          img.thumbnail-image(src="/static/bus-seats.jpg")
           h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
         p.footnote {{prj.sponsor}}
 
@@ -37,7 +37,7 @@
         .image-text-box
           img.thumbnail-image(src="/static/blur.jpg")
           h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
-      p.footnote {{prj.sponsor}}
+        p.footnote {{prj.sponsor}}
 
   br
 </template>
@@ -88,6 +88,25 @@ async function mounted(component) {
   store.plans = allProjects.filter(
     allProjects => allProjects.project_group === 'Plans and Programs'
   )
+
+  // fixLineBreaks()
+}
+
+// i found this on the interweb but it's too slow
+// https://stackoverflow.com/questions/22423951/wrap-text-from-bottom-to-top
+function fixLineBreaks() {
+  console.log('GGG1')
+  let x = document.getElementsByClassName('bottom-left')
+  for (let title of x) {
+    var width = 1
+    var originalHeight = $(title).height()
+    var spacer = $('<div style="float:right;height:1px;"/>').prependTo(title)
+    while (originalHeight == $(title).height()) {
+      spacer.width(++width)
+    }
+    spacer.width(--width)
+  }
+  console.log('GGG 2')
 }
 
 async function fetchCitywideProjects() {
@@ -217,28 +236,16 @@ h4 {
   color: #ea790d;
 }
 
-#zoom-map {
-  float: right;
-  width: 300px;
-  height: 300px;
-  margin-left: 20px;
-  margin-bottom: 10px;
-  background-color: #eee;
-  border: 1px solid #ea790d;
-  border-radius: 8px;
-  box-shadow: 0 0 3px #00000060;
-}
-
 #project-page {
-  height: 100%;
-  max-width: 1100px;
-  margin: 0px auto;
-  padding: 20px 20px;
-}
-
-#mymap {
-  margin: 10px 10px;
+  grid-row: 1 / 5;
+  grid-column: 1 / 4;
   z-index: 1;
+  overflow-y: auto;
+  max-height: 100%;
+  width: 100%;
+  margin: 0px auto;
+  padding: 60px 20px;
+  background-color: #fff;
 }
 
 #hover-panel {

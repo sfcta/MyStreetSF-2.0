@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+
 import MyStreet from '@/components/MyStreet'
 import ProjectPage from '@/components/ProjectPage'
 import CitywideProjects from '@/components/CitywideProjects'
@@ -21,8 +22,8 @@ export default new Router({
     },
     {
       path: '/citywide',
-      name: 'CityWideProjects',
-      component: CitywideProjects,
+      name: 'MyStreet',
+      component: MyStreet,
     },
     {
       // catch-all for mispelled URLs. Maybe add a 404 page...

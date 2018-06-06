@@ -1,204 +1,5 @@
 <template lang="pug">
-#container
-  #helpbox.ui.segment(v-show="showHelp" class="ui segment")
-    h3.black(style="margin-bottom:0px;") MyStreet SF
-    hr(style="margin-bottom:5px")
-    p.black Use this map to explore the many transportation investments happening all across San Francisco.
-    br
-    p.black SF staff need to tell me what to add here!
-
-    ul
-     li Color legend?
-     i.right.arrow.green.icon
-     i.right.arrow.blue.icon
-     i.right.arrow.yellow.icon
-     li Other infoes?
-
-    h3.black(style="margin-top:10px") How to use this map
-
-    hr(style="margin-bottom:5px")
-    | Click any project for info,
-    | etc
-
-    div(style="margin-top:20px;")
-      button.small.ui.right.floated.violet.button(@click="clickedToggleHelp") OK, GOT IT
-      |&nbsp;&nbsp;
-      button.small.ui.right.floated.basic.violet.button(
-        @click="clickedLearnMore"
-        style="margin-right:5px"
-      ) Learn more about MyStreet SF&hellip;
-
-  #layer-widgets
-    button#btn-start.ui.tiny.grey.icon.button(
-      data-tooltip="Projects"
-      v-on:click="clickedShowMainPanel"
-      v-bind:class="{ blue: showingMainPanel}"
-    ): i.list.icon
-    br
-    button#btn-layers.ui.tiny.grey.icon.button(
-      data-tooltip="Map Layers"
-      v-on:click="clickedShowLayerSelector"
-      v-bind:class="{ blue: showingLayerPanel}"
-    ): i.clone.outline.icon
-    br
-    br
-    button#btn-showhide.ui.tiny.green.icon.button(
-           data-tooltip="Show/Hide Panel"
-           v-on:click="clickedShowHide"
-    ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
-
-  #layer-panel.sidepanel(v-if="showingLayerPanel" v-bind:class="{ shrunken: isPanelHidden}")
-    #preheader
-      hr
-      h3.apptitle MyStreet SF
-      hr
-
-      br
-      h5 MAP LAYERS:
-      p: i Additional geographic data that you may find useful.
-      br
-
-      .ui.checkbox.layer-selectors
-        input(@click="clickedToggleLayer"
-              name="layer-sup-districts"
-              type="checkbox"
-              v-bind:checked="extraLayers['layer-sup-districts'].show")
-        label Supervisorial District Boundaries
-
-  #panel.sidepanel(v-if="showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
-    #preheader
-      hr
-      h4.apptitle MyStreet SF
-
-      .helpbar
-        button.ui.right.labeled.icon.violet.tiny.button(
-          @click="clickedToggleHelp")
-          i.icon.info
-          | What is this?
-        |&nbsp;&nbsp;
-        button.ui.right.labeled.icon.violet.tiny.button(
-          @click="clickedLearnMore")
-          i.icon.right.arrow
-          | Learn More
-      hr
-
-    .information-panel(v-cloak)
-        br
-        h2(:class="{noSelection: !infoDetails}" v-html="infoTitle")
-        p  {{ infoDetails }}
-        p(v-if="!infoDetails" style="text-align: center")
-          | or browse the list of&nbsp;
-          router-link(to="citywide") citywide projects&hellip;
-
-    #bottom-panel(v-cloak)
-      .details-link(v-if="infoUrl")
-        a(v-bind:href="infoUrl" target="_blank") &raquo; MORE DETAILS&hellip;
-      .pickers
-        hr
-        h5 STATUS:
-
-        button#btn-underway.tiny.ui.grey.button(
-               v-on:click="clickedFilter"
-               v-bind:class="{ active: filterUnderway, yellow: filterUnderway}"
-        ) Underway
-
-        button#btn-complete.tiny.ui.grey.button(
-               v-on:click="clickedFilter"
-               v-bind:class="{ active: filterComplete, yellow: filterComplete}"
-        ) Completed
-
-        h5 CATEGORY:
-
-        button#btn-streets.tiny.ui.grey.button(
-               v-on:click="clickedFilter"
-               v-bind:class="{ active: filterStreets, green: filterStreets}"
-        ) Streets
-
-        button#btn-transit.tiny.ui.grey.button(
-               v-on:click="clickedFilter"
-               v-bind:class="{ active: filterTransit, blue: filterTransit}"
-        ) Transit
-
-        button#btn-areas.tiny.ui.grey.button(
-               v-on:click="clickedFilter"
-               v-bind:class="{ active: filterAreas, yellow: filterAreas}"
-        ) Plans &amp; Programs
-
-        #dropdowns
-          .narrow-dropdown(style="float:left;")
-            h5 DISTRICT:
-            .ui.selection.fluid.dropdown
-              .text: div(v-cloak) {{ nameOfFilterDistrict(filterDistrict) }}
-              i.dropdown.icon
-              .menu
-                .item(v-for="i in [-1,0,1,2,3,4,5,6,7,8,9,10,11]"
-                      v-on:click="clickedDistrict(i)") {{ nameOfFilterDistrict(i) }}
-          .narrow-dropdown(style="float:right;")
-            h5 FUNDING SOURCE:
-            .ui.selection.fluid.dropdown
-              .text: div(v-cloak) {{ filterFund ? filterFund : "All sources&hellip;" }}
-              i.dropdown.icon
-              .menu
-                .item(@click="clickedFunds" v-bind:data-fund="null") All sources
-                .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
-        br
-        .ui.checkbox.layer-selectors
-          input(@click="devClickedToggleDistrictOption"
-                name="dev-sup-districts"
-                type="checkbox"
-                v-bind:checked="devDistrictOption")
-          label (TEST) Show all projects on map, even when a district is chosen
-        br
-
-      // logo panel
-      hr(style="margin: 0px 0px;")
-
-      table#table-logo
-        tr
-          td.agency-logo: h4.agency: b
-            a(target="_blank"
-              href="http://www.sfcta.org/"
-            ) SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY
-          td.agency-logo
-            a.agency-link(target="_blank" href="http://www.sfcta.org/")
-              img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
-
-  #search-panel
-    #search-term-box.ui.fluid.icon.inverted.input
-      input(v-model="terms"
-            tabindex="1"
-            type="text"
-            v-on:keyup.esc="clearSearchBox"
-            placeholder="Search by project name, topic...")
-      i.search.icon(v-if="!terms")
-      i.remove.link.icon(v-if="terms" v-on:click="clearSearchBox")
-    #search-results(v-cloak v-if="addressSearchResults.length + results.length + tagresults.length + filterTags.size")
-      .ui.relaxed.list
-        .search-category(v-if="terms && (tagresults.length + filterTags.size)"): p TAGS
-        #search-tags.tiny.pink.ui.button(
-          v-for="tag in tagsActiveOrMatchingSearch"
-          @click='clickedSearchTag(tag)'
-          :key="filterKey+tag"
-          :class="{ basic: !filterTags.has(tag) }"
-        ) {{ tag }}
-
-        .search-category(v-if="addressSearchResults.length")
-          p ADDRESSES
-        template(v-for="address in addressSearchResults")
-          div(v-on:click="clickedAddress(address)"
-              v-on:mouseover="hoverAddress(address)")
-            .search-item.address-item(:class="{ red: address.red==true }")
-              h4 {{ address.place_name }}
-
-        .search-category(v-if="results.length")
-          p PROJECTS
-        template(v-for="result in results")
-          div(v-on:click="clickedSearch(result.id)"
-              v-on:mouseover="hoverSearch(result.id)")
-            .search-item
-              h4 {{ result.name }}
-  component(v-bind:is="mainComponent")
-  #hover-panel(style="display:none" v-bind:class="{ 'hover-panel-hide': hoverPanelHide }"): p {{ hoverPanelText }}
+#mymap.custom-popup
 </template>
 
 <script>
@@ -206,10 +7,6 @@
 
 import 'babel-polyfill'
 import * as turf from '@turf/turf'
-
-// components
-import MyMap from '@/components/MyMap'
-import CitywideProjects from '@/components/CitywideProjects'
 
 // Shared stuff across all components
 import { BigStore } from '../shared-store.js'
@@ -253,7 +50,6 @@ let store = {
   infoTitle: defaultPanelTitle,
   infoDetails: '',
   infoUrl: '',
-  mainComponent: 'MyMap',
   selectedTags: '',
   showHelp: false,
   showingLayerPanel: false,
@@ -498,8 +294,7 @@ function nameOfFilterDistrict(i) {
 }
 
 export default {
-  name: 'MyStreet',
-  components: { CitywideProjects, MyMap },
+  name: 'MyMap',
   data() {
     return store
   },
@@ -514,8 +309,6 @@ export default {
     },
   },
   mounted: function() {
-    if (this.$route.path.includes('citywide'))
-      store.mainComponent = 'CitywideProjects'
     mounted()
   },
   methods: {
@@ -547,10 +340,6 @@ export default {
         // eslint-disable-next-line
         $('.ui.dropdown').dropdown()
       }, 250)
-    },
-    $route(to, from) {
-      if (to.path.includes('citywide')) store.mainComponent = 'CitywideProjects'
-      else store.mainComponent = 'MyMap'
     },
   },
 }

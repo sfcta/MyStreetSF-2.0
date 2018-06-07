@@ -162,41 +162,7 @@
           td.agency-logo
             a.agency-link(target="_blank" href="http://www.sfcta.org/")
               img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
-
-  #search-panel
-    #search-term-box.ui.fluid.icon.inverted.input
-      input(v-model="terms"
-            tabindex="1"
-            type="text"
-            v-on:keyup.esc="clearSearchBox"
-            placeholder="Search by project name, topic...")
-      i.search.icon(v-if="!terms")
-      i.remove.link.icon(v-if="terms" v-on:click="clearSearchBox")
-    #search-results(v-cloak v-if="addressSearchResults.length + results.length + tagresults.length + filterTags.size")
-      .ui.relaxed.list
-        .search-category(v-if="terms && (tagresults.length + filterTags.size)"): p TAGS
-        #search-tags.tiny.pink.ui.button(
-          v-for="tag in tagsActiveOrMatchingSearch"
-          @click='clickedSearchTag(tag)'
-          :key="filterKey+tag"
-          :class="{ basic: !filterTags.has(tag) }"
-        ) {{ tag }}
-
-        .search-category(v-if="addressSearchResults.length")
-          p ADDRESSES
-        template(v-for="address in addressSearchResults")
-          div(v-on:click="clickedAddress(address)"
-              v-on:mouseover="hoverAddress(address)")
-            .search-item.address-item(:class="{ red: address.red==true }")
-              h4 {{ address.place_name }}
-
-        .search-category(v-if="results.length")
-          p PROJECTS
-        template(v-for="result in results")
-          div(v-on:click="clickedSearch(result.id)"
-              v-on:mouseover="hoverSearch(result.id)")
-            .search-item
-              h4 {{ result.name }}
+  search-widget
   component(v-bind:is="mainComponent")
   #hover-panel(style="display:none" v-bind:class="{ 'hover-panel-hide': hoverPanelHide }"): p {{ hoverPanelText }}
 </template>
@@ -208,20 +174,22 @@ import 'babel-polyfill'
 import * as turf from '@turf/turf'
 
 // components
-import MyMap from '@/components/MyMap'
 import CitywideProjects from '@/components/CitywideProjects'
+import MyMap from '@/components/MyMap'
+import SearchWidget from '@/components/SearchWidget'
 
 // Shared stuff across all components
-import { BigStore } from '../shared-store.js'
+import { BigStore, EventBus } from '../shared-store.js'
 
 let L = require('leaflet')
-let Color = require('color')
 let keywordExtractor = require('keyword-extractor')
 let omnivore = require('leaflet-omnivore')
 let geocoding = require('mapbox-geocoding')
 
-let BUFFER_DISTANCE_METERS_SHORT = 25
-let BUFFER_DISTANCE_METERS_LONG = 275
+const BUFFER_DISTANCE_METERS_SHORT = 25
+const BUFFER_DISTANCE_METERS_LONG = 275
+
+const defaultPanelTitle = 'Select any project<br/>to learn more about it.'
 
 let _extraLayers = {
   'layer-sup-districts': {
@@ -233,43 +201,9 @@ let _extraLayers = {
 let _projectsByTag = {}
 let _tagList = []
 
-let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
-
-let store = {
-  addressSearchResults: [],
-  devDistrictOption: true,
-  extraLayers: _extraLayers,
-  filterAreas: false,
-  filterComplete: false,
-  filterDistrict: -1,
-  filterStreets: false,
-  filterTags: new Set(),
-  filterTransit: false,
-  filterUnderway: false,
-  filterFund: null,
-  fundSources: [],
-  hoverPanelHide: false,
-  hoverPanelText: '',
-  infoTitle: defaultPanelTitle,
-  infoDetails: '',
-  infoUrl: '',
-  mainComponent: 'MyMap',
-  selectedTags: '',
-  showHelp: false,
-  showingLayerPanel: false,
-  showingMainPanel: true,
-  filterKey: 0,
-  isPanelHidden: false,
-  terms: '',
-  results: [],
-  tagresults: [],
-  tags: _tagList,
-}
-
-let theme = 'light'
-let mymap
-
 const GEO_VIEW = 'mystreet2_all'
+
+let store = BigStore.state
 
 let styles = {
   normal: { color: '#3c6', weight: 6, opacity: 1.0 },
@@ -278,26 +212,23 @@ let styles = {
 }
 
 function clickedFunds(e) {
-  store.filterFund = e.target.dataset.fund
+  BigStore.state.filterFund = e.target.dataset.fund
   if (BigStore.debug) console.log({ FUND: store.filterFund })
 
   updateFilters()
 }
 
 function devClickedToggleDistrictOption() {
-  store.devDistrictOption = !store.devDistrictOption
-  if (BigStore.debug) console.log({ DEVCLICKED: store.devDistrictOption })
+  BigStore.state.devDistrictOption = !BigStore.state.devDistrictOption
+  if (BigStore.debug)
+    console.log({ DEVCLICKED: BigStore.state.devDistrictOption })
   updateFilters()
 }
 
 function clickedShowHide(e) {
-  store.isPanelHidden = !store.isPanelHidden
+  BigStore.state.isPanelHidden = !BigStore.state.isPanelHidden
   // leaflet map needs to be force-recentered, and it is slow.
-  for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
-    setTimeout(function() {
-      mymap.invalidateSize()
-    }, delay)
-  }
+  EventBus.$emit('map-force-resize-animation', BigStore.state.isPanelHidden)
 }
 
 function clickedToggleLayer(e) {
@@ -307,16 +238,7 @@ function clickedToggleLayer(e) {
   if (!layer.show) layer.show = true
   else layer.show = !layer.show
 
-  if (!layer.id) {
-    addExtraMapLayer(layer)
-  } else {
-    if (mymap.hasLayer(layer.id)) {
-      mymap.removeLayer(layer.id)
-    } else {
-      mymap.addLayer(layer.id)
-      layer.id.bringToBack()
-    }
-  }
+  EventBus.$emit('map-toggle-layer', layer)
 }
 
 let _districtColors = [
@@ -333,79 +255,33 @@ let _districtColors = [
   '#00f',
 ]
 
-async function addExtraMapLayer(extraLayer) {
-  let url = extraLayer.geojson
-  if (BigStore.debug) console.log('fetching', url)
-  let group = L.featureGroup()
-
-  let params = {
-    style: function(feature) {
-      let fill = _districtColors[-1 + parseInt(feature.properties.name)]
-      let style = {
-        color: '#000', // this is the "unselected" color -- same for all projects
-        opacity: 0.0,
-        weight: 0,
-        fillColor: fill,
-        fillOpacity: 0.2,
-        interactive: false,
-      }
-      return style
-    },
-  }
-
-  try {
-    let resp = await fetch(url)
-    let jsonData = await resp.json()
-    if (BigStore.debug) console.log(jsonData)
-
-    for (let district of jsonData) {
-      if (district.district === '06') continue
-      var geojsonFeature = {
-        type: 'Feature',
-        geometry: JSON.parse(district.geometry),
-        properties: {
-          name: district.district,
-        },
-      }
-
-      let layer = L.geoJSON(geojsonFeature, params)
-      group.addLayer(layer)
-    }
-
-    group.addTo(mymap)
-    group.bringToBack()
-    extraLayer.id = group
-
-    console.log(group)
-  } catch (error) {
-    console.log('map error: ' + error)
-  }
-}
-
 function clickedShowMainPanel(e) {
-  store.showingMainPanel = true
-  store.showingLayerPanel = false
+  BigStore.state.showingMainPanel = true
+  BigStore.state.showingLayerPanel = false
 }
 
 function clickedShowLayerSelector(e) {
-  store.showingMainPanel = false
-  store.showingLayerPanel = true
+  BigStore.state.showingMainPanel = false
+  BigStore.state.showingLayerPanel = true
 }
 
 function clickedFilter(e) {
   let id = e.target.id
 
-  if (id === 'btn-transit') store.filterTransit = !store.filterTransit
-  if (id === 'btn-streets') store.filterStreets = !store.filterStreets
-  if (id === 'btn-areas') store.filterAreas = !store.filterAreas
+  if (id === 'btn-transit')
+    BigStore.state.filterTransit = !BigStore.state.filterTransit
+  if (id === 'btn-streets')
+    BigStore.state.filterStreets = !BigStore.state.filterStreets
+  if (id === 'btn-areas')
+    BigStore.state.filterAreas = !BigStore.state.filterAreas
 
   if (id === 'btn-complete') {
-    store.filterComplete = !store.filterComplete
-    if (store.filterComplete) store.filterUnderway = false
+    BigStore.state.filterComplete = !BigStore.state.filterComplete
+    if (BigStore.state.filterComplete) BigStore.state.filterUnderway = false
   }
   if (id === 'btn-underway') {
-    store.filterUnderway = !store.filterUnderway
-    if (store.filterUnderway) store.filterComplete = false
+    BigStore.state.filterUnderway = !BigStore.state.filterUnderway
+    if (BigStore.state.filterUnderway) BigStore.state.filterComplete = false
   }
 
   updateFilters()
@@ -414,46 +290,18 @@ function clickedFilter(e) {
 function clickedAnywhereOnMap(map) {
   // undo selection, if user clicked on base map
   if (map.originalEvent.target.id === 'mymap') {
-    store.infoTitle = defaultPanelTitle
-    store.infoDetails = ''
-    store.infoUrl = ''
+    BigStore.state.infoTitle = defaultPanelTitle
+    BigStore.state.infoDetails = ''
+    BigStore.state.infoUrl = ''
     removeHighlightFromPreviousSelection()
   }
 }
 
 function mounted() {
-  mymap = L.map('mymap', { zoomSnap: 0.5 })
-  mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]])
-  mymap.zoomControl.setPosition('bottomleft')
-
-  let url =
-    'https://api.mapbox.com/styles/v1/mapbox/' +
-    theme +
-    '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}'
-  let token =
-    'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ'
-  let attribution =
-    '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
-    '<a href="http://mapbox.com">Mapbox</a>'
-
-  let geocodeExtraParams = '&limit=3&bbox=-122.55,37.7,-122.36,37.85'
-  geocoding.setAccessToken(token + geocodeExtraParams)
-
-  mymap.on('click', clickedAnywhereOnMap)
-
-  L.tileLayer(url, {
-    attribution: attribution,
-    maxZoom: 18,
-    accessToken: token,
-  }).addTo(mymap)
-
   // semantic requires this line for dropdowns to work
   // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
   // eslint-disable-next-line
   $('.ui.dropdown').dropdown()
-
-  queryServer()
-  loadSupervisorDistricts()
 }
 
 let _hoverPopup
@@ -462,22 +310,6 @@ let _hoverPopupTimer
 function updateHoverPopup(id, nearbyProjects, latlng) {
   removeOldHoverPopup()
   showHoverPopupAfterDelay(id, nearbyProjects, latlng, 1000)
-}
-
-function removeOldHoverPopup() {
-  clearTimeout(_hoverPopupTimer)
-  mymap.closePopup()
-}
-
-function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, delay) {
-  let content = buildPopupContent(id, nearbyProjectIDs)
-
-  _hoverPopupTimer = setTimeout(function() {
-    _hoverPopup = L.popup({ className: 'project-list-popup' })
-      .setLatLng(latlng)
-      .setContent(content)
-    _hoverPopup.openOn(mymap)
-  }, delay)
 }
 
 function buildPopupContent(id, nearbyProjectIDs) {
@@ -499,15 +331,15 @@ function nameOfFilterDistrict(i) {
 
 export default {
   name: 'MyStreet',
-  components: { CitywideProjects, MyMap },
+  components: { CitywideProjects, MyMap, SearchWidget },
   data() {
     return store
   },
   computed: {
     tagsActiveOrMatchingSearch: function() {
-      let a = new Set(store.tagresults)
+      let a = new Set(BigStore.state.tagresults)
       let union = Array.from(a)
-      for (let activeTag of store.filterTags) {
+      for (let activeTag of BigStore.state.filterTags) {
         if (!a.has(activeTag)) union.push(activeTag)
       }
       return union
@@ -565,7 +397,7 @@ let _selectedProject, _selectedStyle
 let _hoverProject, _hoverStyle
 
 function selectedTagsChanged() {
-  console.log(store.selectedTags)
+  console.log(BigStore.state.selectedTags)
 }
 
 async function queryServer() {
@@ -586,161 +418,7 @@ let _districtLayers = {}
 let _districtOverlay
 
 function showDistrictOverlay(district) {
-  if (_districtOverlay) {
-    mymap.removeLayer(_districtOverlay)
-    _districtOverlay = null
-  }
-  // that's it if user chose citywide
-  if (district === 0) return
-
-  let params = {
-    style: {
-      color: '#225',
-      fillOpacity: 0.5,
-      interactive: false,
-      weight: 1,
-    },
-  }
-
-  _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(
-    mymap
-  )
-  // fancy flyover
-  // mymap.flyToBounds(_districtLayers[district].getBounds())
-}
-
-async function loadSupervisorDistricts() {
-  const DISTRICT_VIEW = 'sup_district_boundaries'
-  const geoUrl = API_SERVER + DISTRICT_VIEW
-
-  try {
-    let resp = await fetch(geoUrl)
-    let jsonData = await resp.json()
-
-    for (let district of jsonData) {
-      let id = district.district
-      var feature = {
-        type: 'Feature',
-        geometry: JSON.parse(district.geometry),
-        properties: {
-          id: district.district,
-        },
-      }
-
-      _districtLayers[district.district] = L.geoJSON(feature)
-
-      // the supes json is super janky: array of arrays, only one of which is needed
-      let mainOutline = 0
-      if (id === 3) mainOutline = 14
-      if (id === 6) mainOutline = 1
-
-      // draw a giant box around all of SF as first array entry
-      let invertGeometry = [
-        [[[-120, 30], [-130, 30], [-130, 40], [-120, 40], [-120, 30]]],
-        feature.geometry.coordinates[mainOutline],
-      ]
-
-      feature.geometry.coordinates = invertGeometry
-
-      _districtLayersInverted[district.district] = feature
-    }
-  } catch (error) {
-    console.log('map error: ' + error)
-  }
-}
-
-// add segments to the map by using metric data to color
-function mapSegments(cmpsegJson) {
-  let fundStrings = []
-
-  for (let segment of cmpsegJson) {
-    if (segment['geometry'] == null) continue
-
-    let id = segment['project_number']
-
-    // slurp up all the funding sources
-    if (segment.funding_sources) {
-      fundStrings.push(...segment.funding_sources.split(', '))
-    }
-
-    let kml =
-      '<kml xmlns="http://www.opengis.net/kml/2.2">' +
-      '<Placemark>' +
-      segment['geometry'] +
-      '</Placemark></kml>'
-
-    let polygon = false
-    if (segment['shape'] && segment['shape'].includes('Polygon')) {
-      polygon = true
-    }
-
-    let geoLayer = L.geoJSON(null, {
-      style: styleByMetricColor(segment, polygon),
-      onEachFeature: function(feature, layer) {
-        layer.on({
-          mouseover: hoverFeature,
-          mouseout: unHoverFeature,
-          click: clickedOnFeature,
-        })
-      },
-      pointToLayer: function(feature, latlng) {
-        // this turns 'points' into circles
-        return L.circleMarker(latlng, { id: id })
-      },
-    })
-
-    // convert tag string to a set of TAGS
-    if (segment.project_tags) {
-      let tags = Array.from(new Set(segment.project_tags.split(', '))).sort()
-      if (tags[0] === '') tags.splice(0, 1) // drop empty tags
-      segment.tag_list = tags
-
-      // create tag index for easy lookup later
-      _tagList.push(...tags) // this will have lots of duplicates
-      for (let tag of tags) {
-        if (!_projectsByTag[tag]) _projectsByTag[tag] = []
-        _projectsByTag[tag].push(id)
-      }
-
-      // remove all duplicates
-      _tagList = Array.from(new Set(_tagList)).sort()
-      store.tags = _tagList
-    }
-
-    // hang onto the data
-    geoLayer.options.id = id
-    BigStore.addCacheItem(id, segment)
-
-    // validate KML
-    var oParser = new DOMParser()
-    var oDOM = oParser.parseFromString(kml, 'text/xml')
-    // print the name of the root element or error message
-    if (oDOM.documentElement.nodeName === 'parsererror') {
-      console.log('## Error while parsing row id ' + id)
-    }
-
-    // add KML to the map
-    try {
-      let layer = omnivore.kml.parse(kml, null, geoLayer)
-      layer.addTo(mymap)
-      if (polygon) layer.bringToBack()
-      BigStore.addLayer(id, layer)
-      _projectIdsCurrentlyOnMap[id] = true
-    } catch (e) {
-      console.log('couldnt: ' + id)
-      console.log(segment)
-    }
-  }
-
-  // TODO Hard-coded giant polygons -- send to back.
-  for (let giantArea of _bigAreas) {
-    if (BigStore.state.layers[giantArea]) BigStore.sendLayerBack(giantArea)
-  }
-
-  // convert funding source to a unique set
-  let funds = Array.from(new Set(fundStrings))
-  store.fundSources = funds.sort()
-  if (store.fundSources[0] === '') store.fundSources.splice(0, 1) // remove blanks at beginning
+  EventBus.$emit('map-show-district-overlay', district)
 }
 
 function styleByMetricColor(segment, polygon) {
@@ -807,9 +485,9 @@ function updatePanelDetails(id) {
 
   let url = `/projects/${permalink}/`
 
-  store.infoTitle = prj['project_name']
-  store.infoDetails = prj['description']
-  store.infoUrl = url
+  BigStore.state.infoTitle = prj['project_name']
+  BigStore.state.infoDetails = prj['description']
+  BigStore.state.infoUrl = url
 }
 
 function removeHighlightFromPreviousSelection() {
@@ -817,7 +495,7 @@ function removeHighlightFromPreviousSelection() {
 }
 
 function clickedToggleHelp() {
-  store.showHelp = !store.showHelp
+  BigStore.state.showHelp = !BigStore.state.showHelp
 }
 
 function clickedLearnMore() {
@@ -1047,7 +725,7 @@ function hoverFeature(e) {
 
 function clickedDistrict(district) {
   if (BigStore.debug) console.log('Chose District', district)
-  store.filterDistrict = parseInt(district)
+  BigStore.state.filterDistrict = parseInt(district)
 
   updateFilters()
   showDistrictOverlay(district)
@@ -1056,93 +734,7 @@ function clickedDistrict(district) {
 let _projectIdsCurrentlyOnMap = {}
 
 function updateFilters() {
-  let transit = store.filterTransit
-  let streets = store.filterStreets
-  let areas = store.filterAreas
-
-  let complete = store.filterComplete
-  let underway = store.filterUnderway
-
-  // if none are clicked, then all are clicked! :-O
-  let showAll = false
-  if (!transit && !streets && !areas) {
-    showAll = true
-  }
-
-  for (let id in BigStore.state.layers) {
-    let layer = BigStore.state.layers[id]
-    let prj = BigStore.state.prjCache[id]
-
-    let show = false
-
-    if (showAll) {
-      show = true
-    } else {
-      if (!prj) {
-        show = false
-      } else {
-        if (transit && prj.project_group.includes('Transit')) show = true
-        if (streets && prj.project_group.includes('Streets')) show = true
-        if (areas && prj.project_group.includes('Plans and Programs')) {
-          show = true
-        }
-      }
-    }
-
-    // now check FUNDING SOURCE
-    let funds = store.filterFund
-    let isCorrectFund = !funds || prj.funding_sources.includes(funds)
-
-    // now check STATUS
-    let isCorrectStatus = complete === underway // true if both or neither are checked
-    if (complete && prj.status.includes('Closed')) isCorrectStatus = true
-    if (underway && prj.status.includes('Active')) isCorrectStatus = true
-
-    // now check DISTRICT
-    let district = store.filterDistrict
-    let isCorrectDistrict = true
-    if (district === 0) isCorrectDistrict = prj['districts'] === 'Citywide'
-    /*  // Hide for now, so all projects show even when a district is selected */
-    if (!store.devDistrictOption) {
-      if (district > 0) {
-        let districtColName = 'district' + district
-        isCorrectDistrict = prj[districtColName] === 1
-      }
-    }
-
-    // now check TAGS
-    let isCorrectTags = true
-    if (store.filterTags.size) {
-      isCorrectTags = false
-      if (prj.tag_list) {
-        for (let tag of store.filterTags) {
-          if (prj.tag_list.indexOf(tag) > -1) {
-            isCorrectTags = true
-            break
-          }
-        }
-      }
-    }
-
-    // the final word
-    let passedAllTests =
-      show &&
-      isCorrectFund &&
-      isCorrectStatus &&
-      isCorrectDistrict &&
-      isCorrectTags
-
-    if (passedAllTests && !mymap.hasLayer(layer)) {
-      mymap.addLayer(layer)
-      _projectIdsCurrentlyOnMap[id] = true
-      continue
-    }
-    if (!passedAllTests && mymap.hasLayer(layer)) {
-      mymap.removeLayer(layer)
-      if (id in _projectIdsCurrentlyOnMap) delete _projectIdsCurrentlyOnMap[id]
-      continue
-    }
-  }
+  EventBus.$emit('map-update-filters', 0)
 }
 
 function unHoverFeature(e) {
@@ -1168,7 +760,7 @@ async function fetchTagResults(terms) {
       }
     }
   }
-  store.tagresults = answer
+  BigStore.state.tagresults = answer
 }
 
 async function fetchSearchResults(terms) {
@@ -1198,7 +790,7 @@ async function fetchSearchResults(terms) {
 
     // update list ONLY if query has not changed while we were fetching
     if (terms === _queryString) {
-      store.results = jsonData
+      BigStore.state.results = jsonData
     }
   } catch (error) {
     console.log('search error')
@@ -1207,17 +799,17 @@ async function fetchSearchResults(terms) {
 }
 
 function termChanged() {
-  console.log(store.terms)
-  _queryString = store.terms.trim()
+  console.log(BigStore.state.terms)
+  _queryString = BigStore.state.terms.trim()
 
   if (_queryString) fetchTagResults(_queryString)
-  else store.tagresults = []
+  else BigStore.state.tagresults = []
 
   if (_queryString) fetchSearchResults(_queryString)
-  else store.results = []
+  else BigStore.state.results = []
 
   if (_queryString) fetchAddressResults(_queryString)
-  else store.addressSearchResults = []
+  else BigStore.state.addressSearchResults = []
 }
 
 function fetchAddressResults(_queryString) {
@@ -1228,9 +820,9 @@ function fetchAddressResults(_queryString) {
         let i = address.place_name.indexOf(', San Francisco')
         if (i > 0) address.place_name = address.place_name.substring(0, i)
       }
-      store.addressSearchResults = geoData['features']
+      BigStore.state.addressSearchResults = geoData['features']
     } else {
-      store.addressSearchResults = []
+      BigStore.state.addressSearchResults = []
     }
   })
 }
@@ -1249,13 +841,13 @@ function clickedSearch(id) {
 }
 
 function clickedSearchTag(tag) {
-  if (store.filterTags.has(tag)) {
-    store.filterTags.delete(tag)
+  if (BigStore.state.filterTags.has(tag)) {
+    BigStore.state.filterTags.delete(tag)
   } else {
-    store.filterTags.add(tag)
+    BigStore.state.filterTags.add(tag)
   }
-  console.log({ ACTIVE_TAGS: store.filterTags })
-  store.filterKey++
+  console.log({ ACTIVE_TAGS: BigStore.state.filterTags })
+  BigStore.state.filterKey++
   updateFilters()
 }
 
@@ -1277,11 +869,11 @@ function clickedAddress(address) {
   let lng = address.center[0]
   let lat = address.center[1]
 
-  for (let a of store.addressSearchResults) a.red = false
+  for (let a of BigStore.state.addressSearchResults) a.red = false
 
   address.red = true
-  store.addressSearchResults.push([])
-  store.addressSearchResults.pop()
+  BigStore.state.addressSearchResults.push([])
+  BigStore.state.addressSearchResults.pop()
 
   removeAddressMarker()
 
@@ -1310,14 +902,14 @@ function showProjectsNearAddress(latlng) {
       name: BigStore.state.prjCache[project].project_name,
     })
   }
-  store.results = results
+  BigStore.state.results = results
 }
 
 function clearSearchBox() {
-  store.terms = ''
-  // store.filterTags.clear()
+  BigStore.state.terms = ''
+  // BigStore.state.filterTags.clear()
   // updateFilters()
-  store.addressSearchResults = []
+  BigStore.state.addressSearchResults = []
   removeAddressMarker()
 }
 </script>

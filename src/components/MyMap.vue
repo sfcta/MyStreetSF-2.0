@@ -7,9 +7,8 @@
 
 import 'babel-polyfill'
 import * as turf from '@turf/turf'
-
 // Shared stuff across all components
-import { BigStore } from '../shared-store.js'
+import { BigStore, EventBus } from '../shared-store.js'
 
 let L = require('leaflet')
 let Color = require('color')
@@ -32,35 +31,7 @@ let _tagList = []
 
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
 
-let store = {
-  addressSearchResults: [],
-  devDistrictOption: true,
-  extraLayers: _extraLayers,
-  filterAreas: false,
-  filterComplete: false,
-  filterDistrict: -1,
-  filterStreets: false,
-  filterTags: new Set(),
-  filterTransit: false,
-  filterUnderway: false,
-  filterFund: null,
-  fundSources: [],
-  hoverPanelHide: false,
-  hoverPanelText: '',
-  infoTitle: defaultPanelTitle,
-  infoDetails: '',
-  infoUrl: '',
-  selectedTags: '',
-  showHelp: false,
-  showingLayerPanel: false,
-  showingMainPanel: true,
-  filterKey: 0,
-  isPanelHidden: false,
-  terms: '',
-  results: [],
-  tagresults: [],
-  tags: _tagList,
-}
+let store = BigStore.state
 
 let theme = 'light'
 let mymap
@@ -96,13 +67,7 @@ function clickedShowHide(e) {
   }
 }
 
-function clickedToggleLayer(e) {
-  if (BigStore.debug) console.log('toggle layer', e.target.name)
-  let layer = _extraLayers[e.target.name]
-
-  if (!layer.show) layer.show = true
-  else layer.show = !layer.show
-
+function toggleMapLayer(layer) {
   if (!layer.id) {
     addExtraMapLayer(layer)
   } else {
@@ -114,6 +79,8 @@ function clickedToggleLayer(e) {
     }
   }
 }
+
+function clickedToggleLayer(e) {}
 
 let _districtColors = [
   '#e62',
@@ -250,10 +217,34 @@ function mounted() {
 
   queryServer()
   loadSupervisorDistricts()
+  setupEventListeners()
 }
 
 let _hoverPopup
 let _hoverPopupTimer
+
+function setupEventListeners() {
+  EventBus.$on('map-force-resize-animation', payload => {
+    if (BigStore.debug) console.log(`got a map resize event`)
+    for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
+      setTimeout(function() {
+        mymap.invalidateSize()
+      }, delay)
+    }
+  })
+
+  EventBus.$on('map-toggle-layer', layer => {
+    toggleMapLayer(layer)
+  })
+
+  EventBus.$on('map-show-district-overly', district => {
+    showDistrictOverlay(district)
+  })
+
+  EventBus.$on('map-update-filters', unused => {
+    updateFilters()
+  })
+}
 
 function updateHoverPopup(id, nearbyProjects, latlng) {
   removeOldHoverPopup()

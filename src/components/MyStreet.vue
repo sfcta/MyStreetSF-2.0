@@ -179,7 +179,7 @@ import MyMap from '@/components/MyMap'
 import SearchWidget from '@/components/SearchWidget'
 
 // Shared stuff across all components
-import { BigStore, EventBus } from '../shared-store.js'
+import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let L = require('leaflet')
 let keywordExtractor = require('keyword-extractor')
@@ -228,7 +228,7 @@ function devClickedToggleDistrictOption() {
 function clickedShowHide(e) {
   BigStore.state.isPanelHidden = !BigStore.state.isPanelHidden
   // leaflet map needs to be force-recentered, and it is slow.
-  EventBus.$emit('map-force-resize-animation', BigStore.state.isPanelHidden)
+  EventBus.$emit(EVENT.MAP_RESIZE, BigStore.state.isPanelHidden)
 }
 
 function clickedToggleLayer(e) {
@@ -238,7 +238,7 @@ function clickedToggleLayer(e) {
   if (!layer.show) layer.show = true
   else layer.show = !layer.show
 
-  EventBus.$emit('map-toggle-layer', layer)
+  EventBus.$emit(EVENT.MAP_TOGGLE_LAYER, layer)
 }
 
 let _districtColors = [
@@ -418,7 +418,7 @@ let _districtLayers = {}
 let _districtOverlay
 
 function showDistrictOverlay(district) {
-  EventBus.$emit('map-show-district-overlay', district)
+  EventBus.$emit(EVENT.MAP_SHOW_DISTRICT_OVERLAY, district)
 }
 
 function styleByMetricColor(segment, polygon) {
@@ -734,7 +734,7 @@ function clickedDistrict(district) {
 let _projectIdsCurrentlyOnMap = {}
 
 function updateFilters() {
-  EventBus.$emit('map-update-filters', 0)
+  EventBus.$emit(EVENT.UPDATE_FILTERS, 0)
 }
 
 function unHoverFeature(e) {

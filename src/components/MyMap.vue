@@ -8,7 +8,7 @@
 import 'babel-polyfill'
 import * as turf from '@turf/turf'
 // Shared stuff across all components
-import { BigStore, EventBus } from '../shared-store.js'
+import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let L = require('leaflet')
 let Color = require('color')
@@ -224,7 +224,7 @@ let _hoverPopup
 let _hoverPopupTimer
 
 function setupEventListeners() {
-  EventBus.$on('map-force-resize-animation', payload => {
+  EventBus.$on(EVENT.MAP_RESIZE, payload => {
     if (BigStore.debug) console.log(`got a map resize event`)
     for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
       setTimeout(function() {
@@ -233,16 +233,20 @@ function setupEventListeners() {
     }
   })
 
-  EventBus.$on('map-toggle-layer', layer => {
+  EventBus.$on(EVENT.MAP_TOGGLE_LAYER, layer => {
     toggleMapLayer(layer)
   })
 
-  EventBus.$on('map-show-district-overly', district => {
+  EventBus.$on(EVENT.MAP_SHOW_DISTRICT_OVERLAY, district => {
     showDistrictOverlay(district)
   })
 
-  EventBus.$on('map-update-filters', unused => {
+  EventBus.$on(EVENT.UPDATE_FILTERS, unused => {
     updateFilters()
+  })
+
+  EventBus.$on(EVENT.CLICKED_ADDRESS, address => {
+    clickedAddress(address)
   })
 }
 

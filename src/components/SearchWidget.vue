@@ -42,11 +42,9 @@ import 'babel-polyfill'
 import * as turf from '@turf/turf'
 
 // Shared stuff across all components
-import { BigStore } from '../shared-store.js'
+import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
-let Color = require('color')
 let keywordExtractor = require('keyword-extractor')
-let omnivore = require('leaflet-omnivore')
 let geocoding = require('mapbox-geocoding')
 
 let BUFFER_DISTANCE_METERS_SHORT = 25
@@ -159,93 +157,7 @@ function generateColorForSegment(segment) {
 }
 
 function updateFilters() {
-  let transit = store.filterTransit
-  let streets = store.filterStreets
-  let areas = store.filterAreas
-
-  let complete = store.filterComplete
-  let underway = store.filterUnderway
-
-  // if none are clicked, then all are clicked! :-O
-  let showAll = false
-  if (!transit && !streets && !areas) {
-    showAll = true
-  }
-
-  for (let id in BigStore.state.layers) {
-    let layer = BigStore.state.layers[id]
-    let prj = BigStore.state.prjCache[id]
-
-    let show = false
-
-    if (showAll) {
-      show = true
-    } else {
-      if (!prj) {
-        show = false
-      } else {
-        if (transit && prj.project_group.includes('Transit')) show = true
-        if (streets && prj.project_group.includes('Streets')) show = true
-        if (areas && prj.project_group.includes('Plans and Programs')) {
-          show = true
-        }
-      }
-    }
-
-    // now check FUNDING SOURCE
-    let funds = store.filterFund
-    let isCorrectFund = !funds || prj.funding_sources.includes(funds)
-
-    // now check STATUS
-    let isCorrectStatus = complete === underway // true if both or neither are checked
-    if (complete && prj.status.includes('Closed')) isCorrectStatus = true
-    if (underway && prj.status.includes('Active')) isCorrectStatus = true
-
-    // now check DISTRICT
-    let district = store.filterDistrict
-    let isCorrectDistrict = true
-    if (district === 0) isCorrectDistrict = prj['districts'] === 'Citywide'
-    /*  // Hide for now, so all projects show even when a district is selected */
-    if (!store.devDistrictOption) {
-      if (district > 0) {
-        let districtColName = 'district' + district
-        isCorrectDistrict = prj[districtColName] === 1
-      }
-    }
-
-    // now check TAGS
-    let isCorrectTags = true
-    if (store.filterTags.size) {
-      isCorrectTags = false
-      if (prj.tag_list) {
-        for (let tag of store.filterTags) {
-          if (prj.tag_list.indexOf(tag) > -1) {
-            isCorrectTags = true
-            break
-          }
-        }
-      }
-    }
-
-    // the final word
-    let passedAllTests =
-      show &&
-      isCorrectFund &&
-      isCorrectStatus &&
-      isCorrectDistrict &&
-      isCorrectTags
-
-    if (passedAllTests && !mymap.hasLayer(layer)) {
-      mymap.addLayer(layer)
-      _projectIdsCurrentlyOnMap[id] = true
-      continue
-    }
-    if (!passedAllTests && mymap.hasLayer(layer)) {
-      mymap.removeLayer(layer)
-      if (id in _projectIdsCurrentlyOnMap) delete _projectIdsCurrentlyOnMap[id]
-      continue
-    }
-  }
+  EventBus.$emit('map-update-filters', 0)
 }
 
 let _queryString
@@ -336,11 +248,11 @@ function hoverSearch(id) {
   if (id === _hoverSearchLastId) return
 
   _hoverSearchLastId = id
-  hoverFeature(id)
+  // EventBus.$emit(EVENT.MAP_HOVER_FEATURE, id)
 }
 
 function clickedSearch(id) {
-  clickedOnFeature(id)
+  EventBus.$emit(EVENT.CLICKED_ON_FEATURE, id)
 }
 
 function clickedSearchTag(tag) {
@@ -355,27 +267,7 @@ function clickedSearchTag(tag) {
 }
 
 function clickedAddress(address) {
-  console.log({ clickedAddress: address })
-  let lng = address.center[0]
-  let lat = address.center[1]
-
-  for (let a of store.addressSearchResults) a.red = false
-
-  address.red = true
-  store.addressSearchResults.push([])
-  store.addressSearchResults.pop()
-
-  removeAddressMarker()
-
-  _addressMarker = L.circle([lat, lng], {
-    color: 'red',
-    fillColor: '#f63',
-    fillOpacity: 0.6,
-    radius: 250,
-  })
-  _addressMarker.addTo(mymap)
-
-  showProjectsNearAddress({ lat: lat, lng: lng })
+  EventBus.$emit('clicked-address', address)
 }
 
 function hoverAddress(address) {
@@ -384,10 +276,8 @@ function hoverAddress(address) {
 
 function clearSearchBox() {
   store.terms = ''
-  // store.filterTags.clear()
-  // updateFilters()
   store.addressSearchResults = []
-  removeAddressMarker()
+  EventBus.$emit(EVENT.REMOVE_ADDRESS_MARKER, '')
 }
 </script>
 

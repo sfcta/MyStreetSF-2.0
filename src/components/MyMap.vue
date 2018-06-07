@@ -57,16 +57,6 @@ function devClickedToggleDistrictOption() {
   updateFilters()
 }
 
-function clickedShowHide(e) {
-  store.isPanelHidden = !store.isPanelHidden
-  // leaflet map needs to be force-recentered, and it is slow.
-  for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
-    setTimeout(function() {
-      mymap.invalidateSize()
-    }, delay)
-  }
-}
-
 function toggleMapLayer(layer) {
   if (!layer.id) {
     addExtraMapLayer(layer)
@@ -248,6 +238,18 @@ function setupEventListeners() {
   EventBus.$on(EVENT.CLICKED_ADDRESS, address => {
     clickedAddress(address)
   })
+
+  EventBus.$on(EVENT.MAP_HOVER_FEATURE, id => {
+    hoverFeature(id)
+  })
+
+  EventBus.$on(EVENT.CLICKED_ON_FEATURE, id => {
+    clickedOnFeature(id)
+  })
+
+  EventBus.$on(EVENT.REMOVE_ADDRESS_MARKER, id => {
+    removeAddressMarker()
+  })
 }
 
 function updateHoverPopup(id, nearbyProjects, latlng) {
@@ -311,7 +313,6 @@ export default {
     clickedFilter: clickedFilter,
     clickedFunds: clickedFunds,
     clickedLearnMore: clickedLearnMore,
-    clickedShowHide: clickedShowHide,
     clickedShowMainPanel: clickedShowMainPanel,
     clickedShowLayerSelector: clickedShowLayerSelector,
     clickedToggleHelp: clickedToggleHelp,

@@ -304,14 +304,6 @@ function mounted() {
   $('.ui.dropdown').dropdown()
 }
 
-let _hoverPopup
-let _hoverPopupTimer
-
-function updateHoverPopup(id, nearbyProjects, latlng) {
-  removeOldHoverPopup()
-  showHoverPopupAfterDelay(id, nearbyProjects, latlng, 1000)
-}
-
 function buildPopupContent(id, nearbyProjectIDs) {
   let html = `<b>${BigStore.state.prjCache[id].project_name}</b>`
 
@@ -351,7 +343,6 @@ export default {
     mounted()
   },
   methods: {
-    clickedAddress: clickedAddress,
     clickedFilter: clickedFilter,
     clickedFunds: clickedFunds,
     clickedLearnMore: clickedLearnMore,
@@ -363,7 +354,6 @@ export default {
     clickedDistrict: clickedDistrict,
     clickedSearch: clickedSearch,
     clickedSearchTag: clickedSearchTag,
-    clearSearchBox: clearSearchBox,
     devClickedToggleDistrictOption: devClickedToggleDistrictOption,
     hoverAddress: hoverAddress,
     hoverSearch: hoverSearch,
@@ -646,83 +636,6 @@ function isTargetAPoint(target) {
   return false
 }
 
-function hoverFeature(e) {
-  let target
-
-  let nearbyProjects = getLayersNearLatLng(
-    e.latlng,
-    BUFFER_DISTANCE_METERS_SHORT
-  )
-
-  // deal w search clicks first
-  if (e in BigStore.state.layers) {
-    target = BigStore.state.layers[e]
-  } else {
-    target = e.target
-  }
-  // don't add a hover if the proj is already selected
-  if (target === _selectedProject) return
-
-  let polygon = isTargetAPolygon(target)
-  let points = isTargetAPoint(target)
-
-  // For some reason, Leaflet handles points and polygons
-  // differently, hence the weirdness for fetching the id of the selected feature.
-  let id = target.options.id
-  if (!id) id = e.layer.options.id
-
-  // Remove highlight from previous selection
-  if (_hoverProject) _hoverProject.setStyle(_hoverStyle)
-
-  // save real style info
-  _hoverStyle = target.options.style
-
-  try {
-    if (!_hoverStyle) _hoverStyle = e.layer.options.style
-    if (!_hoverStyle) _hoverStyle = JSON.parse(JSON.stringify(e.layer.options))
-  } catch (err) {
-    // hmm
-    let z = target.options
-    _hoverStyle = {
-      color: z.color,
-      fill: z.fill,
-      radius: z.radius,
-      weight: z.weight,
-      truecolor: z.truecolor,
-    }
-  }
-
-  let style = {
-    color: points ? '#333' : _hoverStyle.truecolor,
-    fillColor: _hoverStyle.fillColor,
-    opacity: 1.0,
-    radius: 8,
-    weight: points ? 1 : 6,
-  }
-
-  let polygonStyle = {
-    color: _hoverStyle.truecolor,
-    fillColor: _hoverStyle.truecolor,
-    fillOpacity: 0.3,
-    opacity: 1.0,
-    radius: 10,
-    weight: 6,
-  }
-
-  // the long timeout keeps the highlight from selecting areas every time
-  // the short timeout keeps the highlight from flashing too much on mouse movement
-  let timeout = polygon ? 50 : 15
-
-  clearTimeout(popupTimeout)
-  popupTimeout = setTimeout(function() {
-    target.setStyle(polygon ? polygonStyle : style)
-  }, timeout)
-
-  _hoverProject = target
-
-  updateHoverPopup(id, nearbyProjects, e.latlng)
-}
-
 function clickedDistrict(district) {
   if (BigStore.debug) console.log('Chose District', district)
   BigStore.state.filterDistrict = parseInt(district)
@@ -853,41 +766,6 @@ function clickedSearchTag(tag) {
 
 let _addressMarker
 
-function removeAddressMarker() {
-  if (_addressMarker) {
-    try {
-      mymap.removeLayer(_addressMarker)
-    } catch (e) {
-      // oh well
-    }
-  }
-  _addressMarker = null
-}
-
-function clickedAddress(address) {
-  console.log({ clickedAddress: address })
-  let lng = address.center[0]
-  let lat = address.center[1]
-
-  for (let a of BigStore.state.addressSearchResults) a.red = false
-
-  address.red = true
-  BigStore.state.addressSearchResults.push([])
-  BigStore.state.addressSearchResults.pop()
-
-  removeAddressMarker()
-
-  _addressMarker = L.circle([lat, lng], {
-    color: 'red',
-    fillColor: '#f63',
-    fillOpacity: 0.6,
-    radius: 250,
-  })
-  _addressMarker.addTo(mymap)
-
-  showProjectsNearAddress({ lat: lat, lng: lng })
-}
-
 function hoverAddress(address) {
   // console.log(address)
 }
@@ -903,14 +781,6 @@ function showProjectsNearAddress(latlng) {
     })
   }
   BigStore.state.results = results
-}
-
-function clearSearchBox() {
-  BigStore.state.terms = ''
-  // BigStore.state.filterTags.clear()
-  // updateFilters()
-  BigStore.state.addressSearchResults = []
-  removeAddressMarker()
 }
 </script>
 

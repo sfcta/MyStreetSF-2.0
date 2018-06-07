@@ -30,12 +30,12 @@
 
   br
 
-  h3.project-heading(style="background-color: #db4") PLANS AND STUDIES
+  h3.project-heading(style="background-color: #bb9b3a") PLANS AND STUDIES
   ul.visualizations
     li.viz-thumbnail(v-for="prj in plans")
       router-link(:to="'/projects/' + prj.project_number")
         .image-text-box
-          img.thumbnail-image(src="/static/blur.jpg")
+          img.thumbnail-image(src="/static/map.jpg")
           h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
         p.footnote {{prj.sponsor}}
 
@@ -789,7 +789,7 @@ a {
   background-color: #00aa33dd;
 }
 .bottom-left.plans span {
-  background-color: #ca4;
+  background-color: #bb9b3a;
 }
 
 .project-heading {
@@ -803,7 +803,7 @@ a {
   padding-left: 5px;
   margin-top: -2px;
   margin-bottom: -2px;
-  color: #888;
+  color: #777;
   font-size: 12px;
 }
 </style>

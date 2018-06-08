@@ -191,19 +191,12 @@ const BUFFER_DISTANCE_METERS_LONG = 275
 
 const defaultPanelTitle = 'Select any project<br/>to learn more about it.'
 
-let _extraLayers = {
-  'layer-sup-districts': {
-    name: 'Supervisorial District Boundaries',
-    geojson: 'https://api.sfcta.org/api/sup_district_boundaries',
-  },
-}
+let store = BigStore.state
 
 let _projectsByTag = {}
 let _tagList = []
 
 const GEO_VIEW = 'mystreet2_all'
-
-let store = BigStore.state
 
 let styles = {
   normal: { color: '#3c6', weight: 6, opacity: 1.0 },
@@ -233,7 +226,7 @@ function clickedShowHide(e) {
 
 function clickedToggleLayer(e) {
   if (BigStore.debug) console.log('toggle layer', e.target.name)
-  let layer = _extraLayers[e.target.name]
+  let layer = store.extraLayers[e.target.name]
 
   if (!layer.show) layer.show = true
   else layer.show = !layer.show

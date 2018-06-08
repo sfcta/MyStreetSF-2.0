@@ -8,38 +8,38 @@
   h4(style="color:#888;") A list of projects which are citywide in nature, or which can't be easily placed on the map.
   br
 
-  h3.project-heading(style="background-color: #21ba45") STREET PROJECTS
-  ul.visualizations
-    li.viz-thumbnail(v-for="prj in streetProjects")
-      router-link(:to="'/projects/' + prj.project_number")
-        .image-text-box
-          img.thumbnail-image(src="/static/asphalt.jpg")
-          h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
-        p.footnote {{prj.sponsor}}
+  #projects(v-if="streetProjects.length > 0")
+    h3.project-heading(style="background-color: #21ba45") STREET PROJECTS
+    ul.visualizations
+      li.viz-thumbnail(v-for="prj in streetProjects")
+        router-link(:to="'/projects/' + prj.project_number" v-if="!prj.hide")
+          .image-text-box
+            img.thumbnail-image(src="/static/asphalt.jpg")
+            h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
+          p.footnote {{prj.sponsor}}
+    br
 
-  br
+  #projects(v-if="transitProjects.length > 0")
+    h3.project-heading TRANSIT PROJECTS
+    ul.visualizations
+      li.viz-thumbnail(v-for="prj in transitProjects")
+        router-link(:to="'/projects/' + prj.project_number")
+          .image-text-box
+            img.thumbnail-image(src="/static/bus-seats.jpg")
+            h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
+          p.footnote {{prj.sponsor}}
+    br
 
-  h3.project-heading TRANSIT PROJECTS
-  ul.visualizations
-    li.viz-thumbnail(v-for="prj in transitProjects")
-      router-link(:to="'/projects/' + prj.project_number")
-        .image-text-box
-          img.thumbnail-image(src="/static/bus-seats.jpg")
-          h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
-        p.footnote {{prj.sponsor}}
-
-  br
-
-  h3.project-heading(style="background-color: #bb9b3a") PLANS AND STUDIES
-  ul.visualizations
-    li.viz-thumbnail(v-for="prj in plans")
-      router-link(:to="'/projects/' + prj.project_number")
-        .image-text-box
-          img.thumbnail-image(src="/static/map.jpg")
-          h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
-        p.footnote {{prj.sponsor}}
-
-  br
+  #projects(v-if="planningProjects.length > 0")
+    h3.project-heading(style="background-color: #bb9b3a") PLANS AND STUDIES
+    ul.visualizations
+      li.viz-thumbnail(v-for="prj in planningProjects")
+        router-link(:to="'/projects/' + prj.project_number")
+          .image-text-box
+            img.thumbnail-image(src="/static/blur.jpg")
+            h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
+          p.footnote {{prj.sponsor}}
+    br
 </template>
 
 <script>
@@ -49,12 +49,16 @@
 import 'babel-polyfill'
 
 // Shared stuff across all components
-import { BigStore } from '../shared-store.js'
+import { BigStore, EventBus, EVENT } from '../shared-store.js'
+
+let _allTransitProjects = []
+let _allStreetProjects = []
+let _allPlanningProjects = []
 
 let store = {
   transitProjects: [],
   streetProjects: [],
-  plans: [],
+  planningProjects: [],
   sharedState: BigStore.state,
 }
 
@@ -71,31 +75,38 @@ export default {
 }
 
 async function mounted(component) {
-  // add project KML
   let allProjects = await fetchCitywideProjects()
   allProjects = allProjects.sort(function(a, b) {
     return ('' + a.project_name).localeCompare(b.project_name)
   })
 
-  store.transitProjects = allProjects.filter(
-    allProjects => allProjects.project_group === 'Transit'
-  )
+  // save the full set so we can easily filter later
+  _allTransitProjects = filterBasedOnProjectGroup(allProjects, 'Transit')
+  _allStreetProjects = filterBasedOnProjectGroup(allProjects, 'Streets')
+  _allPlanningProjects = filterBasedOnProjectGroup(allProjects, 'Plans and Programs')
 
-  store.streetProjects = allProjects.filter(
-    allProjects => allProjects.project_group === 'Streets'
-  )
+  // deep copy every element into store for immediate display
+  store.transitProjects = JSON.parse(JSON.stringify(_allTransitProjects))
+  store.streetProjects = JSON.parse(JSON.stringify(_allStreetProjects))
+  store.planningProjects = JSON.parse(JSON.stringify(_allPlanningProjects))
 
-  store.plans = allProjects.filter(
-    allProjects => allProjects.project_group === 'Plans and Programs'
-  )
-
+  setupEventListeners()
   // fixLineBreaks()
+}
+
+function filterBasedOnProjectGroup(projects, group) {
+  return projects.filter(project => project.project_group === group)
+}
+
+function setupEventListeners() {
+  EventBus.$on(EVENT.UPDATE_FILTERS, unused => {
+    updateFilters()
+  })
 }
 
 // i found this on the interweb but it's too slow
 // https://stackoverflow.com/questions/22423951/wrap-text-from-bottom-to-top
 function fixLineBreaks() {
-  console.log('GGG1')
   let x = document.getElementsByClassName('bottom-left')
   for (let title of x) {
     var width = 1
@@ -106,7 +117,84 @@ function fixLineBreaks() {
     }
     spacer.width(--width)
   }
-  console.log('GGG 2')
+}
+
+function updateFilters() {
+  let is = {
+    areas: store.sharedState.filterAreas,
+    complete: store.sharedState.filterComplete,
+    district: store.sharedState.filterDistrict,
+    funds: store.sharedState.filterFund,
+    streets: store.sharedState.filterStreets,
+    transit: store.sharedState.filterTransit,
+    underway: store.sharedState.filterUnderway,
+    showAllThreeCategories: false,
+  }
+
+  // if none are clicked, then all are clicked! :-O
+  if (!is.transit && !is.streets && !is.areas) is.showAllThreeCategories = true
+
+  store.transitProjects = _allTransitProjects.filter(prj => matchesFilters(prj))
+  store.streetProjects = _allStreetProjects.filter(prj => matchesFilters(prj))
+  store.planningProjects = _allPlanningProjects.filter(prj => matchesFilters(prj))
+
+  function matchesFilters(prj) {
+    let show = false
+
+    if (is.showAllThreeCategories) {
+      show = true
+    } else {
+      if (!prj) {
+        show = false
+      } else {
+        if (is.transit && prj.project_group.includes('Transit')) show = true
+        if (is.streets && prj.project_group.includes('Streets')) show = true
+        if (is.areas && prj.project_group.includes('Plans and Programs')) {
+          show = true
+        }
+      }
+    }
+
+    // now check FUNDING SOURCE
+    let isCorrectFund = !is.funds || prj.funding_sources.includes(is.funds)
+
+    // now check STATUS
+    let isCorrectStatus = is.complete === is.underway // true if both or neither are checked
+    if (is.complete && prj.status.includes('Closed')) isCorrectStatus = true
+    if (is.underway && prj.status.includes('Active')) isCorrectStatus = true
+
+    // now check DISTRICT
+    let isCorrectDistrict = true
+    if (is.district === 0) isCorrectDistrict = prj['districts'] === 'Citywide'
+
+    /*  // Hide for now, so all projects show even when a district is selected */
+    if (!store.sharedState.devDistrictOption) {
+      if (is.district > 0) {
+        let districtColName = 'district' + is.district
+        isCorrectDistrict = prj[districtColName] === 1
+      }
+    }
+
+    // now check TAGS
+    let isCorrectTags = true
+    if (store.sharedState.filterTags.size) {
+      isCorrectTags = false
+      if (prj.tag_list) {
+        for (let tag of store.filterTags) {
+          if (prj.tag_list.indexOf(tag) > -1) {
+            isCorrectTags = true
+            break
+          }
+        }
+      }
+    }
+
+    // the final word
+    let passedAllTests =
+      show && isCorrectFund && isCorrectStatus && isCorrectDistrict && isCorrectTags
+
+    return passedAllTests
+  }
 }
 
 async function fetchCitywideProjects() {

@@ -213,8 +213,7 @@ function clickedFunds(e) {
 
 function devClickedToggleDistrictOption() {
   BigStore.state.devDistrictOption = !BigStore.state.devDistrictOption
-  if (BigStore.debug)
-    console.log({ DEVCLICKED: BigStore.state.devDistrictOption })
+  if (BigStore.debug) console.log({ DEVCLICKED: BigStore.state.devDistrictOption })
   updateFilters()
 }
 
@@ -261,12 +260,9 @@ function clickedShowLayerSelector(e) {
 function clickedFilter(e) {
   let id = e.target.id
 
-  if (id === 'btn-transit')
-    BigStore.state.filterTransit = !BigStore.state.filterTransit
-  if (id === 'btn-streets')
-    BigStore.state.filterStreets = !BigStore.state.filterStreets
-  if (id === 'btn-areas')
-    BigStore.state.filterAreas = !BigStore.state.filterAreas
+  if (id === 'btn-transit') BigStore.state.filterTransit = !BigStore.state.filterTransit
+  if (id === 'btn-streets') BigStore.state.filterStreets = !BigStore.state.filterStreets
+  if (id === 'btn-areas') BigStore.state.filterAreas = !BigStore.state.filterAreas
 
   if (id === 'btn-complete') {
     BigStore.state.filterComplete = !BigStore.state.filterComplete
@@ -331,8 +327,7 @@ export default {
     },
   },
   mounted: function() {
-    if (this.$route.path.includes('citywide'))
-      store.mainComponent = 'CitywideProjects'
+    if (this.$route.path.includes('citywide')) store.mainComponent = 'CitywideProjects'
     mounted()
   },
   methods: {
@@ -785,7 +780,7 @@ function showProjectsNearAddress(latlng) {
 
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* prevents transition animations on page load (Screw you IE!) */
@@ -986,6 +981,7 @@ h4 {
   max-height: 100%;
   margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
+  overflow: hidden;
 }
 
 #layer-widgets {

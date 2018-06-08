@@ -8,38 +8,35 @@
   h4(style="color:#888;") A list of projects which are citywide in nature, or which can't be easily placed on the map.
   br
 
-  #projects(v-if="streetProjects.length > 0")
-    h3.project-heading(style="background-color: #21ba45") STREET PROJECTS
-    ul.visualizations
-      li.viz-thumbnail(v-for="prj in streetProjects")
-        router-link(:to="'/projects/' + prj.project_number" v-if="!prj.hide")
-          .image-text-box
-            img.thumbnail-image(src="/static/asphalt.jpg")
-            h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
-          p.footnote {{prj.sponsor}}
-    br
+  h3.project-heading(v-if="streetProjects.length > 0" style="background-color: #21ba45") STREET PROJECTS
+  transition-group.visualizations(name="flip-list" tag="ul")
+    li.viz-thumbnail(v-for="prj in streetProjects" v-bind:key="prj.project_number")
+      router-link(:to="'/projects/' + prj.project_number" v-if="!prj.hide")
+        .image-text-box
+          img.thumbnail-image(src="/static/asphalt.jpg")
+          h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
+        p.footnote {{prj.sponsor}}
+  br(v-if="streetProjects.length > 0")
 
-  #projects(v-if="transitProjects.length > 0")
-    h3.project-heading TRANSIT PROJECTS
-    ul.visualizations
-      li.viz-thumbnail(v-for="prj in transitProjects")
-        router-link(:to="'/projects/' + prj.project_number")
-          .image-text-box
-            img.thumbnail-image(src="/static/bus-seats.jpg")
-            h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
-          p.footnote {{prj.sponsor}}
-    br
+  h3.project-heading(v-if="transitProjects.length > 0") TRANSIT PROJECTS
+  transition-group.visualizations(name="flip-list" tag="ul")
+    li.viz-thumbnail(v-for="prj in transitProjects" v-bind:key="prj.project_number")
+      router-link(:to="'/projects/' + prj.project_number")
+        .image-text-box
+          img.thumbnail-image(src="/static/bus-seats.jpg")
+          h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
+        p.footnote {{prj.sponsor}}
+  br(v-if="transitProjects.length > 0")
 
-  #projects(v-if="planningProjects.length > 0")
-    h3.project-heading(style="background-color: #bb9b3a") PLANS AND STUDIES
-    ul.visualizations
-      li.viz-thumbnail(v-for="prj in planningProjects")
-        router-link(:to="'/projects/' + prj.project_number")
-          .image-text-box
-            img.thumbnail-image(src="/static/blur.jpg")
-            h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
-          p.footnote {{prj.sponsor}}
-    br
+  h3.project-heading(v-if="planningProjects.length > 0" style="background-color: #bb9b3a") PLANS AND STUDIES
+  transition-group.visualizations(name="flip-list" tag="ul")
+    li.viz-thumbnail(v-for="prj in planningProjects" v-bind:key="prj.project_number")
+      router-link(:to="'/projects/' + prj.project_number")
+        .image-text-box
+          img.thumbnail-image(src="/static/blur.jpg")
+          h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
+        p.footnote {{prj.sponsor}}
+  br(v-if="planningProjects.length > 0")
 </template>
 
 <script>
@@ -807,8 +804,8 @@ a {
   grid-gap: 35px;
   grid-template-columns: repeat(auto-fill, 20rem);
   list-style: none;
-  margin-top: 20px;
   padding-left: 0px;
+  margin-bottom: 0px;
 }
 
 .viz-thumbnail {
@@ -884,6 +881,7 @@ a {
   background-color: #0071c6;
   padding-bottom: 5px;
   padding-left: 5px;
+  margin-top: 30px;
 }
 
 .footnote {
@@ -893,5 +891,24 @@ a {
   margin-bottom: -2px;
   color: #777;
   font-size: 12px;
+}
+.flip-list {
+  transition: all 0.5s;
+}
+.flip-list-move {
+  transition: all 0.5s;
+}
+.flip-list-item {
+  transition: all 0.5s;
+  display: inline-block;
+  margin-right: 10px;
+}
+.flip-list-enter, .flip-list-leave-to
+/* .list-complete-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.flip-list-leave-active {
+  position: absolute;
 }
 </style>

@@ -1,9 +1,7 @@
 <template lang="pug">
 #project-page
-  router-link(to='/') &laquo; Back to the map
   br
   br
-
   h1 Citywide Projects
   h4(style="color:#888;") A list of projects which are citywide in nature, or which can't be easily placed on the map.
   br
@@ -87,10 +85,18 @@ async function mounted(component) {
   store.streetProjects = JSON.parse(JSON.stringify(_allStreetProjects))
   store.planningProjects = JSON.parse(JSON.stringify(_allPlanningProjects))
 
+  updateSidePanelHelpText()
   setupEventListeners()
   // fixLineBreaks()
 }
 
+function updateSidePanelHelpText() {
+  store.sharedState.helptext = {
+    PRETEXT: 'or go ',
+    LINK_URL: '/',
+    LINK_TEXT: '&raquo; back to the map.',
+  }
+}
 function filterBasedOnProjectGroup(projects, group) {
   return projects.filter(project => project.project_group === group)
 }

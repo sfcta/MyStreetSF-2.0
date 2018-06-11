@@ -45,6 +45,11 @@ export const BigStore = {
     filterUnderway: false,
     filterFund: null,
     fundSources: [],
+    helptext: {
+      PRETEXT: 'or browse the list of&nbsp;',
+      LINK_URL: 'citywide',
+      LINK_TEXT: 'citywide projects&hellip;',
+    },
     hoverPanelHide: false,
     hoverPanelText: '',
     infoTitle: defaultPanelTitle,

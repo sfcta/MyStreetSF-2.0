@@ -206,12 +206,21 @@ function mounted() {
   $('.ui.dropdown').dropdown()
 
   queryServer()
+  updatePanelHelpText()
   loadSupervisorDistricts()
   setupEventListeners()
 }
 
 let _hoverPopup
 let _hoverPopupTimer
+
+function updatePanelHelpText() {
+  store.helptext = {
+    PRETEXT: 'or browse the list of&nbsp;',
+    LINK_URL: 'citywide',
+    LINK_TEXT: 'citywide projects&hellip;',
+  }
+}
 
 function setupEventListeners() {
   EventBus.$on(EVENT.MAP_RESIZE, payload => {
@@ -387,9 +396,7 @@ function showDistrictOverlay(district) {
     },
   }
 
-  _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(
-    mymap
-  )
+  _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(mymap)
   // fancy flyover
   // mymap.flyToBounds(_districtLayers[district].getBounds())
 }
@@ -756,10 +763,7 @@ function isTargetAPoint(target) {
 function hoverFeature(e) {
   let target
 
-  let nearbyProjects = getLayersNearLatLng(
-    e.latlng,
-    BUFFER_DISTANCE_METERS_SHORT
-  )
+  let nearbyProjects = getLayersNearLatLng(e.latlng, BUFFER_DISTANCE_METERS_SHORT)
 
   // deal w search clicks first
   if (e in BigStore.state.layers) {
@@ -911,11 +915,7 @@ function updateFilters() {
 
     // the final word
     let passedAllTests =
-      show &&
-      isCorrectFund &&
-      isCorrectStatus &&
-      isCorrectDistrict &&
-      isCorrectTags
+      show && isCorrectFund && isCorrectStatus && isCorrectDistrict && isCorrectTags
 
     if (passedAllTests && !mymap.hasLayer(layer)) {
       mymap.addLayer(layer)

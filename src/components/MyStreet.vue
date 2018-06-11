@@ -1,7 +1,7 @@
 <template lang="pug">
 #container
   #helpbox.ui.segment(v-show="showHelp" class="ui segment")
-    h3.black(style="margin-bottom:0px;") MyStreet SF
+    h3.black(style="margin-bottom:0px;") MyStreet San Francisco
     hr(style="margin-bottom:5px")
     p.black Use this map to explore the many transportation investments happening all across San Francisco.
     br
@@ -87,8 +87,8 @@
         h2(:class="{noSelection: !infoDetails}" v-html="infoTitle")
         p  {{ infoDetails }}
         p(v-if="!infoDetails" style="text-align: center")
-          | or browse the list of&nbsp;
-          router-link(to="citywide") citywide projects&hellip;
+          span(v-html="helptext.PRETEXT")
+          router-link(:to="helptext.LINK_URL"): span(v-html="helptext.LINK_TEXT")
 
     #bottom-panel(v-cloak)
       .details-link(v-if="infoUrl")

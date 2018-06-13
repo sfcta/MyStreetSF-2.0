@@ -1,6 +1,7 @@
 <template lang="pug">
 #project-page
   #zoom-map
+
   router-link(v-if='"Citywide" === geojson.districts' to='/citywide') &laquo; Back to citywide projects
   router-link(v-if='geojson.districts && "Citywide" !== geojson.districts' to='/') &laquo; Back to map
   br
@@ -8,6 +9,28 @@
 
   h1 {{ project_name }}
   br
+  .sharebox
+    p Share this!
+    a(target="_blank"
+      :href="'https://twitter.com/intent/tweet?text=' + cleanProjectName + ' ' + currentRoute"
+      title="Twitter")
+      img(src="../assets/twitter.png" )
+    a(target="_blank"
+      :href="'https://www.facebook.com/sharer/sharer.php?u=' + currentRoute"
+      title="Facebook")
+      img(src="../assets/fb.png")
+    a(target="_blank"
+      :href="'https://www.linkedin.com/shareArticle?mini=true&url=' + currentRoute + '&title=' + cleanProjectName"
+      title="LinkedIn")
+      img(src="../assets/linkedin.png")
+    a(target="_blank"
+      :href="'https://pinterest.com/pin/create/button/?url=' + currentRoute"
+      title="Pinterest")
+      img(src="../assets/pinterest.png")
+    a(target="_blank"
+      :href="'mailto:?&subject=' + cleanProjectName + '&body=Check out the SFCTA MyStreet project page for:%0D%0A%0D%0A' + cleanProjectName + '%0D%0A' + currentRoute"
+      title="Email")
+      img(src="../assets/email.png")
 
   h3.project-subtitle Brief Project Description
   p.project-description {{ description }}
@@ -57,12 +80,18 @@ let store = {
   project_name: '',
   project_number: '',
   sharedState: BigStore.state,
+  currentRoute: window.location.href,
 }
 
 export default {
   name: 'ProjectPage',
   data() {
     return store
+  },
+  computed: {
+    cleanProjectName: function() {
+      return store.project_name.replace('&', '%26')
+    },
   },
   mounted: function() {
     mounted(this) // 'this' is the VueComponent
@@ -73,14 +102,24 @@ export default {
 
 async function mounted(component) {
   let id = component.$route.params.id
+
   if (BigStore.debug) console.log({ project_id: id })
 
   // add project KML
+  clearProjectDetails()
   store.geojson = await fetchProjectInfo(id)
   setProjectDetails()
 
   addBaseMap()
   addProjectMapLayer(id)
+}
+
+function clearProjectDetails() {
+  store.details = []
+  store.description = ''
+  store.project = ''
+  store.project_name = ''
+  store.project_number = ''
 }
 
 function setProjectDetails() {
@@ -89,26 +128,28 @@ function setProjectDetails() {
   store.project_number = store.geojson['project_number']
 
   let phase = store.geojson['current_phase']
-  if (phase.endsWith(' ()')) phase = phase.substring(0, phase.length - 3)
+  if (phase.endsWith(' ()')) {
+    phase = phase.substring(0, phase.length - 3)
+  }
   store.details.push(['Current Phase', phase])
 
-  store.details.push([
-    'Percent Complete of Funded Phase',
-    store.geojson['percent_complete'],
-  ])
+  store.details.push(['Percent Complete of Funded Phase', store.geojson['percent_complete']])
 
   store.details.push(['Location', store.geojson['project_location']])
   store.details.push(['Districts', store.geojson['districts']])
   store.details.push(['Cost Estimate', store.geojson['project_cost_estimate']])
 
   let openForUse = store.geojson['project_expected_completion']
-  if (store.geojson['project_group'] === 'Plans and Programs')
+  if (store.geojson['project_group'] === 'Plans and Programs') {
     openForUse = 'N/A'
+  }
   store.details.push(['Open for Use', openForUse])
 
   store.details.push(['Funding Sources', store.geojson['funding_sources']])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Tags', store.geojson['project_tags']])
+
+  if (twttr) twttr.widgets.load()
 }
 
 async function fetchProjectInfo(id) {
@@ -221,10 +262,7 @@ function addProjectMapLayer(id) {
   if (!geometry) return
 
   let kml =
-    '<kml xmlns="http://www.opengis.net/kml/2.2">' +
-    '<Placemark>' +
-    geometry +
-    '</Placemark></kml>'
+    '<kml xmlns="http://www.opengis.net/kml/2.2">' + '<Placemark>' + geometry + '</Placemark></kml>'
 
   let polygon = false
   if (shape && shape.includes('Polygon')) polygon = true
@@ -374,6 +412,7 @@ h4 {
   max-width: 1100px;
   margin: 0px auto;
   padding: 20px 20px;
+  overflow-y: auto;
 }
 
 #mymap {
@@ -841,6 +880,35 @@ td {
 
 h3.project-subtitle {
   padding: 10px;
+}
+
+.sharebox {
+  text-align: right;
+  vertical-align: center;
+  padding: 3px;
+  padding-bottom: 10px;
+}
+
+.sharebox a {
+  padding-left: 5px;
+}
+
+.sharebox a:hover {
+  opacity: 0.8;
+  padding-left: 5px;
+}
+
+.sharebox img {
+  width: 2.25em;
+}
+.sharebox img:hover {
+  transform: translateY(1px);
+}
+
+.sharebox p {
+  color: #888;
+  font-size: 13px;
+  padding-bottom: 2px;
 }
 
 a {

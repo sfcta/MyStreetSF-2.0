@@ -148,8 +148,6 @@ function setProjectDetails() {
   store.details.push(['Funding Sources', store.geojson['funding_sources']])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Tags', store.geojson['project_tags']])
-
-  if (twttr) twttr.widgets.load()
 }
 
 async function fetchProjectInfo(id) {

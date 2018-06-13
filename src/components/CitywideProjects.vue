@@ -54,6 +54,7 @@ let store = {
   transitProjects: [],
   streetProjects: [],
   planningProjects: [],
+  searchTerm: '',
   sharedState: BigStore.state,
 }
 
@@ -61,6 +62,9 @@ export default {
   name: 'CitywideProjects',
   data() {
     return store
+  },
+  created: function() {
+    store.sharedState.whichSearchWidget = 'CitywideSearchWidget'
   },
   mounted: function() {
     mounted(this) // 'this' is the VueComponent
@@ -105,6 +109,10 @@ function setupEventListeners() {
   EventBus.$on(EVENT.UPDATE_FILTERS, unused => {
     updateFilters()
   })
+
+  EventBus.$on(EVENT.SEARCH_TERM_CHANGED, term => {
+    searchTermChanged(term)
+  })
 }
 
 // i found this on the interweb but it's too slow
@@ -122,12 +130,19 @@ function fixLineBreaks() {
   }
 }
 
+function searchTermChanged(term) {
+  console.log('CITYWIDESEARCH: ' + term)
+  store.searchTerm = term.toLowerCase()
+  updateFilters()
+}
+
 function updateFilters() {
   let is = {
     areas: store.sharedState.filterAreas,
     complete: store.sharedState.filterComplete,
     district: store.sharedState.filterDistrict,
     funds: store.sharedState.filterFund,
+    search: store.searchTerm,
     streets: store.sharedState.filterStreets,
     transit: store.sharedState.filterTransit,
     underway: store.sharedState.filterUnderway,
@@ -143,6 +158,11 @@ function updateFilters() {
 
   function matchesFilters(prj) {
     let show = false
+
+    let isSearchMatch = true
+    if (is.search) {
+      isSearchMatch = prj.project_name.toLowerCase().indexOf(is.search) > -1
+    }
 
     if (is.showAllThreeCategories) {
       show = true
@@ -194,7 +214,12 @@ function updateFilters() {
 
     // the final word
     let passedAllTests =
-      show && isCorrectFund && isCorrectStatus && isCorrectDistrict && isCorrectTags
+      show &&
+      isCorrectFund &&
+      isCorrectStatus &&
+      isCorrectDistrict &&
+      isCorrectTags &&
+      isSearchMatch
 
     return passedAllTests
   }

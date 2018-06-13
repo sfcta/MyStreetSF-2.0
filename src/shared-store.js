@@ -13,6 +13,7 @@ export const EVENT = {
   CLICKED_ADDRESS: 'clicked-address',
   CLICKED_ON_FEATURE: 'clicked-on-feature',
   REMOVE_ADDRESS_MARKER: 'remove-address-marker',
+  SEARCH_TERM_CHANGED: 'search-term-changed',
 }
 
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
@@ -64,6 +65,7 @@ export const BigStore = {
     isPanelHidden: false,
     terms: '',
     results: [],
+    whichSearchWidget: 'SearchWidget',
     tagresults: [],
     tags: _tagList,
   },

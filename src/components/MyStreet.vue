@@ -162,7 +162,7 @@
           td.agency-logo
             a.agency-link(target="_blank" href="http://www.sfcta.org/")
               img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
-  search-widget
+  component(v-bind:is="whichSearchWidget")
   component(v-bind:is="mainComponent")
   #hover-panel(style="display:none" v-bind:class="{ 'hover-panel-hide': hoverPanelHide }"): p {{ hoverPanelText }}
 </template>
@@ -175,6 +175,7 @@ import * as turf from '@turf/turf'
 
 // components
 import CitywideProjects from '@/components/CitywideProjects'
+import CitywideSearchWidget from '@/components/CitywideSearchWidget'
 import MyMap from '@/components/MyMap'
 import SearchWidget from '@/components/SearchWidget'
 
@@ -312,7 +313,7 @@ function nameOfFilterDistrict(i) {
 
 export default {
   name: 'MyStreet',
-  components: { CitywideProjects, MyMap, SearchWidget },
+  components: { CitywideProjects, CitywideSearchWidget, MyMap, SearchWidget },
   data() {
     return store
   },

@@ -3,7 +3,6 @@ import Router from 'vue-router'
 
 import MyStreet from '@/components/MyStreet'
 import ProjectPage from '@/components/ProjectPage'
-import CitywideProjects from '@/components/CitywideProjects'
 
 Vue.use(Router)
 

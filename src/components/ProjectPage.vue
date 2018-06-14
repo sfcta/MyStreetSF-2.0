@@ -20,13 +20,17 @@
       title="Facebook")
       img(src="../assets/fb.png")
     a(target="_blank"
+      :href="'https://pinterest.com/pin/create/button/?url=' + currentRoute"
+      title="Pinterest")
+      img(src="../assets/pinterest.png")
+    a(target="_blank"
       :href="'https://www.linkedin.com/shareArticle?mini=true&url=' + currentRoute + '&title=' + cleanProjectName"
       title="LinkedIn")
       img(src="../assets/linkedin.png")
     a(target="_blank"
-      :href="'https://pinterest.com/pin/create/button/?url=' + currentRoute"
-      title="Pinterest")
-      img(src="../assets/pinterest.png")
+      :href="'http://www.reddit.com/submit?url='+ currentRoute + '&title='+ cleanProjectName"
+      title="Reddit")
+      img(src="../assets/reddit.png")
     a(target="_blank"
       :href="'mailto:?&subject=' + cleanProjectName + '&body=Check out the SFCTA MyStreet project page for:%0D%0A%0D%0A' + cleanProjectName + '%0D%0A' + currentRoute"
       title="Email")

@@ -19,13 +19,6 @@ let geocoding = require('mapbox-geocoding')
 let BUFFER_DISTANCE_METERS_SHORT = 25
 let BUFFER_DISTANCE_METERS_LONG = 275
 
-let _extraLayers = {
-  'layer-sup-districts': {
-    name: 'Supervisorial District Boundaries',
-    geojson: 'https://api.sfcta.org/api/sup_district_boundaries',
-  },
-}
-
 let _projectsByTag = {}
 let _tagList = []
 
@@ -87,6 +80,52 @@ let _districtColors = [
 ]
 
 async function addExtraMapLayer(extraLayer) {
+  switch (extraLayer.tag) {
+    case 'layer-sup-districts':
+      addSupDistrictLayer(extraLayer)
+      break
+    case 'layer-high-injury-network':
+      addHighInjuryNetworkLayer(extraLayer)
+      break
+  }
+}
+
+async function addHighInjuryNetworkLayer(extraLayer) {
+  let url = extraLayer.geojson
+  if (BigStore.debug) console.log('fetching', url)
+  let group = L.featureGroup()
+
+  let params = {
+    style: function(feature) {
+      let style = {
+        color: '#f99', // this is the "unselected" color -- same for all projects
+        opacity: 0.9,
+        weight: 8,
+        interactive: false,
+      }
+      return style
+    },
+  }
+
+  try {
+    let resp = await fetch(url)
+    let jsonData = await resp.json()
+    if (BigStore.debug) console.log(jsonData)
+
+    let layer = L.geoJSON(jsonData, params)
+    group.addLayer(layer)
+
+    group.addTo(mymap)
+    group.bringToBack()
+    extraLayer.id = group
+
+    console.log(group)
+  } catch (error) {
+    console.log('map error: ' + error)
+  }
+}
+
+async function addSupDistrictLayer(extraLayer) {
   let url = extraLayer.geojson
   if (BigStore.debug) console.log('fetching', url)
   let group = L.featureGroup()

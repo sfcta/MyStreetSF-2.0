@@ -22,8 +22,19 @@ let _tagList = []
 
 let _extraLayers = {
   'layer-sup-districts': {
+    tag: 'layer-sup-districts',
     name: 'Supervisorial District Boundaries',
     geojson: 'https://api.sfcta.org/api/sup_district_boundaries',
+  },
+  'layer-high-injury-network': {
+    tag: 'layer-high-injury-network',
+    name: 'High Injury Network',
+    geojson: '/static/high-injury-network.geo.json',
+  },
+  'layer-communities-of-concern': {
+    tag: 'layer-communities-of-concern',
+    name: 'Communities of Concern',
+    geojson: ['/assets/mtc-coc.geo.json', '/assets/sf-coc.geo.json'],
   },
 }
 

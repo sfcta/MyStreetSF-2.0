@@ -58,12 +58,13 @@
       p: i Additional geographic data that you may find useful.
       br
 
-      .ui.checkbox.layer-selectors
-        input(@click="clickedToggleLayer"
-              name="layer-sup-districts"
-              type="checkbox"
-              v-bind:checked="extraLayers['layer-sup-districts'].show")
-        label Supervisorial District Boundaries
+      .ui.checkbox.layer-selectors(v-for="layer in extraLayers")
+        input(@click="clickedToggleLayer(layer.tag)"
+              :name="layer.name"
+              :checked="extraLayers[layer.tag].show"
+              type="checkbox")
+        label {{layer.name}}
+        br
 
   #panel.sidepanel(v-if="showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
@@ -224,9 +225,10 @@ function clickedShowHide(e) {
   EventBus.$emit(EVENT.MAP_RESIZE, BigStore.state.isPanelHidden)
 }
 
-function clickedToggleLayer(e) {
-  if (BigStore.debug) console.log('toggle layer', e.target.name)
-  let layer = store.extraLayers[e.target.name]
+function clickedToggleLayer(tag) {
+  if (BigStore.debug) console.log('toggle layer', tag)
+
+  let layer = store.extraLayers[tag]
 
   if (!layer.show) layer.show = true
   else layer.show = !layer.show

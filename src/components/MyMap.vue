@@ -135,11 +135,10 @@ async function addCommunitiesOfConcernLayer(extraLayer) {
 
   let params = {
     style: function(feature) {
-      let fill = feature.properties.Creator === 'MTCGIS' ? '#f00' : '#f60'
       let style = {
         color: '#000', // this is the "unselected" color -- same for all projects
-        fillColor: fill,
-        fillOpacity: 0.2,
+        fillColor: '#80a',
+        fillOpacity: 0.35,
         interactive: false,
         weight: 0,
       }

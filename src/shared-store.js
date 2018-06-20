@@ -34,7 +34,7 @@ let _extraLayers = {
   'layer-communities-of-concern': {
     tag: 'layer-communities-of-concern',
     name: 'Communities of Concern',
-    geojson: '/static/coc-combined.geo.json',
+    geojson: '/static/comm-concern-supp-2017.geo.json',
   },
 }
 

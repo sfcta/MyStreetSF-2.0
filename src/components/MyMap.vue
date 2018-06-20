@@ -61,6 +61,8 @@ function toggleMapLayer(layer) {
       layer.id.bringToBack()
     }
   }
+
+  updateURLHash()
 }
 
 function clickedToggleLayer(e) {}
@@ -81,13 +83,13 @@ let _districtColors = [
 
 async function addExtraMapLayer(extraLayer) {
   switch (extraLayer.tag) {
-    case 'layer-sup-districts':
+    case 'dists':
       addSupDistrictLayer(extraLayer)
       break
-    case 'layer-high-injury-network':
+    case 'injuries':
       addHighInjuryNetworkLayer(extraLayer)
       break
-    case 'layer-communities-of-concern':
+    case 'comm':
       addCommunitiesOfConcernLayer(extraLayer)
       break
   }
@@ -273,6 +275,8 @@ function mounted() {
   geocoding.setAccessToken(token + geocodeExtraParams)
 
   mymap.on('click', clickedAnywhereOnMap)
+  mymap.on('zoomend', movedMap)
+  mymap.on('moveend', movedMap)
 
   L.tileLayer(url, {
     attribution: attribution,
@@ -924,7 +928,49 @@ function clickedDistrict(district) {
 
 let _projectIdsCurrentlyOnMap = {}
 
+function movedMap() {
+  updateURLHash()
+}
+
+function updateURLHash() {
+  let transit = store.filterTransit
+  let streets = store.filterStreets
+  let areas = store.filterAreas
+
+  let complete = store.filterComplete
+  let underway = store.filterUnderway
+
+  // hash is filters:district:funds
+  let hashParams = {}
+
+  let filter = 1 * streets + 2 * transit + 4 * areas + 8 * complete + 16 * underway
+  if (filter > 0) hashParams.filter = filter
+
+  if (store.filterDistrict > -1) hashParams.district = store.filterDistrict
+  if (store.filterFund) hashParams.fund = store.filterFund
+
+  let xlayer = store.extraLayers
+    .filter(z => {
+      return z.show
+    })
+    .map(z => {
+      return z.tag
+    })
+    .join(',')
+
+  if (xlayer) hashParams.xlayer = xlayer
+
+  hashParams.zoom = mymap.getZoom()
+  hashParams.center = mymap.getCenter().lat.toFixed(3) + ',' + mymap.getCenter().lng.toFixed(3)
+
+  window.location.hash = Object.entries(hashParams)
+    .map(([k, v]) => `${k}=${v}`)
+    .join('&')
+}
+
 function updateFilters() {
+  updateURLHash()
+
   let transit = store.filterTransit
   let streets = store.filterStreets
   let areas = store.filterAreas

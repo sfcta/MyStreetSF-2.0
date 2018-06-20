@@ -20,23 +20,23 @@ let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
 let _projectsByTag = {}
 let _tagList = []
 
-let _extraLayers = {
-  'layer-sup-districts': {
-    tag: 'layer-sup-districts',
+let _extraLayers = [
+  {
+    tag: 'dists',
     name: 'Supervisorial District Boundaries',
     geojson: 'https://api.sfcta.org/api/sup_district_boundaries',
   },
-  'layer-high-injury-network': {
-    tag: 'layer-high-injury-network',
+  {
+    tag: 'injuries',
     name: 'High Injury Network',
     geojson: '/static/high-injury-network.geo.json',
   },
-  'layer-communities-of-concern': {
-    tag: 'layer-communities-of-concern',
+  {
+    tag: 'comm',
     name: 'Communities of Concern',
     geojson: '/static/comm-concern-supp-2017.geo.json',
   },
-}
+]
 
 // Shared common state storage. state object should ONLY be read.
 // Use methods to modify state.

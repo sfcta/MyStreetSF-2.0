@@ -61,7 +61,7 @@
       .ui.checkbox.layer-selectors(v-for="layer in extraLayers")
         input(@click="clickedToggleLayer(layer.tag)"
               :name="layer.name"
-              :checked="extraLayers[layer.tag].show"
+              :checked="layer.show"
               type="checkbox")
         label {{layer.name}}
         br
@@ -228,7 +228,9 @@ function clickedShowHide(e) {
 function clickedToggleLayer(tag) {
   if (BigStore.debug) console.log('toggle layer', tag)
 
-  let layer = store.extraLayers[tag]
+  let layer = store.extraLayers.filter(z => {
+    return z.tag === tag
+  })[0]
 
   if (!layer.show) layer.show = true
   else layer.show = !layer.show
@@ -294,6 +296,8 @@ function mounted() {
   // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
   // eslint-disable-next-line
   $('.ui.dropdown').dropdown()
+
+  console.log('HASH: ' + window.location.hash)
 }
 
 function buildPopupContent(id, nearbyProjectIDs) {

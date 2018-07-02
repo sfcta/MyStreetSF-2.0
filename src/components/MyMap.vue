@@ -250,7 +250,9 @@ function clickedAnywhereOnMap(map) {
     store.infoTitle = defaultPanelTitle
     store.infoDetails = ''
     store.infoUrl = ''
+    store.infoProject = ''
     removeHighlightFromPreviousSelection()
+    updateURLHash()
   }
 }
 
@@ -481,8 +483,6 @@ function showDistrictOverlay(district) {
   }
 
   _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(mymap)
-  // fancy flyover
-  // mymap.flyToBounds(_districtLayers[district].getBounds())
 }
 
 async function loadSupervisorDistricts() {
@@ -685,7 +685,10 @@ function updatePanelDetails(id) {
 
   store.infoTitle = prj['project_name']
   store.infoDetails = prj['description']
+  store.infoProject = prj['project_number']
   store.infoUrl = url
+
+  updateURLHash()
 }
 
 function removeHighlightFromPreviousSelection() {
@@ -942,6 +945,8 @@ function updateURLHash() {
 
   // hash is filters:district:funds
   let hashParams = {}
+
+  if (store.infoUrl) hashParams.project = store.infoProject
 
   let filter = 1 * streets + 2 * transit + 4 * areas + 8 * complete + 16 * underway
   if (filter > 0) hashParams.filter = filter

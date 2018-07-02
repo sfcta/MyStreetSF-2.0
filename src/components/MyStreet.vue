@@ -444,37 +444,6 @@ function generateColorForSegment(segment) {
   }
 }
 
-function updatePanelDetails(id) {
-  let prj = BigStore.state.prjCache[id]
-
-  let district = ''
-  if (prj['district1']) district += '1, '
-  if (prj['district2']) district += '2, '
-  if (prj['district3']) district += '3, '
-  if (prj['district4']) district += '4, '
-  if (prj['district5']) district += '5, '
-  if (prj['district6']) district += '6, '
-  if (prj['district7']) district += '7, '
-  if (prj['district8']) district += '8, '
-  if (prj['district9']) district += '9, '
-  if (prj['district10']) district += '10, '
-  if (prj['district11']) district += '11, '
-  if (district) {
-    district = 'District ' + district.slice(0, -2)
-  } else {
-    district = 'Citywide'
-  }
-
-  // generate permalink
-  let permalink = prj['project_number'].toLowerCase()
-
-  let url = `/projects/${permalink}/`
-
-  BigStore.state.infoTitle = prj['project_name']
-  BigStore.state.infoDetails = prj['description']
-  BigStore.state.infoUrl = url
-}
-
 function removeHighlightFromPreviousSelection() {
   if (_selectedProject) _selectedProject.setStyle(_selectedStyle)
 }

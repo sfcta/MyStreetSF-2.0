@@ -21,7 +21,7 @@ let BUFFER_DISTANCE_METERS_LONG = 275
 
 let _projectsByTag = {}
 let _tagList = []
-
+let _starterProject = ''
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
 
 let store = BigStore.state
@@ -326,6 +326,14 @@ function setupEventListeners() {
     showDistrictOverlay(district)
   })
 
+  EventBus.$on(EVENT.SET_MAP_VIEW, view => {
+    setView(view)
+  })
+
+  EventBus.$on(EVENT.SET_MAP_PROJECT, project => {
+    _starterProject = project
+  })
+
   EventBus.$on(EVENT.UPDATE_FILTERS, unused => {
     updateFilters()
   })
@@ -466,6 +474,7 @@ let _districtLayers = {}
 let _districtOverlay
 
 function showDistrictOverlay(district) {
+  district = parseInt(district)
   if (_districtOverlay) {
     mymap.removeLayer(_districtOverlay)
     _districtOverlay = null
@@ -519,6 +528,8 @@ async function loadSupervisorDistricts() {
       feature.geometry.coordinates = invertGeometry
 
       _districtLayersInverted[district.district] = feature
+
+      if (store.filterDistrict > -1) showDistrictOverlay(store.filterDistrict)
     }
   } catch (error) {
     console.log('map error: ' + error)
@@ -617,6 +628,9 @@ function mapSegments(cmpsegJson) {
   let funds = Array.from(new Set(fundStrings))
   store.fundSources = funds.sort()
   if (store.fundSources[0] === '') store.fundSources.splice(0, 1) // remove blanks at beginning
+
+  updateFilters()
+  if (_starterProject) clickedOnFeature(_starterProject)
 }
 
 function styleByMetricColor(segment, polygon) {
@@ -971,6 +985,12 @@ function updateURLHash() {
   window.location.hash = Object.entries(hashParams)
     .map(([k, v]) => `${k}=${v}`)
     .join('&')
+}
+
+function setView(view) {
+  let coord = view.center.split(',')
+  let latlng = new L.LatLng(parseFloat(coord[0]), parseFloat(coord[1]))
+  mymap.setView(latlng, parseFloat(view.zoom))
 }
 
 function updateFilters() {

@@ -297,7 +297,54 @@ function mounted() {
   // eslint-disable-next-line
   $('.ui.dropdown').dropdown()
 
-  console.log('HASH: ' + window.location.hash)
+  handleHash()
+}
+
+function handleHash() {
+  if (BigStore.debug) console.log('HASH: ' + window.location.hash)
+  let p = getUrlParams()
+  if (p) activateMapSettings(p)
+}
+
+function activateMapSettings(p) {
+  if (BigStore.debug) console.log('HASH PARMS: ' + p)
+
+  if (p.filter) {
+    let filter = parseInt(p.filter)
+    store.filterStreets = (filter & 1) == 1
+    store.filterTransit = (filter & 2) == 2
+    store.filterAreas = (filter & 4) == 4
+    store.filterComplete = (filter & 8) == 8
+    store.filterUnderway = (filter & 16) == 16
+  }
+
+  if (p.center && p.zoom) EventBus.$emit(EVENT.SET_MAP_VIEW, p)
+  if (p.district) store.filterDistrict = parseInt(p.district)
+  if (p.fund) store.filterFund = p.fund
+  if (p.project) EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
+
+  if (p.xlayer) {
+    let layers = p.xlayer.split(',')
+    for (let layer of layers) clickedToggleLayer(layer)
+  }
+}
+
+/**
+ * JavaScript Get URL Parameter
+ *
+ * @param String prop The specific URL parameter you want to retreive the value for
+ * @return String|Object If prop is provided a string value is returned, otherwise an object of all properties is returned
+ */
+function getUrlParams(prop) {
+  var params = {}
+  var search = decodeURIComponent(window.location.hash.slice(1))
+  var definitions = search.split('&')
+
+  definitions.forEach(function(val, key) {
+    var parts = val.split('=', 2)
+    params[parts[0]] = parts[1]
+  })
+  return prop && prop in params ? params[prop] : params
 }
 
 function buildPopupContent(id, nearbyProjectIDs) {

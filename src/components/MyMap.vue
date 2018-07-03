@@ -173,7 +173,7 @@ async function addSupDistrictLayer(extraLayer) {
 
   let params = {
     style: function(feature) {
-      let fill = _districtColors[-1 + parseInt(feature.properties.name)]
+      let fill = _districtColors[-1 + parseInt(feature.properties.ID)]
       let style = {
         color: '#000', // this is the "unselected" color -- same for all projects
         opacity: 0.0,
@@ -191,16 +191,7 @@ async function addSupDistrictLayer(extraLayer) {
     let jsonData = await resp.json()
     if (BigStore.debug) console.log(jsonData)
 
-    for (let district of jsonData) {
-      if (district.district === '06') continue
-      var geojsonFeature = {
-        type: 'Feature',
-        geometry: JSON.parse(district.geometry),
-        properties: {
-          name: district.district,
-        },
-      }
-
+    for (let geojsonFeature of jsonData.features) {
       let layer = L.geoJSON(geojsonFeature, params)
       group.addLayer(layer)
     }
@@ -495,39 +486,32 @@ function showDistrictOverlay(district) {
 }
 
 async function loadSupervisorDistricts() {
-  const DISTRICT_VIEW = 'sup_district_boundaries'
-  const geoUrl = API_SERVER + DISTRICT_VIEW
+  //const DISTRICT_VIEW = 'sup_district_boundaries'
+  //const geoUrl = API_SERVER + DISTRICT_VIEW
+  const geoUrl = store.extraLayers[0].geojson
 
   try {
     let resp = await fetch(geoUrl)
     let jsonData = await resp.json()
 
-    for (let district of jsonData) {
-      let id = district.district
-      var feature = {
-        type: 'Feature',
-        geometry: JSON.parse(district.geometry),
-        properties: {
-          id: district.district,
-        },
-      }
+    for (let feature of jsonData.features) {
+      let id = feature.properties.DISTRICT
 
-      _districtLayers[district.district] = L.geoJSON(feature)
+      _districtLayers[id] = L.geoJSON(feature)
 
-      // the supes json is super janky: array of arrays, only one of which is needed
-      let mainOutline = 0
-      if (id === 3) mainOutline = 14
-      if (id === 6) mainOutline = 1
+      let holeArray = 0
+      if (id === '3') holeArray = 14
+      if (id === '6') holeArray = 2
 
       // draw a giant box around all of SF as first array entry
       let invertGeometry = [
         [[[-120, 30], [-130, 30], [-130, 40], [-120, 40], [-120, 30]]],
-        feature.geometry.coordinates[mainOutline],
+        feature.geometry.coordinates[holeArray],
       ]
+      if (id === '6') invertGeometry[2] = feature.geometry.coordinates[1]
 
       feature.geometry.coordinates = invertGeometry
-
-      _districtLayersInverted[district.district] = feature
+      _districtLayersInverted[id] = feature
 
       if (store.filterDistrict > -1) showDistrictOverlay(store.filterDistrict)
     }

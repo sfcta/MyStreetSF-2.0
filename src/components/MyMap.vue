@@ -249,7 +249,9 @@ function mounted() {
   store.whichSearchWidget = 'SearchWidget'
 
   mymap = L.map('mymap', { zoomSnap: 0.5 })
-  mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]])
+  // mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]])
+  mymap.setView([37.788, -122.428], 13.5)
+
   mymap.zoomControl.setPosition('bottomleft')
 
   let url =
@@ -628,7 +630,7 @@ function getNormalStyle(segment, polygon) {
     fillOpacity: 0.7,
     opacity: 1.0,
     radius: radius,
-    weight: 1.5,
+    weight: 2,
   }
 
   if (polygon) {
@@ -853,7 +855,7 @@ function hoverFeature(e) {
   let id = target.options.id
   if (!id) id = e.layer.options.id
 
-// don't add a hover if the proj is already selected
+  // don't add a hover if the proj is already selected
   if (id === _selectedProject) return
 
   let polygon = isTargetAPolygon(target)

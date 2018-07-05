@@ -28,7 +28,7 @@
       title="LinkedIn")
       img(src="../assets/linkedin.png")
     a(target="_blank"
-      :href="'http://www.reddit.com/submit?url='+ currentRoute + '&title='+ cleanProjectName"
+      :href="'https://www.reddit.com/submit?url='+ currentRoute + '&title='+ cleanProjectName"
       title="Reddit")
       img(src="../assets/reddit.png")
     a(target="_blank"

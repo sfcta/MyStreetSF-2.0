@@ -50,13 +50,6 @@ let geocoding = require('mapbox-geocoding')
 let BUFFER_DISTANCE_METERS_SHORT = 25
 let BUFFER_DISTANCE_METERS_LONG = 275
 
-let _extraLayers = {
-  'layer-sup-districts': {
-    name: 'Supervisorial District Boundaries',
-    geojson: 'https://api.sfcta.org/api/sup_district_boundaries',
-  },
-}
-
 let _projectsByTag = {}
 let _tagList = []
 
@@ -163,6 +156,7 @@ function updateFilters() {
 let _queryString
 
 async function fetchTagResults(terms) {
+  if (BigStore.debug) console.log({ TAGLIST: _tagList })
   let answer = []
   let termsLower = terms.toLowerCase()
   for (let tag of _tagList) {

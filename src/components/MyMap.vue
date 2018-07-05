@@ -20,6 +20,7 @@ let BUFFER_DISTANCE_METERS_SHORT = 25
 let BUFFER_DISTANCE_METERS_LONG = 275
 
 let _projectsByTag = {}
+let _projectStylesById = {}
 let _tagList = []
 let _starterProject = ''
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
@@ -31,14 +32,6 @@ let mymap
 
 const API_SERVER = 'https://api.sfcta.org/api/'
 const GEO_VIEW = 'mystreet2_all'
-
-let styles = {
-  normal: {
-    transit: { color: '#3c6', weight: 6, opacity: 1.0 },
-    streets: { color: '#3c6', weight: 6, opacity: 1.0 },
-    plans: { color: '#3c6', weight: 6, opacity: 1.0 },
-  },
-}
 
 function clickedFunds(e) {
   store.filterFund = e.target.dataset.fund
@@ -541,8 +534,10 @@ function mapSegments(cmpsegJson) {
       polygon = true
     }
 
+    _projectStylesById[id] = getNormalStyle(segment, polygon)
+
     let geoLayer = L.geoJSON(null, {
-      style: getNormalStyle(segment, polygon),
+      style: _projectStylesById[id],
       onEachFeature: function(feature, layer) {
         layer.on({
           mouseover: hoverFeature,
@@ -777,7 +772,6 @@ function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
   let insideLayers = []
 
   let numLayers = Object.keys(_projectIdsCurrentlyOnMap).length
-  console.log(numLayers)
   let keys = numLayers === 0 ? BigStore.state.layers : _projectIdsCurrentlyOnMap
 
   for (let key in keys) {
@@ -807,10 +801,10 @@ function isPointInsideFeature(clickPoint, clickBuffer, feature) {
         return turf.booleanPointInPolygon(feature, clickBuffer)
       case 'LineString':
       case 'MultiLineString':
-        return turf.booleanCrosses(feature, clickBuffer)
       case 'Polygon':
-      case 'MultiPolygon':
         return turf.booleanContains(feature, clickPoint)
+      case 'MultiPolygon':
+        return false
       case 'GeometryCollection':
         for (let subfeature of feature.geometry.geometries) {
           if (isPointInsideFeature(clickPoint, clickBuffer, subfeature)) {
@@ -853,10 +847,15 @@ function isTargetAPoint(target) {
   return false
 }
 
+function unHoverFeature(e) {
+  console.log(e)
+  // Remove highlight from previous selection
+  if (e.target.options.id) e.target.setStyle(_projectStylesById[e.target.options.id])
+  if (_hoverProject) _hoverProject.setStyle(_projectStylesById[_hoverProject.options.id])
+}
+
 function hoverFeature(e) {
   let target
-
-  let nearbyProjects = getLayersNearLatLng(e.latlng, BUFFER_DISTANCE_METERS_SHORT)
 
   // deal w search clicks first
   if (e in BigStore.state.layers) {
@@ -864,6 +863,7 @@ function hoverFeature(e) {
   } else {
     target = e.target
   }
+
   // don't add a hover if the proj is already selected
   if (target === _selectedProject) return
 
@@ -875,38 +875,25 @@ function hoverFeature(e) {
   let id = target.options.id
   if (!id) id = e.layer.options.id
 
+  let normal = _projectStylesById[id]
+
   // Remove highlight from previous selection
-  if (_hoverProject) _hoverProject.setStyle(_hoverStyle)
-
-  // save real style info
-  _hoverStyle = target.options.style
-
-  try {
-    if (!_hoverStyle) _hoverStyle = e.layer.options.style
-    if (!_hoverStyle) _hoverStyle = JSON.parse(JSON.stringify(e.layer.options))
-  } catch (err) {
-    // hmm
-    let z = target.options
-    _hoverStyle = {
-      color: z.color,
-      fill: z.fill,
-      radius: z.radius,
-      weight: z.weight,
-      truecolor: z.truecolor,
-    }
+  if (_hoverProject) {
+    _hoverProject.setStyle(_projectStylesById[_hoverProject.options.id])
+    _hoverProject = null
   }
 
   let style = {
-    color: points ? '#333' : _hoverStyle.truecolor,
-    fillColor: _hoverStyle.fillColor,
+    color: points ? '#333' : normal.truecolor,
+    fillColor: normal.fillColor,
     opacity: 1.0,
     radius: 8,
     weight: points ? 1 : 6,
   }
 
   let polygonStyle = {
-    color: _hoverStyle.truecolor,
-    fillColor: _hoverStyle.truecolor,
+    color: normal.truecolor,
+    fillColor: normal.truecolor,
     fillOpacity: 0.3,
     opacity: 1.0,
     radius: 10,
@@ -924,7 +911,8 @@ function hoverFeature(e) {
 
   _hoverProject = target
 
-  updateHoverPopup(id, nearbyProjects, e.latlng)
+  let nearbyProjects = getLayersNearLatLng(e.latlng, BUFFER_DISTANCE_METERS_SHORT)
+  // updateHoverPopup(id, nearbyProjects, e.latlng)
 }
 
 function clickedDistrict(district) {
@@ -1070,13 +1058,6 @@ function updateFilters() {
       if (id in _projectIdsCurrentlyOnMap) delete _projectIdsCurrentlyOnMap[id]
       continue
     }
-  }
-}
-
-function unHoverFeature(e) {
-  // Remove highlight from previous selection
-  if (_hoverProject) {
-    _hoverProject.setStyle(_hoverStyle)
   }
 }
 

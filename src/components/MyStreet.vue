@@ -198,7 +198,11 @@ let store = BigStore.state
 let _projectsByTag = {}
 let _tagList = []
 
+const API_SERVER = 'https://api.sfcta.org/api/'
 const GEO_VIEW = 'mystreet2_all'
+
+// hard code the giant areas so they stay on the bottom layer of the map
+const _bigAreas = [407, 477, 79, 363, 366, 17]
 
 let styles = {
   normal: { color: '#3c6', weight: 6, opacity: 1.0 },
@@ -419,12 +423,6 @@ export default {
   },
 }
 
-// some important global variables.
-const API_SERVER = 'https://api.sfcta.org/api/'
-
-// hard code the giant areas so they stay on the bottom layer of the map
-const _bigAreas = [407, 477, 79, 363, 366, 17]
-
 let _selectedProject, _selectedStyle
 let _hoverProject, _hoverStyle
 
@@ -451,23 +449,6 @@ let _districtOverlay
 
 function showDistrictOverlay(district) {
   EventBus.$emit(EVENT.MAP_SHOW_DISTRICT_OVERLAY, district)
-}
-
-function styleByMetricColor(segment, polygon) {
-  let iconName = segment.icon_name
-  let truecolor = generateColorForSegment(segment) // actual project color;
-  let radius = 4
-  if (iconName && iconName.startsWith('measle')) radius = 8
-
-  return {
-    color: polygon ? '#333a' : '#448C', // this is the "unselected" color -- same for all projects
-    truecolor: truecolor, // this is the "actual" project color
-    fillColor: polygon ? '#4463' : truecolor, // '#448844' + '90' : truecolor,
-    weight: polygon ? 3 : 1,
-    fillOpacity: 0.7,
-    opacity: polygon ? 0.4 : 1.0,
-    radius: radius,
-  }
 }
 
 function generateColorForSegment(segment) {

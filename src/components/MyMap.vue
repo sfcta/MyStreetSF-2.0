@@ -693,7 +693,8 @@ function updatePanelDetails(id) {
 }
 
 function removeHighlightFromPreviousSelection() {
-  if (_selectedProject) _selectedProject.setStyle(_selectedStyle)
+  if (!_selectedProject) return
+  BigStore.state.layers[_selectedProject].setStyle(_projectStylesById[_selectedProject])
 }
 
 function clickedToggleHelp() {
@@ -723,32 +724,13 @@ function clickedOnFeature(e) {
 
   removeHighlightFromPreviousSelection()
 
-  // Remember what the thing looked like before we hovered or clicked on it
-  _selectedStyle = _hoverStyle
-
-  try {
-    if (!_selectedStyle) _selectedStyle = e.layer.options.style
-    if (!_selectedStyle) {
-      _selectedStyle = JSON.parse(JSON.stringify(e.layer.options))
-    }
-  } catch (err) {
-    let z = target.options
-    _selectedStyle = {
-      color: z.color,
-      fillColor: z.fillColor,
-      radius: z.radius,
-      weight: z.weight,
-      truecolor: z.truecolor,
-    }
-  }
-
   // save this project as the selected project; it's no longer just being hovered over!
+  _selectedProject = id
   _hoverProject = null
-  _selectedProject = target
 
-  let clickedStyle = JSON.parse(JSON.stringify(styles.popup))
-  clickedStyle.color = Color(_selectedStyle.truecolor).darken(0.4)
-  clickedStyle.fillColor = _selectedStyle.truecolor
+  let clickedStyle = JSON.parse(JSON.stringify(_projectStylesById[id]))
+  clickedStyle.color = Color(clickedStyle.truecolor).darken(0.4)
+  clickedStyle.fillColor = clickedStyle.truecolor
   clickedStyle.radius = 12
   clickedStyle.weight = 8
   target.setStyle(clickedStyle)
@@ -848,12 +830,11 @@ function isTargetAPoint(target) {
 }
 
 function unHoverFeature(id) {
-  console.log({ unhover: id })
   if (_projectStylesById.hasOwnProperty(id)) {
     BigStore.state.layers[id].setStyle(_projectStylesById[id])
   } else {
     let layer = BigStore.state.layers[_hoverProject]
-    layer.setStyle(_projectStylesById[_hoverProject])
+    if (layer) layer.setStyle(_projectStylesById[_hoverProject])
   }
 }
 
@@ -867,16 +848,16 @@ function hoverFeature(e) {
     target = e.target
   }
 
-  // don't add a hover if the proj is already selected
-  if (target === _selectedProject) return
-
-  let polygon = isTargetAPolygon(target)
-  let points = isTargetAPoint(target)
-
   // For some reason, Leaflet handles points and polygons
   // differently, hence the weirdness for fetching the id of the selected feature.
   let id = target.options.id
   if (!id) id = e.layer.options.id
+
+// don't add a hover if the proj is already selected
+  if (id === _selectedProject) return
+
+  let polygon = isTargetAPolygon(target)
+  let points = isTargetAPoint(target)
 
   let normal = _projectStylesById[id]
 

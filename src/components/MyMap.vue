@@ -29,12 +29,15 @@ let store = BigStore.state
 let theme = 'light'
 let mymap
 
+const API_SERVER = 'https://api.sfcta.org/api/'
 const GEO_VIEW = 'mystreet2_all'
 
 let styles = {
-  normal: { color: '#3c6', weight: 6, opacity: 1.0 },
-  selected: { color: '#39f', weight: 8, opacity: 1.0 },
-  popup: { color: '#36f', weight: 10, opacity: 1.0 },
+  normal: {
+    transit: { color: '#3c6', weight: 6, opacity: 1.0 },
+    streets: { color: '#3c6', weight: 6, opacity: 1.0 },
+    plans: { color: '#3c6', weight: 6, opacity: 1.0 },
+  },
 }
 
 function clickedFunds(e) {
@@ -434,17 +437,10 @@ export default {
   },
 }
 
-// some important global variables.
-const API_SERVER = 'https://api.sfcta.org/api/'
-
-// hard code the giant areas so they stay on the bottom layer of the map
-const _bigAreas = [407, 477, 79, 363, 366, 17]
-
-let _selectedProject, _selectedStyle
-let _hoverProject, _hoverStyle
+let _selectedProject, _hoverProject
 
 function selectedTagsChanged() {
-  console.log(store.selectedTags)
+  if (BigStore.debug) console.log(store.selectedTags)
 }
 
 async function queryServer() {
@@ -546,7 +542,7 @@ function mapSegments(cmpsegJson) {
     }
 
     let geoLayer = L.geoJSON(null, {
-      style: styleByMetricColor(segment, polygon),
+      style: getNormalStyle(segment, polygon),
       onEachFeature: function(feature, layer) {
         layer.on({
           mouseover: hoverFeature,
@@ -617,39 +613,51 @@ function mapSegments(cmpsegJson) {
   if (_starterProject) clickedOnFeature(_starterProject)
 }
 
-function styleByMetricColor(segment, polygon) {
+function getProjectDotRadius(segment) {
+  // major projects get bigger circles
   let iconName = segment.icon_name
-  let truecolor = generateColorForSegment(segment) // actual project color;
-  let radius = 4
-  if (iconName && iconName.startsWith('measle')) radius = 8
+  if (iconName && iconName.startsWith('measle')) return 8
+  return 4
+}
 
-  return {
-    color: polygon ? '#333a' : '#448C', // this is the "unselected" color -- same for all projects
+let TRUE_COLOR = { TRANSIT: '#0071c6', STREETS: '#21ba45', PLANS: '#eb4' }
+
+function getNormalStyle(segment, polygon) {
+  let truecolor = generateColorForSegment(segment) // actual project color;
+  let radius = getProjectDotRadius(segment)
+
+  let style = {
+    color: truecolor,
     truecolor: truecolor, // this is the "actual" project color
-    fillColor: polygon ? '#4463' : truecolor, // '#448844' + '90' : truecolor,
-    weight: polygon ? 3 : 1,
+    fillColor: truecolor,
     fillOpacity: 0.7,
-    opacity: polygon ? 0.4 : 1.0,
+    opacity: 1.0,
     radius: radius,
+    weight: 1.5,
   }
+
+  if (polygon) {
+    style.color = '#a3c0'
+    style.fillColor = '#8482'
+    style.weight = 3
+  }
+  return style
 }
 
 function generateColorForSegment(segment) {
-  let defaultColor = '#0071c6'
-
   let projectCategory = segment.project_group
+  let defaultColor = TRUE_COLOR.TRANSIT
 
   // no category? use blue.
   if (!projectCategory) return defaultColor
 
-  // icon name in db? convert to a color code.
   switch (projectCategory) {
     case 'Transit':
-      return '#0071c6'
+      return TRUE_COLOR.TRANSIT
     case 'Streets':
-      return '#21ba45'
+      return TRUE_COLOR.STREETS
     case 'Plans and Programs':
-      return '#fc4'
+      return TRUE_COLOR.PLANS
     default:
       return defaultColor
   }

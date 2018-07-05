@@ -21,6 +21,8 @@ let BUFFER_DISTANCE_METERS_LONG = 275
 
 let _projectsByTag = {}
 let _projectStylesById = {}
+let _selectedProject, _hoverProject
+
 let _tagList = []
 let _starterProject = ''
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
@@ -429,8 +431,6 @@ export default {
     },
   },
 }
-
-let _selectedProject, _hoverProject
 
 function selectedTagsChanged() {
   if (BigStore.debug) console.log(store.selectedTags)
@@ -847,11 +847,14 @@ function isTargetAPoint(target) {
   return false
 }
 
-function unHoverFeature(e) {
-  console.log(e)
-  // Remove highlight from previous selection
-  if (e.target.options.id) e.target.setStyle(_projectStylesById[e.target.options.id])
-  if (_hoverProject) _hoverProject.setStyle(_projectStylesById[_hoverProject.options.id])
+function unHoverFeature(id) {
+  console.log({ unhover: id })
+  if (_projectStylesById.hasOwnProperty(id)) {
+    BigStore.state.layers[id].setStyle(_projectStylesById[id])
+  } else {
+    let layer = BigStore.state.layers[_hoverProject]
+    layer.setStyle(_projectStylesById[_hoverProject])
+  }
 }
 
 function hoverFeature(e) {
@@ -879,12 +882,12 @@ function hoverFeature(e) {
 
   // Remove highlight from previous selection
   if (_hoverProject) {
-    _hoverProject.setStyle(_projectStylesById[_hoverProject.options.id])
+    unHoverFeature(_hoverProject)
     _hoverProject = null
   }
 
   let style = {
-    color: points ? '#333' : normal.truecolor,
+    color: points ? '#555a' : normal.truecolor,
     fillColor: normal.fillColor,
     opacity: 1.0,
     radius: 8,
@@ -909,10 +912,10 @@ function hoverFeature(e) {
     target.setStyle(polygon ? polygonStyle : style)
   }, timeout)
 
-  _hoverProject = target
+  _hoverProject = id
 
   let nearbyProjects = getLayersNearLatLng(e.latlng, BUFFER_DISTANCE_METERS_SHORT)
-  // updateHoverPopup(id, nearbyProjects, e.latlng)
+  updateHoverPopup(id, nearbyProjects, e.latlng)
 }
 
 function clickedDistrict(district) {

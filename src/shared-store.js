@@ -14,6 +14,8 @@ export const EVENT = {
   CLICKED_ON_FEATURE: 'clicked-on-feature',
   REMOVE_ADDRESS_MARKER: 'remove-address-marker',
   SEARCH_TERM_CHANGED: 'search-term-changed',
+  SET_MAP_PROJECT: 'set-map-project',
+  SET_MAP_VIEW: 'set-map-view',
 }
 
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
@@ -24,7 +26,7 @@ let _extraLayers = [
   {
     tag: 'dists',
     name: 'Supervisorial District Boundaries',
-    geojson: 'https://api.sfcta.org/api/sup_district_boundaries',
+    geojson: '/static/sup-districts.geo.json',
   },
   {
     tag: 'injuries',
@@ -66,6 +68,7 @@ export const BigStore = {
     hoverPanelText: '',
     infoTitle: defaultPanelTitle,
     infoDetails: '',
+    infoProject: '',
     infoUrl: '',
     mainComponent: 'MyMap',
     selectedTags: '',

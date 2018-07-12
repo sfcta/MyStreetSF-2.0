@@ -2,62 +2,70 @@
 #project-page
   #zoom-map
 
-  router-link(v-if='"Citywide" === geojson.districts' to='/citywide') &laquo; Back to citywide projects
-  router-link(v-if='geojson.districts && "Citywide" !== geojson.districts' to='/') &laquo; Back to map
-  br
-  br
+  #nav-links
+    router-link(v-if='"Citywide" === geojson.districts' to='/citywide') &laquo; Back to citywide projects
+    router-link(v-if='geojson.districts && "Citywide" !== geojson.districts' to='/') &laquo; Back to map
 
-  h1 {{ project_name }}
-  br
-  .sharebox
-    p Share this!
-    a(target="_blank"
-      :href="'https://twitter.com/intent/tweet?text=' + cleanProjectName + ' ' + currentRoute"
-      title="Twitter")
-      img(src="../assets/twitter.png" )
-    a(target="_blank"
-      :href="'https://www.facebook.com/sharer/sharer.php?u=' + currentRoute"
-      title="Facebook")
-      img(src="../assets/fb.png")
-    a(target="_blank"
-      :href="'https://pinterest.com/pin/create/button/?url=' + currentRoute"
-      title="Pinterest")
-      img(src="../assets/pinterest.png")
-    a(target="_blank"
-      :href="'https://www.linkedin.com/shareArticle?mini=true&url=' + currentRoute + '&title=' + cleanProjectName"
-      title="LinkedIn")
-      img(src="../assets/linkedin.png")
-    a(target="_blank"
-      :href="'https://www.reddit.com/submit?url='+ currentRoute + '&title='+ cleanProjectName"
-      title="Reddit")
-      img(src="../assets/reddit.png")
-    a(target="_blank"
-      :href="'mailto:?&subject=' + cleanProjectName + '&body=Check out the SFCTA MyStreet project page for:%0D%0A%0D%0A' + cleanProjectName + '%0D%0A' + currentRoute"
-      title="Email")
-      img(src="../assets/email.png")
+  #info-panel
+    h1 {{ project_name }}
+    br
+    .sharebox
+      p Share this!
+      a(target="_blank"
+        :href="'https://twitter.com/intent/tweet?text=' + cleanProjectName + ' ' + currentRoute"
+        title="Twitter")
+        img(src="../assets/twitter.png" )
+      a(target="_blank"
+        :href="'https://www.facebook.com/sharer/sharer.php?u=' + currentRoute"
+        title="Facebook")
+        img(src="../assets/fb.png")
+      a(target="_blank"
+        :href="'https://pinterest.com/pin/create/button/?url=' + currentRoute"
+        title="Pinterest")
+        img(src="../assets/pinterest.png")
+      a(target="_blank"
+        :href="'https://www.linkedin.com/shareArticle?mini=true&url=' + currentRoute + '&title=' + cleanProjectName"
+        title="LinkedIn")
+        img(src="../assets/linkedin.png")
+      a(target="_blank"
+        :href="'https://www.reddit.com/submit?url='+ currentRoute + '&title='+ cleanProjectName"
+        title="Reddit")
+        img(src="../assets/reddit.png")
+      a(target="_blank"
+        :href="'mailto:?&subject=' + cleanProjectName + '&body=Check out the SFCTA MyStreet project page for:%0D%0A%0D%0A' + cleanProjectName + '%0D%0A' + currentRoute"
+        title="Email")
+        img(src="../assets/email.png")
 
-  h3.project-subtitle Brief Project Description
-  p.project-description {{ description }}
 
-  br
 
-  table
-    tr.project-subtitle
-      td(colspan=2): h3 Detailed Project Information
-    tr.project-details(v-for="row in details")
-      td.project-details: b {{ row[0] }}
-      td.project-details.col2 {{ row[1] }}
-  br
-  table
-    tr.project-subtitle
-      td.td-project-subtitle(colspan=2): h3 For More Information
-    tr.project-details
-      td.project-details: b Link to Project
-      td.project-details.col2
-        a(v-bind:href="geojson.project_details_page" target="_blank") {{ geojson.project_details_page }}
-  br
-  br
-  br
+
+    br
+
+    table
+      tr.project-subtitle
+        td(colspan=2): h3 Brief Project Description
+      tr.project-details
+        td: p.project-description {{ description }}
+    br
+
+    table
+      tr.project-subtitle
+        td(colspan=2): h3 Detailed Project Information
+      tr.project-details(v-for="row in details")
+        td.project-details: b {{ row[0] }}
+        td.project-details.col2 {{ row[1] }}
+    br
+
+    table
+      tr.project-subtitle
+        td.td-project-subtitle(colspan=2): h3 For More Information
+      tr.project-details
+        td.project-details: b Link to Project
+        td.project-details.col2
+          a(v-bind:href="geojson.project_details_page" target="_blank") {{ geojson.project_details_page }}
+    br
+    br
+    br
 </template>
 
 <script>
@@ -745,6 +753,7 @@ td.col2 {
 
 .project-subtitle {
   background-color: #c80;
+  width: 100%;
 }
 
 .project-table {

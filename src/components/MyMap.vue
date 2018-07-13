@@ -35,6 +35,9 @@ let mymap
 const API_SERVER = 'https://api.sfcta.org/api/'
 const GEO_VIEW = 'mystreet2_all'
 
+// hard code the giant areas so they stay on the bottom layer of the map
+const _bigAreas = [407, 477, 79, 363, 366, 17]
+
 function clickedFunds(e) {
   store.filterFund = e.target.dataset.fund
   if (BigStore.debug) console.log({ FUND: store.filterFund })

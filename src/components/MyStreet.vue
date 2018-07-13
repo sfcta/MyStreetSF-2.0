@@ -201,9 +201,6 @@ let _tagList = []
 const API_SERVER = 'https://api.sfcta.org/api/'
 const GEO_VIEW = 'mystreet2_all'
 
-// hard code the giant areas so they stay on the bottom layer of the map
-const _bigAreas = [407, 477, 79, 363, 366, 17]
-
 let styles = {
   normal: { color: '#3c6', weight: 6, opacity: 1.0 },
   selected: { color: '#39f', weight: 8, opacity: 1.0 },

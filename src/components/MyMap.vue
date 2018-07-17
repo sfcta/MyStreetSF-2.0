@@ -82,6 +82,14 @@ let _districtColors = [
   '#00f',
 ]
 
+function synchronizeExtraLayer(tag) {
+  let layer = store.extraLayers.filter(z => {
+    return z.tag === tag
+  })[0]
+
+  if (layer.show != mymap.hasLayer(layer.id)) toggleMapLayer(layer)
+}
+
 async function addExtraMapLayer(extraLayer) {
   switch (extraLayer.tag) {
     case 'dists':
@@ -126,6 +134,7 @@ async function addHighInjuryNetworkLayer(extraLayer) {
     extraLayer.id = group
 
     console.log(group)
+    synchronizeExtraLayer('injuries')
   } catch (error) {
     console.log('map error: ' + error)
   }
@@ -161,6 +170,7 @@ async function addCommunitiesOfConcernLayer(extraLayer) {
     group.bringToBack()
     extraLayer.id = group
 
+    synchronizeExtraLayer('comm')
     console.log(group)
   } catch (error) {
     console.log('map error: ' + error)
@@ -201,6 +211,7 @@ async function addSupDistrictLayer(extraLayer) {
     group.bringToBack()
     extraLayer.id = group
 
+    synchronizeExtraLayer('dists')
     console.log(group)
   } catch (error) {
     console.log('map error: ' + error)

@@ -333,7 +333,7 @@ function activateMapSettings(p) {
 /**
  * JavaScript Get URL Parameter
  *
- * @param String prop The specific URL parameter you want to retreive the value for
+ * @param String prop The specific URL parameter you want to retrieve the value for
  * @return String|Object If prop is provided a string value is returned, otherwise an object of all properties is returned
  */
 function getUrlParams(prop) {

@@ -1181,6 +1181,7 @@ function clickedSearchTag(tag) {
     store.filterTags.add(tag)
   }
   store.filterKey++
+  store.tagresults = []
   updateFilters()
 }
 

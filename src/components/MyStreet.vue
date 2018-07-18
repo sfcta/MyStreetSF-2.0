@@ -87,9 +87,9 @@
         br
         h2(:class="{noSelection: !infoDetails}" v-html="infoTitle")
         p  {{ infoDetails }}
-        p(v-if="!infoDetails" style="text-align: center")
+        h3(v-if="!infoDetails" style="text-align: center")
           span(v-html="helptext.PRETEXT")
-          router-link(:to="helptext.LINK_URL"): span(v-html="helptext.LINK_TEXT")
+          router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
 
     #bottom-panel(v-cloak)
       .details-link(v-if="infoUrl")
@@ -329,9 +329,7 @@ function activateMapSettings(p) {
     for (let layer of layers) clickedToggleLayer(layer)
   }
 
-  if (p.tags) {
-    EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
-  }
+  if (p.tags) EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
 }
 
 /**
@@ -1072,6 +1070,15 @@ h4 {
   padding-top: 10px;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.information-panel h3 {
+  padding-top: 20px;
+  line-height: 1.5;
+}
+
+.information-panel a:visited {
+  color: red;
 }
 
 .information-panel::-webkit-scrollbar {

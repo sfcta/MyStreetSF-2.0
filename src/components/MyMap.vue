@@ -1094,6 +1094,7 @@ async function fetchTagResults(terms) {
     }
   }
   store.tagresults = answer
+  store.filterKey++
 }
 
 async function fetchSearchResults(terms) {
@@ -1179,9 +1180,7 @@ function clickedSearchTag(tag) {
   } else {
     store.filterTags.add(tag)
   }
-  console.log({ ACTIVE_TAGS: store.filterTags })
   store.filterKey++
-  store.tagresults = []
   updateFilters()
 }
 

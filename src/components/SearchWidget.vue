@@ -160,7 +160,7 @@ async function fetchTagResults(terms) {
   if (BigStore.debug) console.log({ TAGLIST: _tagList })
   let answer = []
   let termsLower = terms.toLowerCase()
-  for (let tag of _tagList) {
+  for (let tag of store.tags) {
     let cleaned = tag.replace(/\//g, ' ')
     let keywords = keywordExtractor.extract(cleaned)
     for (let word of keywords) {

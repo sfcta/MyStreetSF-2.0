@@ -10,7 +10,8 @@
       i.remove.link.icon(v-if="terms" v-on:click="clearSearchBox")
     #search-results(v-cloak v-if="addressSearchResults.length + results.length + tagresults.length + filterTags.size")
       .ui.relaxed.list
-        .search-category(v-if="terms && (tagresults.length + filterTags.size)"): p TAGS
+        .search-category(v-if="terms && (tagresults.length + filterTags.size)")
+          p TAGS
         #search-tags.tiny.pink.ui.button(
           v-for="tag in tagsActiveOrMatchingSearch"
           @click='clickedSearchTag(tag)'

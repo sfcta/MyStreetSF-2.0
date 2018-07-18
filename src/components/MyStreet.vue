@@ -308,7 +308,7 @@ function handleHash() {
 }
 
 function activateMapSettings(p) {
-  if (BigStore.debug) console.log('HASH PARMS: ' + p)
+  if (BigStore.debug) console.log({ 'HASH PARMS': p })
 
   if (p.filter) {
     let filter = parseInt(p.filter)
@@ -327,6 +327,10 @@ function activateMapSettings(p) {
   if (p.xlayer) {
     let layers = p.xlayer.split(',')
     for (let layer of layers) clickedToggleLayer(layer)
+  }
+
+  if (p.tags) {
+    EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
   }
 }
 
@@ -716,7 +720,7 @@ function termChanged() {
 
 function fetchAddressResults(_queryString) {
   geocoding.geocode('mapbox.places', _queryString, function(err, geoData) {
-    console.log({ err: err, data: geoData })
+    console.log({ address_results_err: err, data: geoData })
     if (geoData.features.length) {
       for (let address of geoData.features) {
         let i = address.place_name.indexOf(', San Francisco')

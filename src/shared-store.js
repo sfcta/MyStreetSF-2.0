@@ -16,6 +16,7 @@ export const EVENT = {
   SEARCH_TERM_CHANGED: 'search-term-changed',
   SET_MAP_PROJECT: 'set-map-project',
   SET_MAP_VIEW: 'set-map-view',
+  ACTIVE_TAGS: 'active-tags',
 }
 
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'

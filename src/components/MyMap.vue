@@ -358,6 +358,18 @@ function setupEventListeners() {
   EventBus.$on(EVENT.REMOVE_ADDRESS_MARKER, id => {
     removeAddressMarker()
   })
+
+  EventBus.$on(EVENT.ACTIVE_TAGS, tags => {
+    activateTags(tags)
+  })
+}
+
+function activateTags(tags) {
+  console.log('ACTIVATING TAGS: ' + tags)
+  let tagArray = tags.split(',')
+  for (let tag of tagArray) {
+    clickedSearchTag(tag)
+  }
 }
 
 function updateHoverPopup(id, nearbyProjects, latlng) {
@@ -948,6 +960,11 @@ function updateURLHash() {
   if (store.filterDistrict > -1) hashParams.district = store.filterDistrict
   if (store.filterFund) hashParams.fund = store.filterFund
 
+  // tags
+  let tags = Array.from(store.filterTags).join(',')
+  if (tags) hashParams.tags = tags
+
+  // extra layers
   let xlayer = store.extraLayers
     .filter(z => {
       return z.show
@@ -1165,6 +1182,7 @@ function clickedSearchTag(tag) {
   }
   console.log({ ACTIVE_TAGS: store.filterTags })
   store.filterKey++
+  store.tagresults = []
   updateFilters()
 }
 

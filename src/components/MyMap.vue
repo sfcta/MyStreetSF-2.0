@@ -262,9 +262,8 @@ function clickedAnywhereOnMap(map) {
 function mounted() {
   store.whichSearchWidget = 'SearchWidget'
 
-  mymap = L.map('mymap', { zoomSnap: 0.5 })
-  // mymap.fitBounds([[37.84, -122.36], [37.7, -122.52]])
-  mymap.setView([37.788, -122.428], 13.5)
+  mymap = L.map('mymap', { zoomSnap: 0.25 })
+  mymap.fitBounds([[37.82, -122.37], [37.71, -122.505]])
 
   mymap.zoomControl.setPosition('bottomleft')
 

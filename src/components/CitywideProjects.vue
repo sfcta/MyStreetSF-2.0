@@ -11,7 +11,7 @@
     li.viz-thumbnail(v-for="prj in streetProjects" v-bind:key="prj.project_number")
       router-link(:to="'/projects/' + prj.project_number" v-if="!prj.hide")
         .image-text-box
-          img.thumbnail-image(src="/static/asphalt.jpg")
+          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-images/'+projectImages[prj.project_number] : '/static/asphalt.jpg'")
           h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
         p.footnote {{prj.sponsor}}
   br(v-if="streetProjects.length > 0")
@@ -21,7 +21,7 @@
     li.viz-thumbnail(v-for="prj in transitProjects" v-bind:key="prj.project_number")
       router-link(:to="'/projects/' + prj.project_number")
         .image-text-box
-          img.thumbnail-image(src="/static/bus-seats.jpg")
+          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-images/'+projectImages[prj.project_number] : '/static/bus-seats.jpg'")
           h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
         p.footnote {{prj.sponsor}}
   br(v-if="transitProjects.length > 0")
@@ -31,7 +31,7 @@
     li.viz-thumbnail(v-for="prj in planningProjects" v-bind:key="prj.project_number")
       router-link(:to="'/projects/' + prj.project_number")
         .image-text-box
-          img.thumbnail-image(src="/static/blur.jpg")
+          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-images/'+projectImages[prj.project_number] : '/static/blur.jpg'")
           h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
         p.footnote {{prj.sponsor}}
   br(v-if="planningProjects.length > 0")
@@ -56,6 +56,7 @@ let store = {
   planningProjects: [],
   searchTerm: '',
   sharedState: BigStore.state,
+  projectImages: {},
 }
 
 export default {
@@ -91,7 +92,21 @@ async function mounted(component) {
 
   updateSidePanelHelpText()
   setupEventListeners()
+  fetchImages()
   // fixLineBreaks()
+}
+
+async function fetchImages() {
+  let url = '/static/project-images/project-images.json'
+  try {
+    let resp = await fetch(url)
+    let jsonData = await resp.json()
+    if (BigStore.debug) console.log({ IMAGES: jsonData })
+    store.projectImages = jsonData
+    return jsonData
+  } catch (error) {
+    console.log({ ERROR: error })
+  }
 }
 
 function updateSidePanelHelpText() {
@@ -870,6 +885,7 @@ a {
 
 .thumbnail-image {
   background-color: #aac;
+  object-fit: cover;
   height: 10rem;
   padding-right: 2px;
   vertical-align: top;

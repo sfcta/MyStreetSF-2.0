@@ -1,6 +1,7 @@
 _dist
 /semantic
 
+/static/project-images
 .ruby-version
 .pug-cache
 

@@ -149,8 +149,8 @@ async function addCommunitiesOfConcernLayer(extraLayer) {
     style: function(feature) {
       let style = {
         color: '#000', // this is the "unselected" color -- same for all projects
-        fillColor: '#80a',
-        fillOpacity: 0.35,
+        fillColor: '#72a',
+        fillOpacity: 0.28,
         interactive: false,
         weight: 0,
       }

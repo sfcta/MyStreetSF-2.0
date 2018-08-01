@@ -77,6 +77,7 @@ export const BigStore = {
     showingLayerPanel: false,
     showingMainPanel: true,
     showNearby: true,
+    popupLocation: { left: 0, top: 0 },
     nearbyProjects: [],
     filterKey: 0,
     isPanelHidden: false,

@@ -28,14 +28,15 @@
         style="margin-right:5px"
       ) Learn more about MyStreet SF&hellip;
 
-  #nearbyprojects.ui.segment(v-show="showNearby" class="ui segment")
+  #nearbyprojects.ui.segment(v-show="nearbyProjects.length>0" class="ui segment"
+    :style="popupLocation")
     div(style="margin-top:5px;")
       button.tiny.ui.right.floated.pink.cute.button(@click="clickedCloseNearby") X
 
     h5.nearby-title NEARBY PROJECTS
     hr(style="margin-bottom:5px")
 
-    .nearby-project-row(v-for="prj in nearbyProjects")
+    .nearby-project-row(v-for="prj in nearbyProjects" @click="clickedNearbyProject(prj.project_number)")
       h5.nearby-row {{prj.project_name}}
 
   #layer-widgets
@@ -102,8 +103,6 @@
           router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
 
     #bottom-panel(v-cloak)
-      .details-link(v-if="infoUrl")
-        a(v-bind:href="infoUrl" target="_blank") &raquo; SHARE THIS MAP&hellip;
       .details-link(v-if="infoUrl")
         a(v-bind:href="infoUrl" target="_blank") &raquo; PROJECT DETAILS&hellip;
       .pickers
@@ -226,6 +225,11 @@ function clickedFunds(e) {
   updateFilters()
 }
 
+function clickedNearbyProject(projectNumber) {
+  store.infoTitle = 'HI ' + projectNumber
+  EventBus.$emit(EVENT.CLICKED_ON_FEATURE, projectNumber)
+}
+
 function devClickedToggleDistrictOption() {
   BigStore.state.devDistrictOption = !BigStore.state.devDistrictOption
   if (BigStore.debug) console.log({ DEVCLICKED: BigStore.state.devDistrictOption })
@@ -276,7 +280,7 @@ function clickedShowLayerSelector(e) {
 }
 
 function clickedCloseNearby(e) {
-  BigStore.state.showNearby = false
+  BigStore.state.nearbyProjects = []
 }
 
 function clickedFilter(e) {
@@ -397,6 +401,7 @@ export default {
     clickedFilter: clickedFilter,
     clickedFunds: clickedFunds,
     clickedLearnMore: clickedLearnMore,
+    clickedNearbyProject: clickedNearbyProject,
     clickedShowHide: clickedShowHide,
     clickedShowMainPanel: clickedShowMainPanel,
     clickedShowLayerSelector: clickedShowLayerSelector,
@@ -1266,19 +1271,21 @@ h2.noSelection {
 }
 
 #nearbyprojects {
-  grid-row: 2 / 4;
-  grid-column: 1 / 2;
+  grid-row: 1 / 4;
+  grid-column: 1 / 4;
   border-radius: 5px;
   box-shadow: 0px 0px 20px 10px rgba(0, 0, 0, 0.25);
   font-size: 8px;
   z-index: 2;
-  width: 350px;
-  margin: 10px 20px 10px 10px;
-  padding: 0px 10px 10px 10px;
+  width: 320px;
+  margin: 10px 10px 5px 5px;
+  padding: 0px 5px 10px 5px;
   color: black;
-  position: absolute;
-  bottom: 0;
-  z-index: 5;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  z-index: 6;
+  transition: visibility 1s 1s, opacity 0.5s linear;
 }
 
 .black {
@@ -1295,6 +1302,7 @@ h2.noSelection {
   font-weight: 400;
   font-size: 13px;
   padding-top: 5px;
+  padding-left: 5px;
   height: 45px;
 }
 

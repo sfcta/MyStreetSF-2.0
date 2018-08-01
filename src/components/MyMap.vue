@@ -254,6 +254,7 @@ function clickedAnywhereOnMap(map) {
     store.infoDetails = ''
     store.infoUrl = ''
     store.infoProject = ''
+    store.nearbyProjects = []
     removeHighlightFromPreviousSelection()
     updateURLHash()
   }
@@ -371,9 +372,9 @@ function activateTags(tags) {
   }
 }
 
-function updateHoverPopup(id, nearbyProjects, latlng) {
+function updateHoverPopup(id, nearbyProjects, latlng, containerPoint) {
   removeOldHoverPopup()
-  showHoverPopupAfterDelay(id, nearbyProjects, latlng, 1000)
+  showHoverPopupAfterDelay(id, nearbyProjects, latlng, containerPoint, 1000)
 }
 
 function removeOldHoverPopup() {
@@ -381,11 +382,23 @@ function removeOldHoverPopup() {
   mymap.closePopup()
 }
 
-function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, delay) {
-  let content = buildPopupContent(id, nearbyProjectIDs)
-  store.nearbyProjects = content
+let _lastNearbyList = []
+let _showNearbyTick = false
+let _containerPoint = null
 
-  if (BigStore.debug) console.log({ NEARBY: store.nearbyProjects })
+function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, containerPoint, delay) {
+  _containerPoint = containerPoint
+  _lastNearbyList = buildPopupContent(id, nearbyProjectIDs)
+  _showNearbyTick = true
+
+  setTimeout(function() {
+    if (_showNearbyTick) {
+      store.nearbyProjects = _lastNearbyList
+      store.popupLocation = { left: _containerPoint.x + 'px', top: _containerPoint.y + 'px' }
+      console.log(_containerPoint)
+      _showNearbyTick = false
+    }
+  }, delay)
 }
 
 function buildPopupContent(id, nearbyProjectIDs) {
@@ -824,7 +837,7 @@ function isPointInsideFeature(clickPoint, clickBuffer, feature) {
         return false
     }
   } catch (e) {
-    console.log({ feature: feature, error: e })
+    // console.log({ feature: feature, error: e })
   }
   return false
 }
@@ -854,6 +867,8 @@ function isTargetAPoint(target) {
 }
 
 function unHoverFeature(id) {
+  _showNearbyTick = false
+
   if (_projectStylesById.hasOwnProperty(id)) {
     BigStore.state.layers[id].setStyle(_projectStylesById[id])
   } else {
@@ -920,7 +935,7 @@ function hoverFeature(e) {
   _hoverProject = id
 
   let nearbyProjects = getLayersNearLatLng(e.latlng, BUFFER_DISTANCE_METERS_SHORT)
-  updateHoverPopup(id, nearbyProjects, e.latlng)
+  updateHoverPopup(id, nearbyProjects, e.latlng, e.containerPoint)
 }
 
 function clickedDistrict(district) {

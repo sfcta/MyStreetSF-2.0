@@ -57,7 +57,7 @@ export const BigStore = {
     filterStreets: true,
     filterTags: new Set(),
     filterTransit: true,
-    filterUnderway: false,
+    filterUnderway: true,
     filterFund: null,
     fundSources: [],
     helptext: {

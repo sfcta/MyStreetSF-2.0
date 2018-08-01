@@ -990,6 +990,8 @@ function updateURLHash() {
   hashParams.zoom = mymap.getZoom()
   hashParams.center = mymap.getCenter().lat.toFixed(3) + ',' + mymap.getCenter().lng.toFixed(3)
 
+  if (store.devDistrictOption) hashParams.showall = store.devDistrictOption
+
   window.location.hash = Object.entries(hashParams)
     .map(([k, v]) => `${k}=${v}`)
     .join('&')

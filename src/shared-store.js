@@ -49,7 +49,7 @@ export const BigStore = {
     layers: {},
     prjCache: {},
     addressSearchResults: [],
-    devDistrictOption: true,
+    devDistrictOption: false,
     extraLayers: _extraLayers,
     filterAreas: true,
     filterComplete: false,

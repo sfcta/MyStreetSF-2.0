@@ -153,27 +153,18 @@
               .menu
                 .item(@click="clickedFunds" v-bind:data-fund="null") All sources
                 .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
-        br
-        .ui.checkbox.layer-selectors
-          input(@click="devClickedToggleDistrictOption"
-                name="dev-sup-districts"
-                type="checkbox"
-                v-bind:checked="devDistrictOption")
-          label (TEST) Show all projects on map, even when a district is chosen
-        br
 
-      // logo panel
-      hr(style="margin: 0px 0px;")
-
-      table#table-logo
-        tr
-          td.agency-logo: h4.agency: b
-            a(target="_blank"
-              href="http://www.sfcta.org/"
-            ) SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY
-          td.agency-logo
-            a.agency-link(target="_blank" href="http://www.sfcta.org/")
-              img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
+        // logo panel
+        .make-some-space
+        table#table-logo
+          tr
+            td.agency-logo: h4.agency: b
+              a(target="_blank"
+                href="http://www.sfcta.org/"
+              ) SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY
+            td.agency-logo
+              a.agency-link(target="_blank" href="http://www.sfcta.org/")
+                img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
   component(v-bind:is="whichSearchWidget")
   component(v-bind:is="mainComponent")
   #hover-panel(style="display:none" v-bind:class="{ 'hover-panel-hide': hoverPanelHide }"): p {{ hoverPanelText }}
@@ -350,6 +341,8 @@ function activateMapSettings(p) {
   }
 
   if (p.tags) EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
+
+  if (p.showall) store.devDistrictOption = true
 }
 
 /**
@@ -1134,8 +1127,8 @@ td.agency-logo {
 }
 
 #table-logo {
-  margin: 0px 0px;
-  padding: 0px 0px;
+  margin: 5px 0px;
+  border-top: 1px solid #ccc;
 }
 
 .apptitle {
@@ -1308,5 +1301,9 @@ h2.noSelection {
 
 .nearby-row:hover {
   background-color: #eee;
+}
+
+.make-some-space {
+  height: 85px;
 }
 </style>

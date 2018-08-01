@@ -122,6 +122,8 @@ async function mounted(component) {
   store.geojson = await fetchProjectInfo(id)
   setProjectDetails()
 
+  document.title = store.project_name + ' - MyStreet SF'
+
   addBaseMap()
   addProjectMapLayer(id)
 }

@@ -265,7 +265,7 @@ function mounted() {
   mymap = L.map('mymap', { zoomSnap: 0.25 })
   mymap.fitBounds([[37.82, -122.37], [37.71, -122.505]])
 
-  mymap.zoomControl.setPosition('bottomleft')
+  mymap.zoomControl.setPosition('topright')
 
   let url =
     'https://api.mapbox.com/styles/v1/mapbox/' +
@@ -383,24 +383,21 @@ function removeOldHoverPopup() {
 
 function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, delay) {
   let content = buildPopupContent(id, nearbyProjectIDs)
+  store.nearbyProjects = content
 
-  _hoverPopupTimer = setTimeout(function() {
-    _hoverPopup = L.popup({ className: 'project-list-popup' })
-      .setLatLng(latlng)
-      .setContent(content)
-    _hoverPopup.openOn(mymap)
-  }, delay)
+  if (BigStore.debug) console.log({ NEARBY: store.nearbyProjects })
 }
 
 function buildPopupContent(id, nearbyProjectIDs) {
-  let html = `<b>${BigStore.state.prjCache[id].project_name}</b>`
+  let projects = []
+  projects.push(store.prjCache[id])
 
   for (let nearby of nearbyProjectIDs) {
     if (nearby === id) continue
-    html += `<hr>${BigStore.state.prjCache[nearby].project_name}`
+    projects.push(store.prjCache[nearby])
   }
 
-  return html
+  return projects
 }
 
 function nameOfFilterDistrict(i) {

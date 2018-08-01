@@ -28,6 +28,16 @@
         style="margin-right:5px"
       ) Learn more about MyStreet SF&hellip;
 
+  #nearbyprojects.ui.segment(v-show="showNearby" class="ui segment")
+    div(style="margin-top:5px;")
+      button.tiny.ui.right.floated.pink.cute.button(@click="clickedCloseNearby") X
+
+    h5.nearby-title NEARBY PROJECTS
+    hr(style="margin-bottom:5px")
+
+    .nearby-project-row(v-for="prj in nearbyProjects")
+      h5.nearby-row {{prj.project_name}}
+
   #layer-widgets
     button#btn-start.ui.tiny.grey.icon.button(
       data-tooltip="Projects"
@@ -93,7 +103,9 @@
 
     #bottom-panel(v-cloak)
       .details-link(v-if="infoUrl")
-        a(v-bind:href="infoUrl" target="_blank") &raquo; MORE DETAILS&hellip;
+        a(v-bind:href="infoUrl" target="_blank") &raquo; SHARE THIS MAP&hellip;
+      .details-link(v-if="infoUrl")
+        a(v-bind:href="infoUrl" target="_blank") &raquo; PROJECT DETAILS&hellip;
       .pickers
         hr
         h5 STATUS:
@@ -263,6 +275,10 @@ function clickedShowLayerSelector(e) {
   BigStore.state.showingLayerPanel = true
 }
 
+function clickedCloseNearby(e) {
+  BigStore.state.showNearby = false
+}
+
 function clickedFilter(e) {
   let id = e.target.id
 
@@ -350,17 +366,6 @@ function getUrlParams(prop) {
   return prop && prop in params ? params[prop] : params
 }
 
-function buildPopupContent(id, nearbyProjectIDs) {
-  let html = `<b>${BigStore.state.prjCache[id].project_name}</b>`
-
-  for (let nearby of nearbyProjectIDs) {
-    if (nearby === id) continue
-    html += `<hr>${BigStore.state.prjCache[nearby].project_name}`
-  }
-
-  return html
-}
-
 function nameOfFilterDistrict(i) {
   if (i === -1) return 'All Projects...'
   if (i === 0) return 'Citywide'
@@ -388,6 +393,7 @@ export default {
     mounted()
   },
   methods: {
+    clickedCloseNearby: clickedCloseNearby,
     clickedFilter: clickedFilter,
     clickedFunds: clickedFunds,
     clickedLearnMore: clickedLearnMore,
@@ -1259,7 +1265,40 @@ h2.noSelection {
   padding: 10px 10px;
 }
 
+#nearbyprojects {
+  grid-row: 2 / 4;
+  grid-column: 1 / 2;
+  border-radius: 5px;
+  box-shadow: 0px 0px 20px 10px rgba(0, 0, 0, 0.25);
+  font-size: 8px;
+  z-index: 2;
+  width: 350px;
+  margin: 10px 20px 10px 10px;
+  padding: 0px 10px 10px 10px;
+  color: black;
+  position: absolute;
+  bottom: 0;
+  z-index: 5;
+}
+
 .black {
   color: black;
+}
+
+.nearby-title {
+  margin: 10px 5px;
+  color: black;
+}
+
+.nearby-row {
+  color: #666;
+  font-weight: 400;
+  font-size: 13px;
+  padding-top: 5px;
+  height: 45px;
+}
+
+.nearby-row:hover {
+  background-color: #eee;
 }
 </style>

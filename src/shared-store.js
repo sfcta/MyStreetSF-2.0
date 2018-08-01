@@ -76,6 +76,8 @@ export const BigStore = {
     showHelp: false,
     showingLayerPanel: false,
     showingMainPanel: true,
+    showNearby: true,
+    nearbyProjects: [],
     filterKey: 0,
     isPanelHidden: false,
     terms: '',

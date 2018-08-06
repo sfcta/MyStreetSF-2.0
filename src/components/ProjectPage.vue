@@ -447,7 +447,7 @@ h4 {
 
 #project-detail-container {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 275px;
   grid-template-rows: 1fr;
   grid-gap: 40px;
   max-width: 1100px;
@@ -459,24 +459,14 @@ h4 {
 #zoom-map {
   grid-row: 1 / 2;
   grid-column: 2 / 3;
-  width: 300px;
-  height: 300px;
+  width: 213px;
+  height: 213px;
   margin-left: 20px;
   margin-bottom: 10px;
   background-color: #eee;
   border: 1px solid #ea790d;
   border-radius: 8px;
   box-shadow: 0 0 3px #00000060;
-}
-
-#hover-panel {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  margin: 0px auto;
-  margin-bottom: 25px;
-  padding: 1px 10px;
-  z-index: 2;
 }
 
 #main-column {
@@ -489,6 +479,7 @@ h4 {
   display: flex;
   flex-direction: column;
   margin-top: 50px;
+  justify-self: end;
 }
 
 .hover-panel-hide {

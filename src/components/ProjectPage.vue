@@ -1021,6 +1021,7 @@ a {
   }
 
   #main-column {
+    margin-top: 10px;
     order: 1;
   }
 

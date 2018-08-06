@@ -266,7 +266,7 @@ function mounted() {
   mymap = L.map('mymap', { zoomSnap: 0.25 })
   mymap.fitBounds([[37.82, -122.37], [37.71, -122.505]])
 
-  mymap.zoomControl.setPosition('topright')
+  mymap.zoomControl.setPosition('bottomleft')
 
   let url =
     'https://api.mapbox.com/styles/v1/mapbox/' +
@@ -1432,9 +1432,9 @@ h4 {
   color: black;
   grid-row: 1 / 2;
   grid-column: 1 / 2;
-  margin: 10px 20px 10px 10px;
+  margin: 10px 10px 10px 10px;
   position: relative;
-  z-index: 5;
+  z-index: 11;
 }
 
 #search-panel input {
@@ -1727,8 +1727,8 @@ h2.noSelection {
 
 #helpbox {
   box-shadow: 0px 0px 20px 10px rgba(0, 0, 0, 0.4);
-  grid-row: 2 / 3;
   grid-column: 1 / 4;
+  grid-row: 2 / 3;
   z-index: 2;
   width: minmax(min-content, 100px);
   max-width: 500px;
@@ -1738,5 +1738,13 @@ h2.noSelection {
 
 .black {
   color: black;
+}
+
+@media only screen and (max-width: 1000px) {
+  #mymap {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+    z-index: 1;
+  }
 }
 </style>

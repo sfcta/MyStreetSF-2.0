@@ -58,6 +58,28 @@
            v-on:click="clickedShowHide"
     ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
 
+  #layer-widgets-mobile
+    button#btn-start.ui.tiny.yellow.labeled.icon.button(
+      v-on:click="clickedShowMainPanel"
+      v-bind:class="{ blue: showingMainPanel}"
+    )
+      i.list.icon
+      | Details
+
+    button#btn-mshowhide.ui.tiny.green.labeled.icon.button(
+      @click="clickedShowHide"
+    )
+      i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
+      | Filters
+
+    button#btn-layers.ui.tiny.blue.labeled.icon.button(
+      v-on:click="clickedShowLayerSelector"
+      v-bind:class="{ blue: showingLayerPanel}"
+    )
+      i.clone.outline.icon
+      | Layers
+
+
   #layer-panel.sidepanel(v-if="showingLayerPanel" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr
@@ -69,13 +91,14 @@
       p: i Additional geographic data that you may find useful.
       br
 
-      .ui.checkbox.layer-selectors(v-for="layer in extraLayers")
-        input(@click="clickedToggleLayer(layer.tag)"
+      #layer-thingies(v-for="layer in extraLayers")
+        .ui.checkbox.layer-selectors
+          input(@click="clickedToggleLayer(layer.tag)"
               :name="layer.name"
               :checked="layer.show"
               type="checkbox")
-        label {{layer.name}}
-        br
+          label {{layer.name}}
+          br
 
   #panel.sidepanel(v-if="showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
@@ -947,9 +970,9 @@ h4 {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   color: black;
-  grid-row: 1 / 2;
   grid-column: 1 / 2;
-  margin: 10px 20px 10px 10px;
+  grid-row: 1 / 2;
+  margin: 10px 10px 10px 10px;
   position: relative;
   z-index: 5;
 }
@@ -1035,7 +1058,7 @@ h4 {
 
 #mymap {
   grid-row: 1 / 5;
-  grid-column: 1 / 4;
+  grid-column: 1 / 5;
   z-index: 1;
 }
 
@@ -1305,5 +1328,83 @@ h2.noSelection {
 
 .make-some-space {
   height: 85px;
+}
+
+#layer-widgets-mobile {
+  display: none;
+}
+
+@media only screen and (max-width: 1000px) {
+  #container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto auto;
+  }
+
+  .sidepanel {
+    opacity: 0.95;
+    display: grid;
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+    align-self: end;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    position: relative;
+    bottom: 0;
+    margin-right: 0px;
+    padding: 0px 15px 20px 15px;
+    transition: margin 0.4s;
+    width: 100%;
+    height: auto;
+    z-index: 4;
+  }
+
+  .shrunken {
+    margin-bottom: -1000px;
+  }
+
+  #layer-widgets {
+    display: none;
+    flex-direction: row;
+    border-radius: 0px;
+    background-color: #333;
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+    position: relative;
+    margin-bottom: 0px;
+    width: 100%;
+    z-index: 4;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+
+  #layer-widgets-mobile {
+    display: flex;
+    padding: 5px;
+    position: relative;
+    flex-direction: row;
+    background-color: #333;
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+    width: 100%;
+    z-index: 10;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+
+  #layer-widgets-mobile button {
+    width: 10em;
+    margin-right: 10px;
+  }
+
+  #search-panel {
+    grid-column: 1 / 2;
+    grid-row: 1 / 4;
+    z-index: 12;
+  }
+
+  #mymap {
+    grid-column: 1 / 2;
+    grid-row: 1 / 4;
+    z-index: 1;
+  }
 }
 </style>

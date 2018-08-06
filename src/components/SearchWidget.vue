@@ -1,5 +1,5 @@
 <template lang="pug">
-#search-panel
+#search-widget
     #search-term-box.ui.fluid.icon.inverted.input
       input(v-model="terms"
             tabindex="1"
@@ -377,18 +377,6 @@ h4 {
   color: #ea790d;
 }
 
-#zoom-map {
-  float: right;
-  width: 300px;
-  height: 300px;
-  margin-left: 20px;
-  margin-bottom: 10px;
-  background-color: #eee;
-  border: 1px solid #ea790d;
-  border-radius: 8px;
-  box-shadow: 0 0 3px #00000060;
-}
-
 .search-item {
   height: 55px;
   border-top: 1px solid #eee;
@@ -439,19 +427,18 @@ h4 {
   padding: 7px 8px;
 }
 
-#search-panel {
+#search-widget {
   background-color: white;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   color: black;
   grid-row: 1 / 2;
   grid-column: 1 / 2;
-  margin: 10px 20px 10px 10px;
-  position: relative;
+  margin: 10px 10px 10px 10px;
   z-index: 5;
 }
 
-#search-panel input {
+#search-widget input {
   padding: 10px 10px;
   width: 100%;
 }
@@ -474,29 +461,6 @@ h4 {
 #search-results::-webkit-scrollbar-thumb {
   background-color: darkgrey;
   outline: 1px solid slategrey;
-}
-
-#layer-widgets {
-  border-radius: 7px 0px 0px 7px;
-  background-color: #555;
-  grid-row: 3 / 5;
-  grid-column: 3 / 4;
-  position: relative;
-  margin-bottom: 25px;
-  z-index: 7;
-}
-
-#layer-widgets button {
-  margin: 5px 5px 5px 5px;
-}
-
-.shrunken {
-  margin-right: -394px;
-}
-
-#preheader {
-  grid-column: 1 / 2;
-  grid-row: 1 / 2;
 }
 
 #table-logo {
@@ -638,5 +602,10 @@ h2.noSelection {
 
 .black {
   color: black;
+}
+@media only screen and (max-width: 1000px) {
+  #search-widget {
+    margin: 10px 80px 10px 10px;
+  }
 }
 </style>

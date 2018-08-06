@@ -886,10 +886,10 @@ a {
 .thumbnail-image {
   background-color: #aac;
   object-fit: cover;
+  width: 20rem;
   height: 10rem;
   padding-right: 2px;
   vertical-align: top;
-  width: 20rem;
 }
 
 .thumbnail-title {
@@ -957,5 +957,26 @@ a {
 }
 .flip-list-leave-active {
   position: absolute;
+}
+
+@media only screen and (max-width: 760px) {
+  .viz-thumbnail {
+    width: 15rem;
+  }
+
+  .thumbnail-image {
+    width: 15rem;
+    height: 7.5rem;
+  }
+
+  .visualizations {
+    display: grid;
+    grid-row-gap: 30px;
+    grid-column-gap: 15px;
+    grid-template-columns: repeat(auto-fill, 15rem);
+    list-style: none;
+    padding-left: 0px;
+    margin-bottom: 0px;
+  }
 }
 </style>

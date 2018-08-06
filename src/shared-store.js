@@ -71,6 +71,7 @@ export const BigStore = {
     infoDetails: '',
     infoProject: '',
     infoUrl: '',
+    isMobile: false,
     mainComponent: 'MyMap',
     selectedTags: '',
     showHelp: false,

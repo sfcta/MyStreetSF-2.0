@@ -59,25 +59,23 @@
     ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
 
   #layer-widgets-mobile
-    button#btn-start.ui.tiny.yellow.labeled.icon.button(
+    button#mbtn-start.ui.tiny.yellow.button(
       v-on:click="clickedShowMainPanel"
-      v-bind:class="{ blue: showingMainPanel}"
     )
       i.list.icon
-      | Details
+      | DETAILS
 
-    button#btn-mshowhide.ui.tiny.green.labeled.icon.button(
+    button#btn-mshowhide.ui.tiny.green.button(
       @click="clickedShowHide"
     )
       i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
-      | Filters
+      | &nbsp;FILTERS
 
-    button#btn-layers.ui.tiny.blue.labeled.icon.button(
+    button#btn-layers.ui.tiny.blue.button(
       v-on:click="clickedShowLayerSelector"
-      v-bind:class="{ blue: showingLayerPanel}"
     )
       i.clone.outline.icon
-      | Layers
+      | LAYERS
 
 
   #layer-panel.sidepanel(v-if="showingLayerPanel" v-bind:class="{ shrunken: isPanelHidden}")
@@ -100,7 +98,26 @@
           label {{layer.name}}
           br
 
-  #panel.sidepanel(v-if="showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
+  #panel.sidepanel(v-if="isMobile && showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
+    .information-panel(v-cloak)
+      br
+      .title-thing
+        button.ui.button.small.pink.compact.labeled.icon(
+          @click="clickedMoreDetails"
+          style="margin:0px 5px 10px 10px; float:right;"
+          v-if="infoUrl"
+          )
+          i.icon.info
+          | MORE DETAILS&hellip;
+        h2(:class="{noSelection: !infoUrl}" v-html="infoTitle")
+
+      p(style="margin-top:10px;")  {{ infoDetails }}
+      h3(v-if="!infoUrl" style="text-align: center")
+        span(v-html="helptext.PRETEXT")
+        router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
+
+
+  #panel.sidepanel(v-if="showingMainPanel && !isMobile" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr
       h4.apptitle MyStreet SF
@@ -332,7 +349,27 @@ function mounted() {
   // eslint-disable-next-line
   $('.ui.dropdown').dropdown()
 
+  store.isMobile = determineMobile()
   handleHash()
+
+  window.addEventListener('resize', function() {
+    store.isMobile = determineMobile()
+  })
+}
+
+function determineMobile() {
+  let MOBILE_LIMIT = 1000
+
+  var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth
+  console.log('width is ' + x)
+
+  _calculatedWidth = true
+
+  return x < MOBILE_LIMIT
 }
 
 function handleHash() {
@@ -392,6 +429,8 @@ function nameOfFilterDistrict(i) {
   return 'District ' + i
 }
 
+let _calculatedWidth = false
+
 export default {
   name: 'MyStreet',
   components: { CitywideProjects, CitywideSearchWidget, MyMap, SearchWidget },
@@ -407,6 +446,11 @@ export default {
       }
       return union
     },
+    isMobile: function() {
+      if (_calculatedWidth) return store.isMobile
+      store.isMobile = determineMobile()
+      return store.isMobile
+    },
   },
   mounted: function() {
     if (this.$route.path.includes('citywide')) store.mainComponent = 'CitywideProjects'
@@ -417,6 +461,7 @@ export default {
     clickedFilter: clickedFilter,
     clickedFunds: clickedFunds,
     clickedLearnMore: clickedLearnMore,
+    clickedMoreDetails: clickedMoreDetails,
     clickedNearbyProject: clickedNearbyProject,
     clickedShowHide: clickedShowHide,
     clickedShowMainPanel: clickedShowMainPanel,
@@ -451,6 +496,10 @@ export default {
 
 let _selectedProject, _selectedStyle
 let _hoverProject, _hoverStyle
+
+function clickedMoreDetails() {
+  this.$router.push(store.infoUrl)
+}
 
 function selectedTagsChanged() {
   console.log(BigStore.state.selectedTags)
@@ -967,19 +1016,16 @@ h4 {
 
 #search-panel {
   background-color: white;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   color: black;
   grid-column: 1 / 2;
-  grid-row: 1 / 2;
-  margin: 10px 10px 10px 10px;
-  position: relative;
+  grid-row: 3 / 4;
   z-index: 5;
 }
 
 #search-panel input {
   padding: 10px 10px;
-  width: 100%;
+  width: 50%;
 }
 
 #search-results {
@@ -1334,7 +1380,7 @@ h2.noSelection {
   display: none;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 760px) {
   #container {
     display: grid;
     grid-template-columns: 1fr;
@@ -1391,7 +1437,6 @@ h2.noSelection {
   }
 
   #layer-widgets-mobile button {
-    width: 10em;
     margin-right: 10px;
   }
 
@@ -1399,6 +1444,7 @@ h2.noSelection {
     grid-column: 1 / 2;
     grid-row: 1 / 4;
     z-index: 12;
+    margin: 10px 80px 10px 10px;
   }
 
   #mymap {

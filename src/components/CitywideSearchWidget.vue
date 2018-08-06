@@ -1,5 +1,5 @@
 <template lang="pug">
-#search-panel
+#search-widget
     #search-term-box.ui.fluid.icon.inverted.input
       input(v-model="terms"
             tabindex="1"
@@ -362,19 +362,19 @@ h4 {
   padding: 7px 8px;
 }
 
-#search-panel {
+#search-widget {
   background-color: white;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
   border-radius: 5px;
   color: black;
   grid-row: 1 / 2;
   grid-column: 1 / 2;
-  margin: 10px 20px 10px 10px;
+  margin: 10px 30px 10px 10px;
   position: relative;
   z-index: 5;
 }
 
-#search-panel input {
+#search-widget input {
   padding: 10px 10px;
   width: 100%;
 }

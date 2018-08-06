@@ -17,7 +17,7 @@
                 img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
   .banner2
 
-  #project-page
+  #project-detail-container
     #nav-column
       #nav-links(v-if="project_name")
         button.ui.button.small.basic.labeled.icon.violet(@click="clickedBack")
@@ -143,6 +143,7 @@ function clickedBack() {
 }
 
 async function mounted(component) {
+  console.log('HEERE')
   let id = component.$route.params.id
 
   if (BigStore.debug) console.log({ project_id: id })
@@ -245,7 +246,6 @@ function styleByMetricColor(iconName, polygon) {
 }
 
 function generateColorFromDb() {
-  console.log(store.geojson)
   let projectCategory = store.geojson.project_group
   let defaultColor = TRUE_COLOR.TRANSIT
 
@@ -445,11 +445,11 @@ h4 {
   display: flex;
 }
 
-#project-page {
+#project-detail-container {
   display: grid;
   grid-template-columns: 1fr 320px;
   grid-template-rows: 1fr;
-  grid-gap: 30px;
+  grid-gap: 40px;
   max-width: 1100px;
   margin: 0px auto;
   padding: 20px 20px;
@@ -979,7 +979,7 @@ h3.project-subtitle {
 .widget p {
   text-align: right;
   color: #ddd;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   padding-bottom: 2px;
   text-transform: uppercase;

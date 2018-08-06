@@ -277,7 +277,7 @@ function clearSearchBox() {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
+<style scoped>
 [v-cloak] {
   display: none;
 }
@@ -476,17 +476,6 @@ h4 {
   outline: 1px solid slategrey;
 }
 
-#container {
-  background-color: #ccc;
-  display: grid;
-  grid-template-columns: 350px 1fr auto auto;
-  grid-template-rows: auto 1fr auto auto;
-  height: 100%;
-  max-height: 100%;
-  margin: 0px 0px 0px 0px;
-  padding: 0px 0px 0px 0px;
-}
-
 #layer-widgets {
   border-radius: 7px 0px 0px 7px;
   background-color: #555;
@@ -501,25 +490,6 @@ h4 {
   margin: 5px 5px 5px 5px;
 }
 
-.sidepanel {
-  background-color: #444;
-  border-color: transparent;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  color: #fff;
-  display: grid;
-  grid-row: 1 / 5;
-  grid-column: 4 / 5;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto 1fr auto;
-  height: 100%;
-  margin-right: 0px;
-  max-height: 100%;
-  padding: 0px 15px 0px 15px;
-  transition: margin 0.4s;
-  width: 400px;
-  z-index: 5;
-}
-
 .shrunken {
   margin-right: -394px;
 }
@@ -527,90 +497,6 @@ h4 {
 #preheader {
   grid-column: 1 / 2;
   grid-row: 1 / 2;
-}
-
-#mymap {
-  grid-row: 1 / 5;
-  grid-column: 1 / 4;
-  z-index: 1;
-}
-
-#hover-panel {
-  grid-row: 4 / 5;
-  grid-column: 1 / 3;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  margin: 0px auto;
-  margin-bottom: 25px;
-  padding: 1px 10px;
-  position: relative;
-  z-index: 2;
-}
-
-.hover-panel-hide {
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s 0.5s, opacity 0.5s linear;
-}
-
-#hover-panel p {
-  color: #66a;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.information-panel {
-  grid-row: 2 / 3;
-  grid-column: 1 / 2;
-  overflow-y: auto;
-}
-
-.information-panel p {
-  padding-top: 10px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.information-panel::-webkit-scrollbar {
-  width: 0.3em;
-}
-
-.information-panel::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
-.information-panel::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
-  outline: 1px solid slategrey;
-}
-
-#bottom-panel {
-  grid-row: 3 / 4;
-  grid-column: 1 / 2;
-  display: table-row;
-  text-align: right;
-  vertical-align: bottom;
-  margin-bottom: 0px;
-}
-
-.agency a {
-  color: #fff;
-  text-decoration: none;
-  font-size: 15px;
-  float: right;
-}
-
-.agency a:hover {
-  color: #ccc;
-}
-
-td.agency-logo {
-  margin: 0px 0px;
-  padding: 2px 0px 0px 0px;
-  vertical-align: middle;
-  text-align: right;
 }
 
 #table-logo {

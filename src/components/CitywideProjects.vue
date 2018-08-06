@@ -1,5 +1,5 @@
 <template lang="pug">
-#project-page
+#zcontainer
   br
   br
   h1 Citywide Projects
@@ -367,7 +367,7 @@ h4 {
   color: #ea790d;
 }
 
-#project-page {
+#zcontainer {
   grid-row: 1 / 5;
   grid-column: 1 / 4;
   z-index: 1;

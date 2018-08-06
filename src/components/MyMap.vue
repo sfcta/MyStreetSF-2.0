@@ -1263,7 +1263,7 @@ function clearSearchBox() {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
+<style scoped>
 [v-cloak] {
   display: none;
 }

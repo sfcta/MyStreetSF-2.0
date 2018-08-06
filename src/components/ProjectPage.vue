@@ -20,7 +20,7 @@
   #project-detail-container
     #nav-column
       #nav-links(v-if="project_name")
-        button.ui.button.small.basic.labeled.icon.violet(@click="clickedBack")
+        button.ui.button.small.basic.labeled.icon.violet(@click="clickedBack" style="width:100%;")
          i.icon(:class="backButtonIcon")
          | {{ backButtonText }}
 
@@ -105,7 +105,7 @@ let TRUE_COLOR = { TRANSIT: '#0071c6', STREETS: '#21ba45', PLANS: '#eb4' }
 
 let store = {
   backButtonIcon: 'map',
-  backButtonText: 'BACK TO THE MAP',
+  backButtonText: 'VIEW ON MAP',
   color: TRUE_COLOR.TRANSIT,
   description: '',
   details: [],
@@ -176,7 +176,7 @@ function setProjectDetails() {
   if ('Citywide' === store.geojson.districts) {
     store.isCitywide = true
     store.backButtonIcon = 'th' // back button icon th==table of dots
-    store.backButtonText = 'BACK TO CITYWIDE PROJECTS'
+    store.backButtonText = 'VIEW CITYWIDE PROJECTS'
   } else {
     store.isCitywide = false
   }
@@ -441,7 +441,7 @@ h4 {
 .content-barea {
   max-width: 1100px;
   margin: 0px auto;
-  padding: 10px 20px 20px 20px;
+  padding: 10px 20px 20px 40px;
   display: flex;
 }
 
@@ -452,20 +452,19 @@ h4 {
   grid-gap: 40px;
   max-width: 1100px;
   margin: 0px auto;
-  padding: 20px 20px;
+  padding: 20px 40px;
   overflow-y: auto;
 }
 
 #zoom-map {
   grid-row: 1 / 2;
   grid-column: 2 / 3;
-  width: 213px;
-  height: 213px;
-  margin-left: 20px;
+  width: 218px;
+  height: 218px;
   margin-bottom: 10px;
   background-color: #eee;
   border: 1px solid #ea790d;
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow: 0 0 3px #00000060;
 }
 
@@ -476,6 +475,8 @@ h4 {
 }
 
 #nav-column {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
   display: flex;
   flex-direction: column;
   margin-top: 50px;
@@ -498,7 +499,6 @@ h4 {
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 20px;
-  text-align: right;
 }
 
 #hover-panel p {
@@ -529,16 +529,6 @@ h4 {
 .information-panel::-webkit-scrollbar-thumb {
   background-color: darkgrey;
   outline: 1px solid slategrey;
-}
-
-.bottom-panel {
-  display: table-row;
-  text-align: right;
-  vertical-align: bottom;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 0px;
-  height: 80px;
 }
 
 .agency a {
@@ -943,7 +933,6 @@ h3.project-subtitle {
 }
 
 .widget {
-  text-align: right;
   grid-row: 1 / 2;
   grid-column: 2 / 3;
   vertical-align: center;
@@ -952,12 +941,11 @@ h3.project-subtitle {
 }
 
 .widget a {
-  padding-left: 5px;
+  padding-right: 5px;
 }
 
 .widget a:hover {
   opacity: 0.9;
-  padding-left: 5px;
 }
 
 .widget img {
@@ -968,7 +956,6 @@ h3.project-subtitle {
 }
 
 .widget p {
-  text-align: right;
   color: #ddd;
   font-size: 14px;
   font-weight: bold;
@@ -1002,7 +989,7 @@ a {
 
 .footer {
   margin-top: 50px;
-  height: 250px;
+  height: 100px;
   background-color: #444;
 }
 .footer p {
@@ -1017,5 +1004,46 @@ a {
   margin-top: 30px;
   text-transform: uppercase;
   letter-spacing: 1.2px;
+}
+
+#container {
+  background-color: white;
+}
+
+@media only screen and (max-width: 800px) {
+  .banner1-title {
+    margin-top: 20px;
+  }
+
+  #project-detail-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #main-column {
+    order: 1;
+  }
+
+  #nav-column {
+    order: 2;
+  }
+
+  #zoom-map {
+    width: 100%;
+    height: 250px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .banner1-logo {
+    align-self: end;
+  }
+
+  .content-barea {
+    margin: 0px auto;
+    padding: 0px 20px 20px 40px;
+    display: flex;
+    flex-direction: column-reverse;
+  }
 }
 </style>

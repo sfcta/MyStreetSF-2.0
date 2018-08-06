@@ -1,71 +1,88 @@
 <template lang="pug">
-#project-page
-  #zoom-map
+#container
+  .banner1
+    .content-barea
+      .banner1-title(v-cloak)
+        h1(style="color:white") MyStreet SF
+        p Project Details: {{ geojson['sponsor'] }} Project {{project_number}}
+      .banner1-logo
+        table#table-logo
+          tr
+            td.agency-logo: h4.agency: b
+              a(target="_blank"
+                href="http://www.sfcta.org/"
+              ) SAN&nbsp;FRANCISCO&nbsp;COUNTY<br/>TRANSPORTATION&nbsp;AUTHORITY
+            td.agency-logo
+              a.agency-link(target="_blank" href="http://www.sfcta.org/")
+                img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
+  .banner2
 
-  #nav-links
-    router-link(v-if='"Citywide" === geojson.districts' to='/citywide') &laquo; Back to citywide projects
-    router-link(v-if='geojson.districts && "Citywide" !== geojson.districts' to='/') &laquo; Back to map
+  #project-page
+    #nav-column
+      #nav-links(v-if="project_name")
+        button.ui.button.small.basic.labeled.icon.violet(@click="clickedBack")
+         i.icon(:class="backButtonIcon")
+         | {{ backButtonText }}
 
-  #info-panel
-    h1 {{ project_name }}
-    br
-    .sharebox
-      p Share this!
-      a(target="_blank"
-        :href="'https://twitter.com/intent/tweet?text=' + cleanProjectName + ' ' + currentRoute"
-        title="Twitter")
-        img(src="../assets/twitter.png" )
-      a(target="_blank"
-        :href="'https://www.facebook.com/sharer/sharer.php?u=' + currentRoute"
-        title="Facebook")
-        img(src="../assets/fb.png")
-      a(target="_blank"
-        :href="'https://pinterest.com/pin/create/button/?url=' + currentRoute"
-        title="Pinterest")
-        img(src="../assets/pinterest.png")
-      a(target="_blank"
-        :href="'https://www.linkedin.com/shareArticle?mini=true&url=' + currentRoute + '&title=' + cleanProjectName"
-        title="LinkedIn")
-        img(src="../assets/linkedin.png")
-      a(target="_blank"
-        :href="'https://www.reddit.com/submit?url='+ currentRoute + '&title='+ cleanProjectName"
-        title="Reddit")
-        img(src="../assets/reddit.png")
-      a(target="_blank"
-        :href="'mailto:?&subject=' + cleanProjectName + '&body=Check out the SFCTA MyStreet project page for:%0D%0A%0D%0A' + cleanProjectName + '%0D%0A' + currentRoute"
-        title="Email")
-        img(src="../assets/email.png")
+      .widget(v-if="!isCitywide")
+        p(:style="color") Project Location
+        #zoom-map
 
+      .widget
+        p(:style="color") Share this!
+        a(target="_blank"
+          :href="'https://twitter.com/intent/tweet?text=' + cleanProjectName + ' ' + currentRoute"
+          title="Twitter")
+          img(src="../assets/twitter.png" )
+        a(target="_blank"
+          :href="'https://www.facebook.com/sharer/sharer.php?u=' + currentRoute"
+          title="Facebook")
+          img(src="../assets/fb.png")
+        a(target="_blank"
+          :href="'https://pinterest.com/pin/create/button/?url=' + currentRoute"
+          title="Pinterest")
+          img(src="../assets/pinterest.png")
+        a(target="_blank"
+          :href="'https://www.linkedin.com/shareArticle?mini=true&url=' + currentRoute + '&title=' + cleanProjectName"
+          title="LinkedIn")
+          img(src="../assets/linkedin.png")
+        a(target="_blank"
+          :href="'https://www.reddit.com/submit?url='+ currentRoute + '&title='+ cleanProjectName"
+          title="Reddit")
+          img(src="../assets/reddit.png")
+        a(target="_blank"
+          :href="'mailto:?&subject=' + cleanProjectName + '&body=Check out the SFCTA MyStreet project page for:%0D%0A%0D%0A' + cleanProjectName + '%0D%0A' + currentRoute"
+          title="Email")
+          img(src="../assets/email.png")
 
+    #main-column
+      h1 {{ project_name }}
 
+      .brief-info
+        h3.billy-header(:style="color") Brief Project Description
+        p.project-description {{ description }}
 
-    br
+      .detailed-info
+        h3.billy-header(:style="color") Detailed Project Information
+        table
+          tr.project-details(v-for="row in details")
+            td.project-details: b {{ row[0] }}
+            td.project-details.col2 {{ row[1] }}
 
-    table
-      tr.project-subtitle
-        td(colspan=2): h3 Brief Project Description
-      tr.project-details
-        td: p.project-description {{ description }}
-    br
+      .for-more-info
+        h3.billy-header(:style="color") For More Information
+        table
+          tr.project-details
+            td.project-details: b Link to Project
+            td.project-details.col2
+              a(v-bind:href="geojson.project_details_page" target="_blank") {{ geojson.project_details_page }}
 
-    table
-      tr.project-subtitle
-        td(colspan=2): h3 Detailed Project Information
-      tr.project-details(v-for="row in details")
-        td.project-details: b {{ row[0] }}
-        td.project-details.col2 {{ row[1] }}
-    br
-
-    table
-      tr.project-subtitle
-        td.td-project-subtitle(colspan=2): h3 For More Information
-      tr.project-details
-        td.project-details: b Link to Project
-        td.project-details.col2
-          a(v-bind:href="geojson.project_details_page" target="_blank") {{ geojson.project_details_page }}
-    br
-    br
-    br
+  .footer
+    .banner2
+    .banner1
+      .content-barea
+        p All content &copy; 2018 San Francisco County Transportation Authority.
+        br
 </template>
 
 <script>
@@ -84,10 +101,16 @@ let omnivore = require('leaflet-omnivore')
 let mymap
 let theme = 'light'
 
+let TRUE_COLOR = { TRANSIT: '#0071c6', STREETS: '#21ba45', PLANS: '#eb4' }
+
 let store = {
+  backButtonIcon: 'map',
+  backButtonText: 'BACK TO THE MAP',
+  color: TRUE_COLOR.TRANSIT,
   description: '',
   details: [],
   geojson: {},
+  isCitywide: false,
   project: '',
   project_name: '',
   project_number: '',
@@ -108,8 +131,15 @@ export default {
   mounted: function() {
     mounted(this) // 'this' is the VueComponent
   },
-  methods: {},
+  methods: {
+    clickedBack,
+  },
   watch: {},
+}
+
+function clickedBack() {
+  let goBack = store.isCitywide ? '/citywide' : '/'
+  this.$router.push(goBack)
 }
 
 async function mounted(component) {
@@ -137,9 +167,18 @@ function clearProjectDetails() {
 }
 
 function setProjectDetails() {
-  store.description = store.geojson['description']
   store.project_name = store.geojson['project_name']
+  store.description = store.geojson['description'] || store.project_name
   store.project_number = store.geojson['project_number']
+  store.color = { color: generateColorFromDb() }
+
+  if ('Citywide' === store.geojson.districts) {
+    store.isCitywide = true
+    store.backButtonIcon = 'th' // back button icon th==table of dots
+    store.backButtonText = 'BACK TO CITYWIDE PROJECTS'
+  } else {
+    store.isCitywide = false
+  }
 
   let phase = store.geojson['current_phase']
   if (phase.endsWith(' ()')) {
@@ -162,7 +201,7 @@ function setProjectDetails() {
   store.details.push(['Districts', store.geojson['districts']])
   store.details.push(['Total Project Cost', cost])
   store.details.push(['Funding Sources', store.geojson['funding_sources']])
-  store.details.push(['Tags', store.geojson['project_tags']])
+  // store.details.push(['Tags', store.geojson['project_tags']])
 }
 
 async function fetchProjectInfo(id) {
@@ -191,13 +230,13 @@ async function fetchProjectInfo(id) {
 }
 
 function styleByMetricColor(iconName, polygon) {
-  let xcolor = generateColorFromDb(iconName)
+  let xcolor = generateColorFromDb()
   let radius = 4
   if (iconName && iconName.startsWith('measle')) radius = 8
 
   return {
     color: xcolor,
-    fillColor: polygon ? xcolor : '#88e',
+    fillColor: xcolor,
     fillOpacity: 0.5,
     opacity: 1.0,
     radius: radius,
@@ -205,30 +244,21 @@ function styleByMetricColor(iconName, polygon) {
   }
 }
 
-function generateColorFromDb(iconName) {
-  console.log(iconName)
-  let defaultColor = '#44c'
+function generateColorFromDb() {
+  console.log(store.geojson)
+  let projectCategory = store.geojson.project_group
+  let defaultColor = TRUE_COLOR.TRANSIT
 
-  // no color? use blue.
-  if (!iconName) return defaultColor
+  // no category? use blue.
+  if (!projectCategory) return defaultColor
 
-  // color code in db? use it.
-  if (iconName.startsWith('#')) return iconName
-
-  // icon name in db? convert to a color code.
-  switch (iconName) {
-    case 'small_blue':
-      return '#44f'
-    case 'small_green':
-      return '#4f4'
-    case 'small_purple':
-      return '#63c'
-    case 'small_red':
-      return '#f44'
-    case 'small_yellow':
-      return '#aa3'
-    case 'measle_turquoise':
-      return '#369'
+  switch (projectCategory) {
+    case 'Transit':
+      return TRUE_COLOR.TRANSIT
+    case 'Streets':
+      return TRUE_COLOR.STREETS
+    case 'Plans and Programs':
+      return TRUE_COLOR.PLANS
     default:
       return defaultColor
   }
@@ -408,8 +438,27 @@ h4 {
   color: #ea790d;
 }
 
+.content-barea {
+  max-width: 1100px;
+  margin: 0px auto;
+  padding: 10px 20px 20px 20px;
+  display: flex;
+}
+
+#project-page {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  grid-template-rows: 1fr;
+  grid-gap: 30px;
+  max-width: 1100px;
+  margin: 0px auto;
+  padding: 20px 20px;
+  overflow-y: auto;
+}
+
 #zoom-map {
-  float: right;
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
   width: 300px;
   height: 300px;
   margin-left: 20px;
@@ -420,22 +469,7 @@ h4 {
   box-shadow: 0 0 3px #00000060;
 }
 
-#project-page {
-  height: 100%;
-  max-width: 1100px;
-  margin: 0px auto;
-  padding: 20px 20px;
-  overflow-y: auto;
-}
-
-#mymap {
-  margin: 10px 10px;
-  z-index: 1;
-}
-
 #hover-panel {
-  grid-row: 3 / 4;
-  grid-column: 1 / 3;
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   border-radius: 5px;
@@ -445,10 +479,35 @@ h4 {
   z-index: 2;
 }
 
+#main-column {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  margin-top: 50px;
+}
+
+#nav-column {
+  display: flex;
+  flex-direction: column;
+  margin-top: 50px;
+}
+
 .hover-panel-hide {
   visibility: hidden;
   opacity: 0;
   transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
+
+#nav-links {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+  color: #ddd;
+  font-size: 13px;
+  font-weight: bold;
+  padding-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  text-align: right;
 }
 
 #hover-panel p {
@@ -754,7 +813,7 @@ td.col2 {
 }
 
 .project-subtitle {
-  background-color: #c80;
+  background-color: #f00;
   width: 100%;
 }
 
@@ -864,10 +923,6 @@ td {
   opacity: 0;
 }
 
-#main-content {
-  margin-top: 100px;
-}
-
 .navbar-default {
   border: 0;
   background-color: #99ac90;
@@ -896,36 +951,80 @@ h3.project-subtitle {
   padding: 10px;
 }
 
-.sharebox {
+.widget {
   text-align: right;
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
   vertical-align: center;
-  padding: 3px;
+  padding-top: 20px;
   padding-bottom: 10px;
 }
 
-.sharebox a {
+.widget a {
   padding-left: 5px;
 }
 
-.sharebox a:hover {
-  opacity: 0.8;
+.widget a:hover {
+  opacity: 0.9;
   padding-left: 5px;
 }
 
-.sharebox img {
+.widget img {
   width: 2.25em;
 }
-.sharebox img:hover {
+.widget img:hover {
   transform: translateY(1px);
 }
 
-.sharebox p {
-  color: #888;
+.widget p {
+  text-align: right;
+  color: #ddd;
   font-size: 13px;
+  font-weight: bold;
   padding-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 a {
   color: #33c;
+}
+
+.banner1 {
+  background-color: #444;
+}
+
+.banner1-title {
+  margin-top: 80px;
+  width: 100%;
+}
+
+.banner1-title p {
+  font-size: 13px;
+  color: #999;
+}
+
+.banner2 {
+  background-color: #6435c9;
+  height: 18px;
+}
+
+.footer {
+  margin-top: 50px;
+  height: 250px;
+  background-color: #444;
+}
+.footer p {
+  margin: 0 auto;
+  margin-top: 15px;
+  font-size: 13px;
+  color: #999;
+}
+
+.billy-header {
+  color: #ddd;
+  margin-top: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
 }
 </style>

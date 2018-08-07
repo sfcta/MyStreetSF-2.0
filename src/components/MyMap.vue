@@ -399,6 +399,9 @@ let _showNearbyTick = false
 let _containerPoint = null
 
 function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, containerPoint, delay) {
+  // no popups on mobile
+  if (store.isMobile) return
+
   _containerPoint = containerPoint
   _lastNearbyList = buildPopupContent(id, nearbyProjectIDs)
   _showNearbyTick = true

@@ -88,30 +88,34 @@
       h5 MAP LAYERS:
       p: i Additional geographic data that you may find useful.
       br
+      br
 
       #layer-thingies(v-for="layer in extraLayers")
-        .ui.checkbox.layer-selectors
+        label {{layer.name}}
+        br
+        .ui.toggle.checkbox.layer-selectors
           input(@click="clickedToggleLayer(layer.tag)"
               :name="layer.name"
               :checked="layer.show"
               type="checkbox")
-          label {{layer.name}}
+          label &nbsp;
           br
+        br
 
   #panel.sidepanel(v-if="isMobile && showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
     .information-panel(v-cloak)
       br
       .title-thing
-        button.ui.button.small.pink.compact.labeled.icon(
+        button.ui.button.small.pink.compact.icon(
           @click="clickedMoreDetails"
-          style="margin:0px 5px 10px 10px; float:right;"
+          style="margin:2px 5px 10px 15px; float:right;"
           v-if="infoUrl"
           )
-          i.icon.info
-          | MORE DETAILS&hellip;
+          i.icon.chart.bar.outline
+          | &nbsp;&nbsp;SHOW DETAILS&hellip;
         h2(:class="{noSelection: !infoUrl}" v-html="infoTitle")
 
-      p(style="margin-top:10px;")  {{ infoDetails }}
+      p(style="margin-top:10px;")  {{ clippedInfoDetails }}
       h3(v-if="!infoUrl" style="text-align: center")
         span(v-html="helptext.PRETEXT")
         router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
@@ -144,7 +148,13 @@
 
     #bottom-panel(v-cloak)
       .details-link(v-if="infoUrl")
-        a(v-bind:href="infoUrl" target="_blank") &raquo; PROJECT DETAILS&hellip;
+        button.ui.button.tiny.pink.compact.icon(
+          @click="clickedMoreDetails"
+          style="margin:2px 0px 0px 15px;"
+          )
+          i.icon.chart.bar.outline
+          | &nbsp;&nbsp;More Details&hellip;
+
       .pickers
         hr
         h5 STATUS:
@@ -449,6 +459,10 @@ export default {
       if (_calculatedWidth) return store.isMobile
       store.isMobile = determineMobile()
       return store.isMobile
+    },
+    clippedInfoDetails: function() {
+      if (store.infoDetails.length < 300) return store.infoDetails
+      return store.infoDetails.substring(0, 300) + '...'
     },
   },
   mounted: function() {
@@ -1300,8 +1314,8 @@ td {
   font-size: 16px;
 }
 
-.layer-selectors {
-  padding: 5px 0px;
+.ui.checkbox.layer-selectors {
+  margin: 5px 0px;
 }
 
 .project-list-popup .leaflet-popup-content {

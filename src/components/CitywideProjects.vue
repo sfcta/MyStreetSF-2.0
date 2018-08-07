@@ -90,6 +90,11 @@ async function mounted(component) {
   store.streetProjects = JSON.parse(JSON.stringify(_allStreetProjects))
   store.planningProjects = JSON.parse(JSON.stringify(_allPlanningProjects))
 
+  if (store.sharedState.isMobile) {
+    store.sharedState.isPanelHidden = true
+    store.sharedState.showingMainPanel = false
+  }
+
   updateSidePanelHelpText()
   setupEventListeners()
   fetchImages()

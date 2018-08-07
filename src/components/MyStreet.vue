@@ -59,19 +59,19 @@
     ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
 
   #layer-widgets-mobile
-    button#mbtn-start.ui.tiny.yellow.button(
+    button#mbtn-start.ui.small.yellow.button(
       v-on:click="mobileToggleMainPanel"
     )
       i.list.icon
       | PROJECTS
 
-    button#btn-mshowhide.ui.tiny.green.button(
+    button#btn-mshowhide.ui.small.green.button(
       @click="mobileToggleFilterPanel"
     )
       i.filter.icon
-      | &nbsp;FILTERS
+      | FILTERS
 
-    button#btn-layers.ui.tiny.blue.button(
+    button#btn-layers.ui.small.blue.button(
       v-on:click="mobileToggleLayerSelector"
     )
       i.clone.outline.icon
@@ -379,16 +379,25 @@ function switchPanel(panelToActivate) {
       store[panelToActivate] = true
     }
   }, delay)
+
+  if (panelToActivate === 'showingFilterPanel') {
+    setTimeout(function() {
+      // eslint-disable-next-line
+      $('.ui.dropdown').dropdown()
+    }, delay + 250)
+  }
 }
 
 function clickedShowMainPanel(e) {
   BigStore.state.showingMainPanel = true
   BigStore.state.showingLayerPanel = false
+  BigStore.state.showingFilterPanel = false
 }
 
 function clickedShowLayerSelector(e) {
   BigStore.state.showingMainPanel = false
   BigStore.state.showingLayerPanel = true
+  BigStore.state.showingFilterPanel = false
 }
 
 function clickedCloseNearby(e) {
@@ -544,8 +553,8 @@ export default {
       return union
     },
     clippedInfoDetails: function() {
-      if (store.infoDetails.length < 300) return store.infoDetails
-      return store.infoDetails.substring(0, 300) + '...'
+      if (store.infoDetails.length < 250) return store.infoDetails
+      return store.infoDetails.substring(0, 250) + '...'
     },
   },
   mounted: function() {
@@ -1533,19 +1542,21 @@ h2.noSelection {
 
   #layer-widgets-mobile {
     display: flex;
+    justify-content: center;
     padding: 5px;
     position: relative;
     flex-direction: row;
-    background-color: #333;
+    background-color: #fff;
     grid-column: 1 / 2;
     grid-row: 3 / 4;
     width: 100%;
     z-index: 10;
+    margin: 0 0;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   }
 
   #layer-widgets-mobile button {
-    margin-right: 10px;
+    margin-left: 2px;
   }
 
   #search-panel {

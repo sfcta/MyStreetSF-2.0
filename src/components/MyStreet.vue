@@ -28,16 +28,45 @@
         style="margin-right:5px"
       ) Learn more about MyStreet SF&hellip;
 
+  #downloadbox.ui.segment(v-cloak v-show="showDownload" class="ui segment")
+    h3(style="margin-left: 10px")
+      button.ui.tiny.compact.red.icon.button(
+        style="float:right;"
+        @click="clickedCloseDownload"
+      )
+        i.close.icon
+      | Download Data
+    .mybox(style="background-color: white")
+      hr
+      .myotherbox(style="padding: 25px 25px")
+        p(style="color: #888; line-height: 1.1;") The data powering this site can be downloaded in .CSV format and opened in any spreadsheet software such as Microsoft Excel.
+        br
+        p(style="color: #888; line-height: 1.1;") You can download data just for the projects you've selected, or you can download the entire dataset.
+        br
+        h3.black(style="margin-bottom:10px") Choose what you would like to download:
+        .download-buttons.ui.buttons
+          button#dl-selected-project.ui.yellow.button(
+          ) Filtered Projects
+          .or
+          button.ui.pink.button Everything
+
+
   #nearbyprojects.ui.segment(v-show="nearbyProjects.length>0" class="ui segment"
     :style="popupLocation")
-    div(style="margin-top:5px;")
-      button.tiny.ui.right.floated.pink.cute.button(@click="clickedCloseNearby") X
 
-    h5.nearby-title NEARBY PROJECTS
-    hr(style="margin-bottom:5px")
+    h5.nearby-title
+      button.ui.tiny.compact.pink.icon.button(
+        @click="clickedCloseNearby"
+        style="float:right;"
+      )
+        i.close.icon
+      | {{ nearbyProjects.length>0 ? nearbyProjects[0].project_name : "" }}
 
-    .nearby-project-row(v-for="prj in nearbyProjects" @click="clickedNearbyProject(prj.project_number)")
-      h5.nearby-row {{prj.project_name}}
+    .other-projects(v-if="nearbyProjects.length > 1")
+      h5.black(style="font-size:11px; margin-left:5px; padding-top:5px;") ALSO NEARBY:
+      hr(style="margin: 0px 8px 5px 5px;")
+      .nearby-project-row(v-for="(prj,index) in nearbyProjects" @click="clickedNearbyProject(prj.project_number)")
+        h5.nearby-row(v-if="index > 0") {{prj.project_name}}
 
   #layer-widgets
     button#btn-start.ui.tiny.grey.icon.button(
@@ -203,10 +232,15 @@
           router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
 
     #bottom-panel(v-cloak)
-      .details-link(v-if="infoUrl")
-        button.ui.button.tiny.pink.compact.icon(
+      .details-link
+        button.ui.icon.button.small.grey.compact(
+          data-tooltip="Download map data" @click="clickedDownload"
+        )
+          i.download.icon
+        button.ui.button.small.pink.compact.icon(
+          v-if="infoUrl"
           @click="clickedMoreDetails"
-          style="margin:2px 0px 0px 15px;"
+          style="margin:2px 0px 0px 5px;"
           )
           i.icon.chart.bar.outline
           | &nbsp;&nbsp;More Details&hellip;
@@ -389,19 +423,19 @@ function switchPanel(panelToActivate) {
 }
 
 function clickedShowMainPanel(e) {
-  BigStore.state.showingMainPanel = true
-  BigStore.state.showingLayerPanel = false
-  BigStore.state.showingFilterPanel = false
+  store.showingMainPanel = true
+  store.showingLayerPanel = false
+  store.showingFilterPanel = false
 }
 
 function clickedShowLayerSelector(e) {
-  BigStore.state.showingMainPanel = false
-  BigStore.state.showingLayerPanel = true
-  BigStore.state.showingFilterPanel = false
+  store.showingMainPanel = false
+  store.showingLayerPanel = true
+  store.showingFilterPanel = false
 }
 
 function clickedCloseNearby(e) {
-  BigStore.state.nearbyProjects = []
+  store.nearbyProjects = []
 }
 
 function mobileToggleMainPanel(e) {
@@ -563,6 +597,8 @@ export default {
   },
   methods: {
     clickedCloseNearby,
+    clickedCloseDownload,
+    clickedDownload,
     clickedFilter,
     clickedFunds,
     clickedLearnMore,
@@ -607,6 +643,14 @@ let _hoverProject, _hoverStyle
 
 function clickedMoreDetails() {
   this.$router.push(store.infoUrl)
+}
+
+function clickedDownload() {
+  store.showDownload = true
+}
+
+function clickedCloseDownload() {
+  store.showDownload = false
 }
 
 function selectedTagsChanged() {
@@ -822,6 +866,7 @@ function clickedDistrict(district) {
 let _projectIdsCurrentlyOnMap = {}
 
 function updateFilters() {
+  store.showDownload = false
   EventBus.$emit(EVENT.UPDATE_FILTERS, 0)
 }
 
@@ -1440,21 +1485,32 @@ h2.noSelection {
   padding: 10px 10px;
 }
 
+#downloadbox {
+  box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.4);
+  grid-row: 2 / 3;
+  grid-column: 1 / 4;
+  z-index: 2;
+  background-color: #48f;
+  width: minmax(min-content, 100px);
+  max-width: 500px;
+  margin: auto 40px;
+  padding: 0px 0px;
+}
+
 #nearbyprojects {
   grid-row: 1 / 4;
   grid-column: 1 / 4;
-  border-radius: 5px;
-  box-shadow: 0px 0px 20px 10px rgba(0, 0, 0, 0.25);
+  box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
   font-size: 8px;
   z-index: 2;
   width: 320px;
   margin: 10px 10px 5px 5px;
-  padding: 0px 5px 10px 5px;
+  padding: 0px 0px 5px 5px;
   color: black;
   position: fixed;
   left: 0px;
   top: 0px;
-  z-index: 6;
+  z-index: 22;
   transition: visibility 1s 1s, opacity 0.5s linear;
 }
 

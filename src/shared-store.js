@@ -74,6 +74,7 @@ export const BigStore = {
     isMobile: false,
     mainComponent: 'MyMap',
     selectedTags: '',
+    showDownload: false,
     showHelp: false,
     showingFilterPanel: false,
     showingLayerPanel: false,

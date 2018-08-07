@@ -1037,12 +1037,16 @@ a {
 
 @media only screen and (max-width: 600px) {
   .banner1-logo {
-    align-self: end;
+    align-self: flex-end;
+  }
+
+  #project-detail-container {
+    padding: 15px 15px;
   }
 
   .content-barea {
     margin: 0px auto;
-    padding: 0px 20px 20px 40px;
+    padding: 0px 10px 20px 15px;
     display: flex;
     flex-direction: column-reverse;
   }

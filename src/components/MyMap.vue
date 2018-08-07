@@ -664,8 +664,8 @@ function getNormalStyle(segment, polygon) {
     fillColor: truecolor,
     fillOpacity: 0.7,
     opacity: 1.0,
-    radius: radius,
-    weight: 2,
+    radius: store.isMobile ? 7 : radius,
+    weight: store.isMobile ? 5 : 3,
   }
 
   if (polygon) {
@@ -769,7 +769,7 @@ function clickedOnFeature(e) {
   clickedStyle.color = Color(clickedStyle.truecolor).darken(0.4)
   clickedStyle.fillColor = clickedStyle.truecolor
   clickedStyle.radius = 12
-  clickedStyle.weight = 8
+  clickedStyle.weight = 12
   target.setStyle(clickedStyle)
 
   updatePanelDetails(id)
@@ -907,11 +907,11 @@ function hoverFeature(e) {
   }
 
   let style = {
-    color: points ? '#555a' : normal.truecolor,
+    color: points ? '#f5fe' : normal.truecolor,
     fillColor: normal.fillColor,
     opacity: 1.0,
-    radius: 8,
-    weight: points ? 1 : 6,
+    radius: 7,
+    weight: points ? 4 : 6,
   }
 
   let polygonStyle = {

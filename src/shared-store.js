@@ -75,6 +75,7 @@ export const BigStore = {
     mainComponent: 'MyMap',
     selectedTags: '',
     showHelp: false,
+    showingFilterPanel: false,
     showingLayerPanel: false,
     showingMainPanel: true,
     showNearby: true,

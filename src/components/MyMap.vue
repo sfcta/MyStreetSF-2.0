@@ -250,13 +250,25 @@ function clickedFilter(e) {
 function clickedAnywhereOnMap(map) {
   // undo selection, if user clicked on base map
   if (map.originalEvent.target.id === 'mymap') {
-    store.infoTitle = defaultPanelTitle
-    store.infoDetails = ''
-    store.infoUrl = ''
-    store.infoProject = ''
-    store.nearbyProjects = []
-    removeHighlightFromPreviousSelection()
-    updateURLHash()
+    // drop panel if user is just clicking around
+    if (store.isMobile) {
+      store.isPanelHidden = true
+      setTimeout(function() {
+        store.showingMainPanel = false
+      }, 500)
+    }
+
+    let delay = store.isMobile ? 500 : 0
+    setTimeout(function() {
+      store.infoTitle = defaultPanelTitle
+      store.infoDetails = ''
+      store.infoUrl = ''
+      store.infoProject = ''
+      store.nearbyProjects = []
+
+      removeHighlightFromPreviousSelection()
+      updateURLHash()
+    }, delay)
   }
 }
 
@@ -773,6 +785,15 @@ function clickedOnFeature(e) {
   target.setStyle(clickedStyle)
 
   updatePanelDetails(id)
+  makeSureMobileUsersSeeTheirSelection()
+}
+
+function makeSureMobileUsersSeeTheirSelection() {
+  if (store.isMobile) {
+    store.showingMainPanel = true
+    store.showingFilterPanel = store.showingLayerPanel = false
+    store.isPanelHidden = false
+  }
 }
 
 function getLayersNearLatLng(latlng, distanceInMeters) {

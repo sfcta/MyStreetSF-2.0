@@ -60,68 +60,124 @@
 
   #layer-widgets-mobile
     button#mbtn-start.ui.tiny.yellow.button(
-      v-on:click="clickedShowMainPanel"
+      v-on:click="mobileToggleMainPanel"
     )
       i.list.icon
-      | DETAILS
+      | PROJECTS
 
     button#btn-mshowhide.ui.tiny.green.button(
-      @click="clickedShowHide"
+      @click="mobileToggleFilterPanel"
     )
-      i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
+      i.filter.icon
       | &nbsp;FILTERS
 
     button#btn-layers.ui.tiny.blue.button(
-      v-on:click="clickedShowLayerSelector"
+      v-on:click="mobileToggleLayerSelector"
     )
       i.clone.outline.icon
       | LAYERS
 
 
-  #layer-panel.sidepanel(v-if="showingLayerPanel" v-bind:class="{ shrunken: isPanelHidden}")
-    #preheader
-      hr
-      h3.apptitle MyStreet SF
-      hr
+  transition(name="slide")
+    .panel.sidepanel(v-if="showingLayerPanel" v-bind:class="{ shrunken: isPanelHidden}")
+      #preheader
+        .some-flair(v-if="isMobile")
+        .product-title(v-if="!isMobile")
+          hr
+          h3.apptitle MyStreet SF
+          hr
 
-      br
-      h5 MAP LAYERS:
-      p: i Additional geographic data that you may find useful.
-      br
-      br
-
-      #layer-thingies(v-for="layer in extraLayers")
-        label {{layer.name}}
+        br(v-if="!isMobile")
+        h2 MAP LAYERS:
+        p You can add additional geographic data to the map from the options below.
         br
-        .ui.toggle.checkbox.layer-selectors
-          input(@click="clickedToggleLayer(layer.tag)"
-              :name="layer.name"
-              :checked="layer.show"
-              type="checkbox")
-          label &nbsp;
+        br
+
+        #layer-thingies(v-for="layer in extraLayers")
+          label {{layer.name}}
           br
-        br
+          .ui.toggle.checkbox.layer-selectors
+            input(@click="clickedToggleLayer(layer.tag)"
+                :name="layer.name"
+                :checked="layer.show"
+                type="checkbox")
+            label &nbsp;
+            br
+          br
 
-  #panel.sidepanel(v-if="isMobile && showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
-    .information-panel(v-cloak)
-      br
-      .title-thing
-        button.ui.button.small.pink.compact.icon(
-          @click="clickedMoreDetails"
-          style="margin:2px 5px 10px 15px; float:right;"
-          v-if="infoUrl"
-          )
-          i.icon.chart.bar.outline
-          | &nbsp;&nbsp;SHOW DETAILS&hellip;
-        h2(:class="{noSelection: !infoUrl}" v-html="infoTitle")
+  transition(name="slide")
+    .panel.sidepanel(v-if="showingFilterPanel" v-bind:class="{ shrunken: isPanelHidden}")
+      .some-flair
+      .information-panel(v-cloak)
+        h2 FILTERS
+        .pickers
+          h5 STATUS:
 
-      p(style="margin-top:10px;")  {{ clippedInfoDetails }}
-      h3(v-if="!infoUrl" style="text-align: center")
-        span(v-html="helptext.PRETEXT")
-        router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
+          button#btn-underway.tiny.ui.grey.button(
+                v-on:click="clickedFilter"
+                v-bind:class="{ active: filterUnderway, yellow: filterUnderway}"
+          ) Underway
 
+          button#btn-complete.tiny.ui.grey.button(
+                v-on:click="clickedFilter"
+                v-bind:class="{ active: filterComplete, yellow: filterComplete}"
+          ) Completed
 
-  #panel.sidepanel(v-if="showingMainPanel && !isMobile" v-bind:class="{ shrunken: isPanelHidden}")
+          h5 CATEGORY:
+
+          button#btn-streets.tiny.ui.grey.button(
+                v-on:click="clickedFilter"
+                v-bind:class="{ active: filterStreets, green: filterStreets}"
+          ) Streets
+
+          button#btn-transit.tiny.ui.grey.button(
+                v-on:click="clickedFilter"
+                v-bind:class="{ active: filterTransit, blue: filterTransit}"
+          ) Transit
+
+          button#btn-areas.tiny.ui.grey.button(
+                v-on:click="clickedFilter"
+                v-bind:class="{ active: filterAreas, yellow: filterAreas}"
+          ) Plans &amp; Programs
+
+          #dropdowns
+            .narrow-dropdown(style="float:left;")
+              h5 DISTRICT:
+              .ui.selection.fluid.dropdown
+                .text: div(v-cloak) {{ nameOfFilterDistrict(filterDistrict) }}
+                i.dropdown.icon
+                .menu
+                  .item(v-for="i in [-1,0,1,2,3,4,5,6,7,8,9,10,11]"
+                        v-on:click="clickedDistrict(i)") {{ nameOfFilterDistrict(i) }}
+            .narrow-dropdown(style="float:right;")
+              h5 FUNDING SOURCE:
+              .ui.selection.fluid.dropdown
+                .text: div(v-cloak) {{ filterFund ? filterFund : "All sources&hellip;" }}
+                i.dropdown.icon
+                .menu
+                  .item(@click="clickedFunds" v-bind:data-fund="null") All sources
+                  .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
+
+  transition(name="slide")
+    .panel.sidepanel(v-if="isMobile && showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
+      .some-flair
+      .information-panel(v-cloak)
+        .title-thing
+          button.ui.button.small.pink.compact.icon(
+            @click="clickedMoreDetails"
+            style="margin:2px 0px 10px 15px; float:right;"
+            v-if="infoUrl"
+            )
+            i.icon.chart.bar.outline
+            | &nbsp;&nbsp;SHOW DETAILS&hellip;
+          h2(:class="{noSelection: !infoUrl}" v-html="infoTitle")
+
+        p(style="margin-top:10px; text-align: justify")  {{ clippedInfoDetails }}
+        h3(v-if="!infoUrl" style="text-align: center")
+          span(v-html="helptext.PRETEXT")
+          router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
+
+  .panel.sidepanel(v-if="showingMainPanel && !isMobile" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr
       h4.apptitle MyStreet SF
@@ -278,9 +334,9 @@ function devClickedToggleDistrictOption() {
 }
 
 function clickedShowHide(e) {
-  BigStore.state.isPanelHidden = !BigStore.state.isPanelHidden
+  store.isPanelHidden = !store.isPanelHidden
   // leaflet map needs to be force-recentered, and it is slow.
-  EventBus.$emit(EVENT.MAP_RESIZE, BigStore.state.isPanelHidden)
+  if (store.isMobile) EventBus.$emit(EVENT.MAP_RESIZE, BigStore.state.isPanelHidden)
 }
 
 function clickedToggleLayer(tag) {
@@ -310,6 +366,21 @@ let _districtColors = [
   '#00f',
 ]
 
+function switchPanel(panelToActivate) {
+  store.isPanelHidden = true
+  const delay =
+    store.showingMainPanel || store.showingLayerPanel || store.showingFilterPanel ? 400 : 0
+
+  setTimeout(function() {
+    store.showingMainPanel = store.showingLayerPanel = store.showingFilterPanel = false
+    store.isPanelHidden = panelToActivate == null
+
+    if (panelToActivate) {
+      store[panelToActivate] = true
+    }
+  }, delay)
+}
+
 function clickedShowMainPanel(e) {
   BigStore.state.showingMainPanel = true
   BigStore.state.showingLayerPanel = false
@@ -322,6 +393,18 @@ function clickedShowLayerSelector(e) {
 
 function clickedCloseNearby(e) {
   BigStore.state.nearbyProjects = []
+}
+
+function mobileToggleMainPanel(e) {
+  switchPanel(store.showingMainPanel ? null : 'showingMainPanel')
+}
+
+function mobileToggleFilterPanel(e) {
+  switchPanel(store.showingFilterPanel ? null : 'showingFilterPanel')
+}
+
+function mobileToggleLayerSelector(e) {
+  switchPanel(store.showingLayerPanel ? null : 'showingLayerPanel')
 }
 
 function clickedFilter(e) {
@@ -346,10 +429,15 @@ function clickedFilter(e) {
 function clickedAnywhereOnMap(map) {
   // undo selection, if user clicked on base map
   if (map.originalEvent.target.id === 'mymap') {
+    console.log('B')
+
     BigStore.state.infoTitle = defaultPanelTitle
     BigStore.state.infoDetails = ''
     BigStore.state.infoUrl = ''
     removeHighlightFromPreviousSelection()
+
+    // drop panel if user is just clicking around
+    if (store.isMobile) store.isPanelHidden = true
   }
 }
 
@@ -455,11 +543,6 @@ export default {
       }
       return union
     },
-    isMobile: function() {
-      if (_calculatedWidth) return store.isMobile
-      store.isMobile = determineMobile()
-      return store.isMobile
-    },
     clippedInfoDetails: function() {
       if (store.infoDetails.length < 300) return store.infoDetails
       return store.infoDetails.substring(0, 300) + '...'
@@ -470,25 +553,28 @@ export default {
     mounted()
   },
   methods: {
-    clickedCloseNearby: clickedCloseNearby,
-    clickedFilter: clickedFilter,
-    clickedFunds: clickedFunds,
-    clickedLearnMore: clickedLearnMore,
-    clickedMoreDetails: clickedMoreDetails,
-    clickedNearbyProject: clickedNearbyProject,
-    clickedShowHide: clickedShowHide,
-    clickedShowMainPanel: clickedShowMainPanel,
-    clickedShowLayerSelector: clickedShowLayerSelector,
-    clickedToggleHelp: clickedToggleHelp,
-    clickedToggleLayer: clickedToggleLayer,
-    clickedDistrict: clickedDistrict,
-    clickedSearch: clickedSearch,
-    clickedSearchTag: clickedSearchTag,
-    devClickedToggleDistrictOption: devClickedToggleDistrictOption,
-    hoverAddress: hoverAddress,
-    hoverSearch: hoverSearch,
-    nameOfFilterDistrict: nameOfFilterDistrict,
-    termChanged: termChanged,
+    clickedCloseNearby,
+    clickedFilter,
+    clickedFunds,
+    clickedLearnMore,
+    clickedMoreDetails,
+    clickedNearbyProject,
+    clickedShowHide,
+    clickedShowMainPanel,
+    clickedShowLayerSelector,
+    clickedToggleHelp,
+    clickedToggleLayer,
+    clickedDistrict,
+    clickedSearch,
+    clickedSearchTag,
+    devClickedToggleDistrictOption,
+    hoverAddress,
+    hoverSearch,
+    mobileToggleMainPanel,
+    mobileToggleFilterPanel,
+    mobileToggleLayerSelector,
+    nameOfFilterDistrict,
+    termChanged,
   },
   watch: {
     terms: termChanged,
@@ -1220,19 +1306,19 @@ td.agency-logo {
   text-align: center;
 }
 
-#panel a {
+.panel a {
   color: #fff;
 }
 
-#panel label {
+.panel label {
   color: #fff;
 }
 
-#panel p {
+.panel p {
   color: #ccc;
 }
 
-#panel h1,
+.panel h1,
 h3,
 h4,
 h5 {
@@ -1241,7 +1327,7 @@ h5 {
   margin: 0px 0px;
 }
 
-#panel hr {
+.panel hr {
   margin: 8px 0px;
 }
 
@@ -1394,6 +1480,14 @@ h2.noSelection {
 }
 
 @media only screen and (max-width: 760px) {
+  .slide-enter-active,
+  .slide-leave-active {
+    transition: margin 0.5s;
+  }
+  .slide-enter, .slide-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    margin-bottom: -500px;
+  }
+
   #container {
     display: grid;
     grid-template-columns: 1fr;
@@ -1412,13 +1506,14 @@ h2.noSelection {
     bottom: 0;
     margin-right: 0px;
     padding: 0px 15px 20px 15px;
-    transition: margin 0.4s;
+    transition: margin 0.5s;
     width: 100%;
     height: auto;
     z-index: 4;
   }
 
   .shrunken {
+    margin-right: 0px;
     margin-bottom: -1000px;
   }
 
@@ -1464,6 +1559,16 @@ h2.noSelection {
     grid-column: 1 / 2;
     grid-row: 1 / 4;
     z-index: 1;
+  }
+
+  .some-flair {
+    width: 100%;
+    height: 8px;
+    margin-right: 25px;
+    background-color: rgb(235, 36, 201);
+  }
+  .title-thing {
+    margin-top: 12px;
   }
 }
 </style>

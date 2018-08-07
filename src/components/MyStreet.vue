@@ -358,14 +358,13 @@ function mounted() {
 }
 
 function determineMobile() {
-  let MOBILE_LIMIT = 1000
+  let MOBILE_LIMIT = 760
 
   var w = window,
     d = document,
     e = d.documentElement,
     g = d.getElementsByTagName('body')[0],
     x = w.innerWidth || e.clientWidth || g.clientWidth
-  console.log('width is ' + x)
 
   _calculatedWidth = true
 

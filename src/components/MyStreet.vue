@@ -496,6 +496,18 @@ function mounted() {
   window.addEventListener('resize', function() {
     store.isMobile = determineMobile()
   })
+
+  addEscapeKeyListener()
+}
+
+function addEscapeKeyListener() {
+  document.addEventListener("keydown", (e) => {
+    if (e.keyCode==27) {
+      store.nearbyProjects = []
+      store.showDownload = false
+      store.showHelp = false
+    }
+  })
 }
 
 function determineMobile() {

@@ -78,7 +78,7 @@
       v-bind:class="{ blue: showingLayerPanel}"
     ): i.clone.outline.icon
     br
-    button.ui.icon.button.small.grey.compact(
+    button.ui.icon.tiny.grey.button(
       data-tooltip="Download map data" @click="clickedDownload"
     ): i.download.icon
 

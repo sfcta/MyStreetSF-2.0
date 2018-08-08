@@ -138,7 +138,7 @@ export default {
 }
 
 function clickedBack() {
-  let goBack = store.isCitywide ? '/citywide' : '/'
+  let goBack = store.isCitywide ? '/citywide' : '/#project=' + store.project_number
   this.$router.push(goBack)
 }
 

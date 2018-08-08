@@ -1,5 +1,8 @@
 <template lang="pug">
 #mymap.custom-popup
+  .ui.inverted.dimmer(:class="{active: nowMoloading}")
+    .ui.large.text.loader Loading
+
 </template>
 
 <script>

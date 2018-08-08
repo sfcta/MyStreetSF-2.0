@@ -73,6 +73,7 @@ export const BigStore = {
     infoUrl: '',
     isMobile: false,
     mainComponent: 'MyMap',
+    nowMoloading: false,
     selectedTags: '',
     showDownload: false,
     showHelp: false,

@@ -309,7 +309,6 @@
                 img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
   component(v-bind:is="whichSearchWidget")
   component(v-bind:is="mainComponent")
-  #hover-panel(style="display:none" v-bind:class="{ 'hover-panel-hide': hoverPanelHide }"): p {{ hoverPanelText }}
 </template>
 
 <script>

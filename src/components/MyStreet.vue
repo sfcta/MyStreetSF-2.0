@@ -1,56 +1,52 @@
 <template lang="pug">
 #container
-  #helpbox.ui.segment(v-show="showHelp" class="ui segment")
-    h3.black(style="margin-bottom:0px;") MyStreet San Francisco
-    hr(style="margin-bottom:5px")
-    p.black Use this map to explore the many transportation investments happening all across San Francisco.
-    br
-    p.black SF staff need to tell me what to add here!
+  transition(name="fade")
+    #helpbox.ui.segment(v-show="showHelp" class="ui segment")
+      h3(style="margin-left: 10px") MyStreet San Francisco
+      .mybox(style="background-color: white")
+        hr
+        .myotherbox(style="padding: 25px 25px")
+          p Use this map to explore the many transportation investments happening all across San Francisco.
 
-    ul
-     li Color legend?
-     i.right.arrow.green.icon
-     i.right.arrow.blue.icon
-     i.right.arrow.yellow.icon
-     li Other infoes?
+          h3.black(style="margin-top:10px") How to use this map
+          hr(style="margin-bottom:5px")
+          ul
+            li Click any project for info, and check "More Details" for timing, expenditures, and more.
+            li Use the filters on the right to reduce clutter: see just the projects you're interested in
 
-    h3.black(style="margin-top:10px") How to use this map
 
-    hr(style="margin-bottom:5px")
-    | Click any project for info,
-    | etc
 
-    div(style="margin-top:20px;")
-      button.small.ui.right.floated.violet.button(@click="clickedToggleHelp") OK, GOT IT
-      |&nbsp;&nbsp;
-      button.small.ui.right.floated.basic.violet.button(
-        @click="clickedLearnMore"
-        style="margin-right:5px"
-      ) Learn more about MyStreet SF&hellip;
+          div(style="margin-top:20px;")
+            button.small.ui.right.floated.violet.button(@click="clickedToggleHelp") OK, GOT IT
+            |&nbsp;&nbsp;
+            button.small.ui.right.floated.basic.violet.button(
+              @click="clickedLearnMore"
+              style="margin-right:5px"
+            ) Learn more about MyStreet SF&hellip;
 
-  #downloadbox.ui.segment(v-cloak v-show="showDownload" class="ui segment")
-    h3(style="margin-left: 10px")
-      button.ui.tiny.compact.pink.icon.button(
-        style="float:right;"
-        @click="clickedCloseDownload"
-      )
-        i.close.icon
-      | Download Data
-    .mybox(style="background-color: white")
-      hr
-      .myotherbox(style="padding: 25px 25px")
-        p(style="color: #888; line-height: 1.1;") The data powering this site can be downloaded in .CSV format and opened in any spreadsheet software such as Microsoft Excel.
-        br
-        p(style="color: #888; line-height: 1.1;") You can download data just for the projects you've selected, or you can download the entire dataset.
-        br
-        h3.black(style="margin-bottom:10px") Choose what you would like to download:
-        .download-buttons.ui.buttons
-          button#dl-selected-project.ui.yellow.button(
-            @click="downloadData(filtered=true)"
-          ) Filtered Projects
-          .or
-          button.ui.pink.button(@click="downloadData(filtered=false)") Everything
-
+  transition(name="fade")
+    #downloadbox.ui.segment(v-cloak v-show="showDownload" class="ui segment")
+      h3(style="margin-left: 10px")
+        button.ui.tiny.compact.pink.icon.button(
+          style="float:right;"
+          @click="clickedCloseDownload"
+        )
+          i.close.icon
+        | Download Data
+      .mybox(style="background-color: white")
+        hr
+        .myotherbox(style="padding: 25px 25px")
+          p The data powering this site can be downloaded in .CSV format and opened in any spreadsheet software such as Microsoft Excel.
+          br
+          p You can download data just for the projects you've selected, or you can download the entire dataset.
+          br
+          h3.black(style="margin-bottom:10px") Choose what you would like to download:
+          .download-buttons.ui.buttons
+            button#dl-selected-project.ui.yellow.button(
+              @click="downloadData(filtered=true)"
+            ) Filtered Projects
+            .or
+            button.ui.violet.button(@click="downloadData(filtered=false)") Everything
 
   #nearbyprojects.ui.segment(v-show="nearbyProjects.length>0" class="ui segment"
     :style="popupLocation")
@@ -1496,7 +1492,7 @@ td {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 1s;
+  transition: opacity 0.3s;
 }
 .fade-enter,
 .fade-leave-to {
@@ -1533,26 +1529,26 @@ h2.noSelection {
 }
 
 #helpbox {
-  box-shadow: 0px 0px 20px 10px rgba(0, 0, 0, 0.4);
+  background-color: #48f;
+  box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.4);
   grid-row: 2 / 3;
   grid-column: 1 / 4;
-  z-index: 2;
-  width: minmax(min-content, 100px);
+  z-index: 30;
+  width: minmax(min-content, 150px);
   max-width: 500px;
   margin: auto auto;
-  padding: 10px 10px;
+  padding: 0px 0px;
 }
 
 #downloadbox {
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.4);
   grid-row: 2 / 3;
   grid-column: 1 / 4;
-  z-index: 2;
   z-index: 30;
   background-color: #48f;
-  width: minmax(min-content, 100px);
+  width: minmax(min-content, 150px);
   max-width: 500px;
-  margin: auto 40px;
+  margin: auto auto;
   padding: 0px 0px;
 }
 
@@ -1575,6 +1571,12 @@ h2.noSelection {
 
 .black {
   color: black;
+}
+
+.myotherbox p,
+li {
+  color: #888;
+  line-height: 1.2;
 }
 
 .nearby-title {

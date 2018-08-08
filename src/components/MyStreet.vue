@@ -46,9 +46,10 @@
         h3.black(style="margin-bottom:10px") Choose what you would like to download:
         .download-buttons.ui.buttons
           button#dl-selected-project.ui.yellow.button(
+            @click="downloadData(filtered=true)"
           ) Filtered Projects
           .or
-          button.ui.pink.button Everything
+          button.ui.pink.button(@click="downloadData(filtered=false)") Everything
 
 
   #nearbyprojects.ui.segment(v-show="nearbyProjects.length>0" class="ui segment"
@@ -80,6 +81,11 @@
       v-on:click="clickedShowLayerSelector"
       v-bind:class="{ blue: showingLayerPanel}"
     ): i.clone.outline.icon
+    br
+    button.ui.icon.button.small.grey.compact(
+      data-tooltip="Download map data" @click="clickedDownload"
+    ): i.download.icon
+
     br
     br
     button#btn-showhide.ui.tiny.green.icon.button(
@@ -233,10 +239,6 @@
 
     #bottom-panel(v-cloak)
       .details-link
-        button.ui.icon.button.small.grey.compact(
-          data-tooltip="Download map data" @click="clickedDownload"
-        )
-          i.download.icon
         button.ui.button.small.pink.compact.icon(
           v-if="infoUrl"
           @click="clickedMoreDetails"
@@ -326,6 +328,7 @@ import SearchWidget from '@/components/SearchWidget'
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let L = require('leaflet')
+let jsonexport = require('jsonexport')
 let keywordExtractor = require('keyword-extractor')
 let omnivore = require('leaflet-omnivore')
 let geocoding = require('mapbox-geocoding')
@@ -472,8 +475,6 @@ function clickedFilter(e) {
 function clickedAnywhereOnMap(map) {
   // undo selection, if user clicked on base map
   if (map.originalEvent.target.id === 'mymap') {
-    console.log('B')
-
     BigStore.state.infoTitle = defaultPanelTitle
     BigStore.state.infoDetails = ''
     BigStore.state.infoUrl = ''
@@ -625,6 +626,7 @@ export default {
     clickedSearch,
     clickedSearchTag,
     devClickedToggleDistrictOption,
+    downloadData,
     hoverAddress,
     hoverSearch,
     mobileToggleMainPanel,
@@ -667,6 +669,46 @@ function clickedCloseDownload() {
 
 function selectedTagsChanged() {
   console.log(BigStore.state.selectedTags)
+}
+
+async function downloadData(filtered) {
+  if (BigStore.debug) console.log('DOWnLOAD FILTERED ' + filtered)
+
+  let data = []
+
+  if (filtered) {
+    for (const id of Object.keys(store.projectIDsCurrentlyOnMap)) {
+      data.push(store.prjCache[id])
+    }
+    console.log(Object.keys(store.layers))
+  } else {
+    data = Object.values(store.prjCache)
+  }
+
+  jsonexport(data, function(err, csv) {
+    if (err) {
+      alert('Something went wrong; sorry. Please try again later.')
+      return console.log(err)
+    }
+    sendDownloadFileToUser(csv)
+  })
+
+  store.showDownload = false
+}
+
+function sendDownloadFileToUser(csv) {
+  let blob = new Blob([csv])
+  if (window.navigator.msSaveOrOpenBlob)
+    // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
+    window.navigator.msSaveBlob(blob, 'sfcta-mystreets-data.csv')
+  else {
+    var a = window.document.createElement('a')
+    a.href = window.URL.createObjectURL(blob, { type: 'text/csv' })
+    a.download = 'sfcta-mystreets-data.csv'
+    document.body.appendChild(a)
+    a.click() // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
+    document.body.removeChild(a)
+  }
 }
 
 async function queryServer() {

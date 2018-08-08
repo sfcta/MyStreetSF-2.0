@@ -82,6 +82,7 @@ export const BigStore = {
     showNearby: true,
     popupLocation: { left: 0, top: 0 },
     nearbyProjects: [],
+    projectIDsCurrentlyOnMap: {},
     filterKey: 0,
     isPanelHidden: false,
     terms: '',

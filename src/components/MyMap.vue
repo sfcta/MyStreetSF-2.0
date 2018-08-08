@@ -265,6 +265,8 @@ function clickedAnywhereOnMap(map) {
       store.infoUrl = ''
       store.infoProject = ''
       store.nearbyProjects = []
+      store.showHelp = false
+      store.showDownload = false
 
       removeHighlightFromPreviousSelection()
       updateURLHash()
@@ -970,7 +972,7 @@ function clickedDistrict(district) {
   showDistrictOverlay(district)
 }
 
-let _projectIdsCurrentlyOnMap = {}
+let _projectIdsCurrentlyOnMap = store.projectIDsCurrentlyOnMap
 
 function movedMap() {
   updateURLHash()

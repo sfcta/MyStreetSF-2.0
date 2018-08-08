@@ -91,21 +91,21 @@
     ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
 
   #layer-widgets-mobile
-    button#mbtn-start.ui.small.grey.button(
+    button#mbtn-start.ui.small.button(
       v-on:click="mobileToggleMainPanel"
       :class="{violet: showingMainPanel}"
     )
       i.list.icon
       | PROJECTS
 
-    button#btn-mshowhide.ui.small.grey.button(
+    button#btn-mshowhide.ui.small.button(
       @click="mobileToggleFilterPanel"
       :class="{violet: showingFilterPanel}"
     )
       i.filter.icon
       | FILTERS
 
-    button#btn-layers.ui.small.grey.button(
+    button#btn-layers.ui.small.button(
       @click="mobileToggleLayerSelector"
       :class="{violet: showingLayerPanel}"
     )
@@ -492,12 +492,22 @@ function mounted() {
 
   store.isMobile = determineMobile()
   handleHash()
+  addEscapeKeyListener()
 
   window.addEventListener('resize', function() {
-    store.isMobile = determineMobile()
-  })
+    let isMobile = determineMobile()
+    if (isMobile === store.isMobile) return
 
-  addEscapeKeyListener()
+    if (!isMobile) switchingToDesktop()
+    store.isMobile = isMobile
+  })
+}
+
+function switchingToDesktop() {
+  console.log('SWITCHING')
+  store.showingFilterPanel = false
+  store.isPanelHidden = false
+  clickedShowMainPanel()
 }
 
 function addEscapeKeyListener() {
@@ -1625,19 +1635,18 @@ li {
   #container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto auto;
+    grid-template-rows: auto auto-fill auto;
   }
 
   .sidepanel {
     opacity: 0.95;
     display: grid;
     grid-column: 1 / 2;
-    grid-row: 1 / 3;
+    grid-row: 2 / 3;
     align-self: end;
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr auto;
-    position: relative;
-    bottom: 0;
+    margin-top: auto;
     margin-right: 0px;
     padding: 0px 15px 20px 15px;
     transition: margin 0.5s;
@@ -1667,11 +1676,12 @@ li {
 
   #layer-widgets-mobile {
     display: flex;
+
     justify-content: center;
     padding: 5px;
     position: relative;
     flex-direction: row;
-    background-color: #333;
+    background-color: #f8f8f8;
     grid-column: 1 / 2;
     grid-row: 3 / 4;
     width: 100%;

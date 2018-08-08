@@ -88,6 +88,8 @@ export const BigStore = {
     isPanelHidden: false,
     terms: '',
     results: [],
+    cacheDb: null,
+    cacheSupervisorDistricts: null,
     whichSearchWidget: 'SearchWidget',
     tagresults: [],
     tags: _tagList,

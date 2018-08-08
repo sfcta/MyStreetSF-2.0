@@ -279,13 +279,20 @@ function clickedAnywhereOnMap(map) {
   }
 }
 
+function setInitialMapExtentIfNecessary() {
+  let hash = window.location.hash
+  if (hash.indexOf('zoom') == -1 || hash.indexOf('center') == -1) {
+    mymap.fitBounds([[37.82, -122.37], [37.71, -122.505]])
+  }
+}
+
 function mounted() {
   store.whichSearchWidget = 'SearchWidget'
 
   mymap = L.map('mymap', { zoomSnap: 0.25 })
-  mymap.fitBounds([[37.82, -122.37], [37.71, -122.505]])
-
   mymap.zoomControl.setPosition('topright')
+
+  setInitialMapExtentIfNecessary()
 
   let url =
     'https://api.mapbox.com/styles/v1/mapbox/' +
@@ -497,14 +504,22 @@ function selectedTagsChanged() {
 
 async function queryServer() {
   const geoUrl = API_SERVER + GEO_VIEW
-  // const geoUrl = '/static/mystreet2_all.json'
+
+  if (store.cacheDb) {
+    await mapSegments(store.cacheDb)
+    return
+  }
 
   try {
+    store.nowMoloading = true
     let resp = await fetch(geoUrl)
-    let jsonData = await resp.json()
-    mapSegments(jsonData)
+    store.cacheDb = await resp.json()
+    store.nowMoloading = false
+    await promiseMapSegments(store.cacheDb)
   } catch (error) {
-    console.log('map error: ' + error)
+    // console.log('map error: ' + error)
+  } finally {
+    store.nowMoloading = false
   }
 }
 
@@ -515,9 +530,14 @@ let _districtOverlay
 function showDistrictOverlay(district) {
   district = parseInt(district)
   if (_districtOverlay) {
-    mymap.removeLayer(_districtOverlay)
+    try {
+      mymap.removeLayer(_districtOverlay)
+    } catch (e) {
+      console.log(e)
+    }
     _districtOverlay = null
   }
+
   // that's it if user chose citywide
   if (district === 0) return
 
@@ -530,17 +550,22 @@ function showDistrictOverlay(district) {
     },
   }
 
-  _districtOverlay = L.geoJSON(_districtLayersInverted[district], params).addTo(mymap)
+  _districtOverlay = L.geoJSON(_districtLayersInverted[district], params)
+  _districtOverlay.addTo(mymap)
 }
 
 async function loadSupervisorDistricts() {
-  //const DISTRICT_VIEW = 'sup_district_boundaries'
-  //const geoUrl = API_SERVER + DISTRICT_VIEW
   const geoUrl = store.extraLayers[0].geojson
 
   try {
-    let resp = await fetch(geoUrl)
-    let jsonData = await resp.json()
+    let jsonData
+    if (store.cacheSupervisorDistricts) {
+      jsonData = store.cacheSupervisorDistricts
+    } else {
+      let resp = await fetch(geoUrl)
+      jsonData = await resp.json()
+      store.cacheSupervisorDistricts = jsonData
+    }
 
     for (let feature of jsonData.features) {
       let id = feature.properties.DISTRICT
@@ -560,12 +585,15 @@ async function loadSupervisorDistricts() {
 
       feature.geometry.coordinates = invertGeometry
       _districtLayersInverted[id] = feature
-
-      if (store.filterDistrict > -1) showDistrictOverlay(store.filterDistrict)
     }
+    if (store.filterDistrict > -1) showDistrictOverlay(store.filterDistrict)
   } catch (error) {
-    console.log('map error: ' + error)
+    // console.log('map error: ' + error)
   }
+}
+
+function promiseMapSegments(segJson) {
+  return new Promise(r => mapSegments(segJson))
 }
 
 // add segments to the map by using metric data to color
@@ -622,10 +650,6 @@ function mapSegments(cmpsegJson) {
         if (!_projectsByTag[tag]) _projectsByTag[tag] = []
         _projectsByTag[tag].push(id)
       }
-
-      // remove all duplicates
-      _tagList = Array.from(new Set(_tagList)).sort()
-      store.tags = _tagList
     }
 
     // hang onto the data
@@ -648,10 +672,14 @@ function mapSegments(cmpsegJson) {
       BigStore.addLayer(id, layer)
       _projectIdsCurrentlyOnMap[id] = true
     } catch (e) {
-      console.log('couldnt: ' + id)
-      console.log(segment)
+      // console.log('couldnt: ' + id)
+      // console.log(segment)
     }
   }
+
+  // remove all tag duplicates
+  _tagList = Array.from(new Set(_tagList)).sort()
+  store.tags = _tagList
 
   // TODO Hard-coded giant polygons -- send to back.
   for (let giantArea of _bigAreas) {
@@ -784,7 +812,7 @@ function clickedOnFeature(e) {
   removeHighlightFromPreviousSelection()
 
   // save this project as the selected project; it's no longer just being hovered over!
-  _selectedProject = id
+  _starterProject = _selectedProject = id
   _hoverProject = null
 
   let clickedStyle = JSON.parse(JSON.stringify(_projectStylesById[id]))
@@ -835,7 +863,7 @@ function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
           insideLayers.push(key) // BigStore.state.layers[key])
         }
       } catch (e) {
-        console.log({ msg: 'feature failed', feature: feature })
+        // console.log({ msg: 'feature failed', feature: feature })
       }
     }
   }
@@ -863,8 +891,8 @@ function isPointInsideFeature(clickPoint, clickBuffer, feature) {
         }
         return false
       default:
-        console.log('what? ' + featureType)
-        console.log(feature)
+        // console.log('what? ' + featureType)
+        // console.log(feature)
         return false
     }
   } catch (e) {

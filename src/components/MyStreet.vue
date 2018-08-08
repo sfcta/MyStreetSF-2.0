@@ -525,7 +525,7 @@ function determineMobile() {
 }
 
 function handleHash() {
-  if (BigStore.debug) console.log('HASH: ' + window.location.hash)
+  if (BigStore.debug) console.log('HANDLE HASH: ' + window.location.hash)
   let p = getUrlParams()
   if (p) activateMapSettings(p)
 }
@@ -545,7 +545,6 @@ function activateMapSettings(p) {
   if (p.center && p.zoom) EventBus.$emit(EVENT.SET_MAP_VIEW, p)
   if (p.district) store.filterDistrict = parseInt(p.district)
   if (p.fund) store.filterFund = p.fund
-  if (p.project) EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
 
   if (p.xlayer) {
     let layers = p.xlayer.split(',')
@@ -554,7 +553,12 @@ function activateMapSettings(p) {
 
   if (p.tags) EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
 
+  if (p.project) EventBus.$emit(EVENT.CLICKED_ON_FEATURE, p.project)
+  if (p.project) EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
+
   if (p.showall) store.devDistrictOption = true
+
+  updateFilters()
 }
 
 /**
@@ -655,6 +659,11 @@ let _selectedProject, _selectedStyle
 let _hoverProject, _hoverStyle
 
 function clickedMoreDetails() {
+  let z = getUrlParams()
+
+  EventBus.$emit('MAP_SET_PROJECT', store.projectNumber)
+  store.nearbyProjects = []
+
   this.$router.push(store.infoUrl)
 }
 

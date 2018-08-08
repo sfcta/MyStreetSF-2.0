@@ -1798,7 +1798,7 @@ h2.noSelection {
   color: black;
 }
 
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 768px) {
   #mymap {
     grid-column: 1 / 2;
     grid-row: 1 / 3;

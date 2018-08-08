@@ -511,7 +511,7 @@ function addEscapeKeyListener() {
 }
 
 function determineMobile() {
-  let MOBILE_LIMIT = 760
+  let MOBILE_LIMIT = 768
 
   var w = window,
     d = document,
@@ -1613,7 +1613,7 @@ li {
   display: none;
 }
 
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 768px) {
   .slide-enter-active,
   .slide-leave-active {
     transition: margin 0.5s;

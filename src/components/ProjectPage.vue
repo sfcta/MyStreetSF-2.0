@@ -1010,7 +1010,7 @@ a {
   background-color: white;
 }
 
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 768px) {
   .banner1-title {
     margin-top: 20px;
   }

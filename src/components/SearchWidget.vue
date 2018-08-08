@@ -603,7 +603,7 @@ h2.noSelection {
 .black {
   color: black;
 }
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 768px) {
   #search-widget {
     margin: 10px 80px 10px 10px;
   }

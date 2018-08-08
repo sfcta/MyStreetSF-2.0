@@ -964,7 +964,7 @@ a {
   position: absolute;
 }
 
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 768px) {
   .viz-thumbnail {
     width: 15rem;
   }

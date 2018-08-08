@@ -255,7 +255,9 @@ function clickedAnywhereOnMap(map) {
       store.isPanelHidden = true
       setTimeout(function() {
         store.showingMainPanel = false
-      }, 500)
+        store.showingFilterPanel = false
+        store.showingLayerPanel = false
+      }, 300)
     }
 
     let delay = store.isMobile ? 500 : 0

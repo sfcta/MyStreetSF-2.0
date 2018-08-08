@@ -30,7 +30,7 @@
 
   #downloadbox.ui.segment(v-cloak v-show="showDownload" class="ui segment")
     h3(style="margin-left: 10px")
-      button.ui.tiny.compact.red.icon.button(
+      button.ui.tiny.compact.pink.icon.button(
         style="float:right;"
         @click="clickedCloseDownload"
       )
@@ -88,26 +88,30 @@
 
     br
     br
+
     button#btn-showhide.ui.tiny.green.icon.button(
            data-tooltip="Show/Hide Panel"
            v-on:click="clickedShowHide"
     ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
 
   #layer-widgets-mobile
-    button#mbtn-start.ui.small.yellow.button(
+    button#mbtn-start.ui.small.grey.button(
       v-on:click="mobileToggleMainPanel"
+      :class="{violet: showingMainPanel}"
     )
       i.list.icon
       | PROJECTS
 
-    button#btn-mshowhide.ui.small.green.button(
+    button#btn-mshowhide.ui.small.grey.button(
       @click="mobileToggleFilterPanel"
+      :class="{violet: showingFilterPanel}"
     )
       i.filter.icon
       | FILTERS
 
-    button#btn-layers.ui.small.blue.button(
-      v-on:click="mobileToggleLayerSelector"
+    button#btn-layers.ui.small.grey.button(
+      @click="mobileToggleLayerSelector"
+      :class="{violet: showingLayerPanel}"
     )
       i.clone.outline.icon
       | LAYERS
@@ -502,8 +506,8 @@ function mounted() {
 }
 
 function addEscapeKeyListener() {
-  document.addEventListener("keydown", (e) => {
-    if (e.keyCode==27) {
+  document.addEventListener('keydown', e => {
+    if (e.keyCode == 27) {
       store.nearbyProjects = []
       store.showDownload = false
       store.showHelp = false
@@ -1544,6 +1548,7 @@ h2.noSelection {
   grid-row: 2 / 3;
   grid-column: 1 / 4;
   z-index: 2;
+  z-index: 30;
   background-color: #48f;
   width: minmax(min-content, 100px);
   max-width: 500px;
@@ -1656,7 +1661,7 @@ h2.noSelection {
     padding: 5px;
     position: relative;
     flex-direction: row;
-    background-color: #fff;
+    background-color: #333;
     grid-column: 1 / 2;
     grid-row: 3 / 4;
     width: 100%;

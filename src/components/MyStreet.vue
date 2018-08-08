@@ -377,7 +377,7 @@ function devClickedToggleDistrictOption() {
 function clickedShowHide(e) {
   store.isPanelHidden = !store.isPanelHidden
   // leaflet map needs to be force-recentered, and it is slow.
-  if (store.isMobile) EventBus.$emit(EVENT.MAP_RESIZE, BigStore.state.isPanelHidden)
+  EventBus.$emit(EVENT.MAP_RESIZE, BigStore.state.isPanelHidden)
 }
 
 function clickedToggleLayer(tag) {

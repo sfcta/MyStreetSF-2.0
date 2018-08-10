@@ -851,8 +851,9 @@ a {
 }
 
 .visualizations {
+  justify-content: center;
   display: grid;
-  grid-gap: 35px;
+  grid-gap: 0.5rem;
   grid-template-columns: repeat(auto-fill, 20rem);
   list-style: none;
   padding-left: 0px;
@@ -860,11 +861,8 @@ a {
 }
 
 .viz-thumbnail {
-  background: #dde8ff;
+  background: #fff;
   background-color: #fff;
-  border-style: solid;
-  border-width: 1px 1px;
-  border-color: #aaa;
   display: table-cell;
   opacity: 0.9;
   padding: 0 0 0 0;
@@ -889,11 +887,10 @@ a {
 }
 
 .thumbnail-image {
-  background-color: #aac;
+  background-color: #fff;
   object-fit: cover;
   width: 20rem;
-  height: 10rem;
-  padding-right: 2px;
+  height: 18rem;
   vertical-align: top;
 }
 
@@ -931,16 +928,18 @@ a {
 
 .project-heading {
   background-color: #0071c6;
-  padding-bottom: 5px;
+  padding-top: 15px;
+  padding-bottom: 15px;
   padding-left: 5px;
   margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .footnote {
-  background-color: #ccd;
+  background-color: #e5e5e5;
   padding-left: 5px;
   margin-top: -2px;
-  margin-bottom: -2px;
+  margin-bottom: 0px;
   color: #777;
   font-size: 12px;
 }
@@ -966,22 +965,26 @@ a {
 
 @media only screen and (max-width: 768px) {
   .viz-thumbnail {
-    width: 15rem;
+    width: 10rem;
   }
 
   .thumbnail-image {
-    width: 15rem;
-    height: 7.5rem;
+    width: 10rem;
+    height: 9rem;
   }
 
   .visualizations {
     display: grid;
-    grid-row-gap: 30px;
-    grid-column-gap: 15px;
-    grid-template-columns: repeat(auto-fill, 15rem);
+    grid-gap: 0.25rem;
+    grid-row-gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, 10rem);
     list-style: none;
     padding-left: 0px;
     margin-bottom: 0px;
+  }
+
+  .bottom-left {
+    font-size: 1.1rem;
   }
 }
 </style>

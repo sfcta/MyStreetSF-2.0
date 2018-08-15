@@ -199,7 +199,7 @@ function setProjectDetails() {
   store.details.push(['Open for Use', openForUse])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Location', store.geojson['project_location']])
-  store.details.push(['Districts', store.geojson['districts']])
+  store.details.push(['District(s)', store.geojson['districts']])
   store.details.push(['Total Project Cost', cost])
   store.details.push(['Funding Sources', store.geojson['funding_sources']])
   // store.details.push(['Tags', store.geojson['project_tags']])

@@ -48,16 +48,16 @@
             .or
             button.ui.violet.button(@click="downloadData(filtered=false)") Everything
 
-  #nearbyprojects.ui.segment(v-show="nearbyProjects.length>0" class="ui segment"
+  #nearbyprojects.ui.segment(v-if="nearbyProjects.length>0" class="ui segment"
     :style="popupLocation")
 
-    h5.nearby-title
-      button.ui.tiny.compact.pink.icon.button(
-        @click="clickedCloseNearby"
-        style="float:right;"
-      )
-        i.close.icon
-      | {{ nearbyProjects.length>0 ? nearbyProjects[0].project_name : "" }}
+    .thing(@click="clickedNearbyProject(nearbyProjects[0].project_number)")
+      h5.nearby-title
+       button.ui.tiny.compact.pink.icon.button(
+          @click="clickedCloseNearby"
+          style="float:right;"
+        ): i.close.icon
+       | {{ nearbyProjects[0].project_name}}
 
     .other-projects(v-if="nearbyProjects.length > 1")
       h5.black(style="font-size:11px; margin-left:5px; padding-top:5px;") ALSO NEARBY:
@@ -1578,7 +1578,7 @@ h2.noSelection {
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
   font-size: 8px;
   z-index: 2;
-  width: 320px;
+  width: 280px;
   margin: 10px 10px 5px 5px;
   padding: 0px 0px 5px 5px;
   color: black;
@@ -1602,15 +1602,21 @@ li {
 .nearby-title {
   margin: 10px 5px;
   color: black;
+  padding-top: 2px;
+  min-height: 30px;
+}
+
+.nearby-title:hover {
+  background-color: #eee;
 }
 
 .nearby-row {
   color: #666;
   font-weight: 400;
   font-size: 13px;
-  padding-top: 5px;
+  padding-top: 2px;
   padding-left: 5px;
-  height: 45px;
+  height: 40px;
 }
 
 .nearby-row:hover {

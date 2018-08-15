@@ -435,7 +435,6 @@ function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, containerPoint, 
     if (_showNearbyTick) {
       store.nearbyProjects = _lastNearbyList
       store.popupLocation = { left: _containerPoint.x + 'px', top: _containerPoint.y + 'px' }
-      console.log(_containerPoint)
       _showNearbyTick = false
     }
   }, delay)
@@ -815,6 +814,7 @@ function updatePanelDetails(id) {
 
 function removeHighlightFromPreviousSelection() {
   if (!_selectedProject) return
+
   BigStore.state.layers[_selectedProject].setStyle(_projectStylesById[_selectedProject])
 }
 
@@ -873,6 +873,7 @@ function getLayersNearLatLng(latlng, distanceInMeters) {
   let lng = latlng.lng
 
   let clickPoint = turf.point([lng, lat]) // turf uses long-lat, leaflet uses lat-long :-O
+
   let clickBuffer = turf.buffer(clickPoint, distanceInMeters, {
     units: 'meters',
   })
@@ -894,13 +895,14 @@ function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
     for (let feature of features) {
       try {
         if (isPointInsideFeature(clickPoint, clickBuffer, feature)) {
-          insideLayers.push(key) // BigStore.state.layers[key])
+          insideLayers.push(key)
         }
       } catch (e) {
         // console.log({ msg: 'feature failed', feature: feature })
       }
     }
   }
+
   return insideLayers
 }
 
@@ -910,23 +912,28 @@ function isPointInsideFeature(clickPoint, clickBuffer, feature) {
     switch (featureType) {
       case 'Point':
       case 'MultiPoint':
-        return turf.booleanPointInPolygon(feature, clickBuffer)
+        let distance = turf.distance(feature, clickPoint, { units: 'meters' })
+        return distance < BUFFER_DISTANCE_METERS_SHORT
+
       case 'LineString':
       case 'MultiLineString':
+        return turf.booleanCrosses(feature, clickBuffer)
+
       case 'Polygon':
-        return turf.booleanContains(feature, clickPoint)
+        return turf.booleanWithin(clickBuffer, feature) || turf.booleanOverlap(feature, clickBuffer)
+
       case 'MultiPolygon':
         return false
+
       case 'GeometryCollection':
-        for (let subfeature of feature.geometry.geometries) {
-          if (isPointInsideFeature(clickPoint, clickBuffer, subfeature)) {
-            return true
-          }
+        for (const subFeature of feature.geometry.geometries) {
+          if (isPointInsideFeature(clickPoint, clickBuffer, subFeature)) return true
         }
         return false
+
       default:
-        // console.log('what? ' + featureType)
-        // console.log(feature)
+        if (BigStore.debug) console.log('what? ' + featureType)
+        if (BigStore.debug) console.log(feature)
         return false
     }
   } catch (e) {
@@ -987,9 +994,6 @@ function hoverFeature(e) {
   // differently, hence the weirdness for fetching the id of the selected feature.
   let id = target.options.id
   if (!id) id = e.layer.options.id
-
-  // don't add a hover if the proj is already selected
-  if (id === _selectedProject) return
 
   let polygon = isTargetAPolygon(target)
   let points = isTargetAPoint(target)

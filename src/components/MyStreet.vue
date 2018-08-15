@@ -96,21 +96,21 @@
       :class="{violet: showingMainPanel}"
     )
       i.list.icon
-      | PROJECTS
+      | Info
 
     button.nav-button.ui.small.button(
       @click="mobileToggleFilterPanel"
       :class="{violet: showingFilterPanel}"
     )
       i.filter.icon
-      | FILTERS
+      | Filters
 
     button.nav-button.ui.small.button(
       @click="mobileToggleLayerSelector"
       :class="{violet: showingLayerPanel}"
     )
       i.clone.outline.icon
-      | LAYERS
+      | Layers
 
 
   transition(name="slide")
@@ -198,16 +198,14 @@
       .some-flair
       .information-panel(v-cloak)
         .title-thing
-          button.ui.button.small.pink.compact.icon(
+          button.ui.button.small.pink.compact(
             @click="clickedMoreDetails"
             style="margin:2px 0px 10px 15px; float:right;"
             v-if="infoUrl"
-            )
-            i.icon.chart.bar.outline
-            | &nbsp;&nbsp;SHOW DETAILS&hellip;
-          h2(:class="{noSelection: !infoUrl}" v-html="infoTitle")
+            ) SHOW DETAILS
+          h2.mobile-squish(:class="{noSelection: !infoUrl}" v-html="infoTitle")
 
-        p(style="margin-top:10px; text-align: justify")  {{ clippedInfoDetails }}
+        p.mobile-squish {{ clippedInfoDetails }}
         h3(v-if="!infoUrl" style="text-align: center")
           span(v-html="helptext.PRETEXT")
           router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
@@ -1727,6 +1725,16 @@ li {
 
   .nav-button {
     line-height: 1.2em;
+  }
+
+  h2.mobile-squish {
+    font-size: 20px;
+  }
+
+  p.mobile-squish {
+    margin-top: 0px;
+    text-align: justify;
+    line-height: 1.3em;
   }
 }
 </style>

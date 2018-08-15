@@ -54,7 +54,17 @@ function devClickedToggleDistrictOption() {
   updateFilters()
 }
 
-function toggleMapLayer(layer) {
+async function toggleMapLayer(layer) {
+  try {
+    await asyncToggleMapLayer(layer)
+  } catch (e) {
+    // nothing
+  }
+
+  updateURLHash()
+}
+
+async function asyncToggleMapLayer(layer) {
   if (!layer.id) {
     addExtraMapLayer(layer)
   } else {
@@ -65,8 +75,6 @@ function toggleMapLayer(layer) {
       layer.id.bringToBack()
     }
   }
-
-  updateURLHash()
 }
 
 function clickedToggleLayer(e) {}

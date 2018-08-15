@@ -93,7 +93,14 @@ function synchronizeExtraLayer(tag) {
   if (layer.show != mymap.hasLayer(layer.id)) toggleMapLayer(layer)
 }
 
+let _alreadyLoaded = new Set()
+
 async function addExtraMapLayer(extraLayer) {
+  // only load once
+  if (_alreadyLoaded.has(extraLayer.tag)) return
+
+  _alreadyLoaded.add(extraLayer.tag)
+
   switch (extraLayer.tag) {
     case 'dists':
       addSupDistrictLayer(extraLayer)

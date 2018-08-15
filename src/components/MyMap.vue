@@ -960,6 +960,9 @@ function unHoverFeature(id) {
 }
 
 function hoverFeature(e) {
+  // don't hover ANYTHING if we're on mobile
+  if (store.isMobile) return
+
   let target
 
   // deal w search clicks first

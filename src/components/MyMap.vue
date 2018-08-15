@@ -620,12 +620,9 @@ function mapSegments(cmpsegJson) {
       segment['geometry'] +
       '</Placemark></kml>'
 
-    let polygon = false
-    if (segment['shape'] && segment['shape'].includes('Polygon')) {
-      polygon = true
-    }
+    let polygon = segment['shape'] && segment['shape'].includes('Polygon')
 
-    _projectStylesById[id] = getNormalStyle(segment, polygon)
+    _projectStylesById[id] = getNormalStyle(segment)
 
     let geoLayer = L.geoJSON(null, {
       style: _projectStylesById[id],
@@ -741,10 +738,17 @@ function getNormalStyle(segment) {
     weight: store.isMobile ? 5 : 3,
   }
 
+  let polygon = segment['shape'] && segment['shape'].includes('Polygon')
+
   if (polygon) {
     style.color = '#a3c0'
     style.fillColor = '#8482'
     style.weight = 3
+  }
+
+  if (segment.geometry && segment.geometry.indexOf('Point') > -1) {
+    style.weight = 1
+    style.fillOpacity = 0.1
   }
   return style
 }
@@ -1033,8 +1037,11 @@ function clickedDistrict(district) {
 
 let _projectIdsCurrentlyOnMap = store.projectIDsCurrentlyOnMap
 
+let _oldZoom = 0
+
 function movedMap() {
   updateURLHash()
+  // if (mymap.getZoom() != _oldZoom) resetStyles()
 }
 
 function updateURLHash() {

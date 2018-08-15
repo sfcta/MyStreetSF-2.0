@@ -66,13 +66,13 @@
         h5.nearby-row(v-if="index > 0") {{prj.project_name}}
 
   #layer-widgets
-    button#btn-start.ui.tiny.grey.icon.button(
+    button.ui.tiny.grey.icon.button(
       data-tooltip="Projects"
       v-on:click="clickedShowMainPanel"
       v-bind:class="{ blue: showingMainPanel}"
     ): i.list.icon
     br
-    button#btn-layers.ui.tiny.grey.icon.button(
+    button.ui.tiny.grey.icon.button(
       data-tooltip="Map Layers"
       v-on:click="clickedShowLayerSelector"
       v-bind:class="{ blue: showingLayerPanel}"
@@ -91,21 +91,21 @@
     ): i.angle.double.icon(v-bind:class="{left: isPanelHidden, right: !isPanelHidden}")
 
   #layer-widgets-mobile
-    button#mbtn-start.ui.small.button(
+    button.nav-button.ui.small.button(
       v-on:click="mobileToggleMainPanel"
       :class="{violet: showingMainPanel}"
     )
       i.list.icon
       | PROJECTS
 
-    button#btn-mshowhide.ui.small.button(
+    button.nav-button.ui.small.button(
       @click="mobileToggleFilterPanel"
       :class="{violet: showingFilterPanel}"
     )
       i.filter.icon
       | FILTERS
 
-    button#btn-layers.ui.small.button(
+    button.nav-button.ui.small.button(
       @click="mobileToggleLayerSelector"
       :class="{violet: showingLayerPanel}"
     )
@@ -1717,6 +1717,10 @@ li {
   }
   .title-thing {
     margin-top: 12px;
+  }
+
+  .nav-button {
+    line-height: 1.2em;
   }
 }
 </style>

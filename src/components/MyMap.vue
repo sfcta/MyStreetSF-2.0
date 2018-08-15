@@ -385,6 +385,10 @@ function setupEventListeners() {
     removeAddressMarker()
   })
 
+  EventBus.$on(EVENT.TOGGLE_MOBILE, mobile => {
+    resetStyles()
+  })
+
   EventBus.$on(EVENT.ACTIVE_TAGS, tags => {
     activateTags(tags)
   })
@@ -695,16 +699,35 @@ function mapSegments(cmpsegJson) {
   if (_starterProject) clickedOnFeature(_starterProject)
 }
 
+function resetStyles(mobile) {
+  _oldZoom = mymap.getZoom()
+
+  let opacity = _oldZoom < 14 ? 0.1 : 1.0
+
+  for (const id in store.layers) {
+    let prj = store.prjCache[id]
+    let style = getNormalStyle(prj)
+
+    style.opacity = fillOpacity
+    style.fillOpacity = opacity
+
+    _projectStylesById[id] = style
+
+    // let layer = store.layers[id]
+    // layer.setStyle(_projectStylesById[id])
+  }
+}
+
 function getProjectDotRadius(segment) {
   // major projects get bigger circles
   let iconName = segment.icon_name
-  if (iconName && iconName.startsWith('measle')) return 8
-  return 4
+  if (iconName && iconName.startsWith('measle')) return 9
+  return 6
 }
 
 let TRUE_COLOR = { TRANSIT: '#0071c6', STREETS: '#21ba45', PLANS: '#eb4' }
 
-function getNormalStyle(segment, polygon) {
+function getNormalStyle(segment) {
   let truecolor = generateColorForSegment(segment) // actual project color;
   let radius = getProjectDotRadius(segment)
 

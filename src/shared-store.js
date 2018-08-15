@@ -17,6 +17,7 @@ export const EVENT = {
   SET_MAP_PROJECT: 'set-map-project',
   SET_MAP_VIEW: 'set-map-view',
   ACTIVE_TAGS: 'active-tags',
+  TOGGLE_MOBILE: 'toggle-mobile',
 }
 
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'

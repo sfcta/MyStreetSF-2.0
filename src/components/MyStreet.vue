@@ -500,6 +500,8 @@ function mounted() {
 
     if (!isMobile) switchingToDesktop()
     store.isMobile = isMobile
+
+    EventBus.$emit(EVENT.TOGGLE_MOBILE, isMobile)
   })
 }
 

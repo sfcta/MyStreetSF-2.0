@@ -115,7 +115,6 @@ let store = {
   project_name: '',
   project_number: '',
   sharedState: BigStore.state,
-  currentRoute: window.location.href,
 }
 
 export default {
@@ -126,6 +125,17 @@ export default {
   computed: {
     cleanProjectName: function() {
       return store.project_name.replace('&', '%26')
+    },
+    currentRoute: function() {
+      let port = window.location.port != 80 ? ':' + window.location.port : ''
+      return (
+        window.location.protocol +
+        '//' +
+        window.location.hostname +
+        port +
+        '/project/' +
+        store.project_number
+      )
     },
   },
   mounted: function() {

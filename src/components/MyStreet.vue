@@ -240,12 +240,12 @@
 
     .information-panel(v-cloak)
         br
-        h2.noSelection(v-show="!infoDetails" v-html="infoTitle")
-        h2.clickableLink(v-show="infoDetails")
+        h2.noSelection(v-show="!infoUrl" v-html="infoTitle")
+        h2.clickableLink(v-show="infoUrl")
           router-link(:to="infoUrl") {{infoTitle}}
 
         p  {{ infoDetails }}
-        h3(v-if="!infoDetails" style="text-align: center")
+        h3(v-if="!infoUrl" style="text-align: center")
           span(v-html="helptext.PRETEXT")
           router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
 

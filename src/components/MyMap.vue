@@ -341,6 +341,7 @@ function mounted() {
   updatePanelHelpText()
   loadSupervisorDistricts()
   setupEventListeners()
+  EventBus.$emit(EVENT.SET_PREVENT_OVERSCROLL, true)
 }
 
 let _hoverPopup

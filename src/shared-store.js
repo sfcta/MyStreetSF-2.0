@@ -16,6 +16,7 @@ export const EVENT = {
   SEARCH_TERM_CHANGED: 'search-term-changed',
   SET_MAP_PROJECT: 'set-map-project',
   SET_MAP_VIEW: 'set-map-view',
+  SET_PREVENT_OVERSCROLL: 'set-overscroll',
   ACTIVE_TAGS: 'active-tags',
   TOGGLE_MOBILE: 'toggle-mobile',
 }
@@ -75,6 +76,7 @@ export const BigStore = {
     isMobile: false,
     mainComponent: 'MyMap',
     nowMoloading: false,
+    preventOverscroll: true,
     selectedTags: '',
     showDownload: false,
     showHelp: false,

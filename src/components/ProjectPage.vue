@@ -93,7 +93,7 @@ import 'babel-polyfill'
 import 'isomorphic-fetch'
 
 // Shared stuff across all components
-import { BigStore } from '../shared-store.js'
+import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let L = require('leaflet')
 let omnivore = require('leaflet-omnivore')
@@ -178,6 +178,8 @@ function clearProjectDetails() {
 }
 
 function setProjectDetails() {
+  EventBus.$emit(EVENT.SET_PREVENT_OVERSCROLL, false)
+
   store.project_name = store.geojson['project_name']
   store.description = store.geojson['description'] || store.project_name
   store.project_number = store.geojson['project_number']
@@ -357,6 +359,7 @@ function addProjectMapLayer(id) {
 html,
 body {
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* prevents transition animations on page load (Screw you IE!) */
@@ -1017,6 +1020,7 @@ a {
 }
 
 #container {
+  overflow-y: auto;
   background-color: white;
 }
 

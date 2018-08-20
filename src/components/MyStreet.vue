@@ -1335,6 +1335,7 @@ h4 {
   padding: 0px 15px 0px 15px;
   transition: margin 0.4s;
   width: 400px;
+  overflow-y: hidden;
   z-index: 5;
 }
 

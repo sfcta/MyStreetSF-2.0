@@ -1020,11 +1020,11 @@ a {
   background-color: white;
 }
 
-@media only screen and (max-width: 768px) {
-  .banner1-title {
-    margin-top: 20px;
-  }
+.banner1-title {
+  margin-top: 20px;
+}
 
+@media only screen and (max-width: 768px) {
   #project-detail-container {
     display: flex;
     flex-direction: column;

@@ -213,7 +213,7 @@
   .panel.sidepanel(v-if="showingMainPanel && !isMobile" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr
-      h4.apptitle MyStreet SF
+      h4.apptitle: a(href="/") MyStreet SF
 
       .helpbar
         button.ui.right.labeled.icon.violet.tiny.button(
@@ -229,7 +229,10 @@
 
     .information-panel(v-cloak)
         br
-        h2(:class="{noSelection: !infoDetails}" v-html="infoTitle")
+        h2.noSelection(v-show="!infoDetails" v-html="infoTitle")
+        h2.clickableLink(v-show="infoDetails")
+          router-link(:to="infoUrl") {{infoTitle}}
+
         p  {{ infoDetails }}
         h3(v-if="!infoDetails" style="text-align: center")
           span(v-html="helptext.PRETEXT")
@@ -237,13 +240,11 @@
 
     #bottom-panel(v-cloak)
       .details-link
-        button.ui.button.small.pink.compact.icon(
+        button.ui.button.small.pink.compact(
           v-if="infoUrl"
           @click="clickedMoreDetails"
           style="margin:2px 0px 0px 5px;"
-          )
-          i.icon.chart.bar.outline
-          | &nbsp;&nbsp;More Details&hellip;
+          ) More Details&hellip;
 
       .pickers
         hr
@@ -1375,10 +1376,6 @@ h4 {
   line-height: 1.5;
 }
 
-.information-panel a:visited {
-  color: red;
-}
-
 .information-panel::-webkit-scrollbar {
   width: 0.3em;
 }
@@ -1430,6 +1427,10 @@ td.agency-logo {
   margin: 0px 0px;
   margin-top: -5px;
   text-align: center;
+}
+
+.apptitle a:hover {
+  color: #ccc;
 }
 
 .panel a {
@@ -1627,6 +1628,10 @@ li {
 
 #layer-widgets-mobile {
   display: none;
+}
+
+.clickableLink a:hover {
+  color: #ccc;
 }
 
 @media only screen and (max-width: 768px) {

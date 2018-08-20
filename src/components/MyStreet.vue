@@ -114,7 +114,10 @@
 
 
   transition(name="slide")
-    .panel.sidepanel(v-if="showingLayerPanel" v-bind:class="{ shrunken: isPanelHidden}")
+    .panel.sidepanel(v-if="showingLayerPanel"
+                     v-bind:class="{ shrunken: isPanelHidden}"
+                     v-touch:swipe="swipeHandler"
+    )
       #preheader
         .some-flair(v-if="isMobile")
         .product-title(v-if="!isMobile")
@@ -141,7 +144,10 @@
           br
 
   transition(name="slide")
-    .panel.sidepanel(v-if="showingFilterPanel" v-bind:class="{ shrunken: isPanelHidden}")
+    .panel.sidepanel(v-touch:swipe="swipeHandler"
+                     v-if="showingFilterPanel"
+                     v-bind:class="{ shrunken: isPanelHidden}"
+    )
       .some-flair
       .information-panel(v-cloak)
         h2 FILTERS
@@ -194,7 +200,10 @@
                   .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
 
   transition(name="slide")
-    .panel.sidepanel(v-if="isMobile && showingMainPanel" v-bind:class="{ shrunken: isPanelHidden}")
+    .panel.sidepanel(v-if="showingMainPanel && isMobile"
+                     v-bind:class="{ shrunken: isPanelHidden}"
+                     v-touch:swipe="swipeHandler"
+    )
       .some-flair
       .information-panel(v-cloak)
         .title-thing
@@ -208,7 +217,9 @@
         p.mobile-squish {{ clippedInfoDetails }}
         h3(v-if="!infoUrl" style="text-align: center")
           span(v-html="helptext.PRETEXT")
-          router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
+          router-link(:to="helptext.LINK_URL")
+            span(style="color: #fc4"
+                  v-html="helptext.LINK_TEXT")
 
   .panel.sidepanel(v-if="showingMainPanel && !isMobile" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
@@ -532,7 +543,7 @@ function determineMobile() {
 
   _calculatedWidth = true
 
-  return x < MOBILE_LIMIT
+  return x <= MOBILE_LIMIT
 }
 
 function handleHash() {
@@ -647,6 +658,7 @@ export default {
     mobileToggleFilterPanel,
     mobileToggleLayerSelector,
     nameOfFilterDistrict,
+    swipeHandler,
     termChanged,
   },
   watch: {
@@ -668,6 +680,13 @@ export default {
 
 let _selectedProject, _selectedStyle
 let _hoverProject, _hoverStyle
+
+function swipeHandler(direction) {
+  if (store.isMobile && direction === 'bottom') {
+    clickedShowHide()
+    store.showingFilterPanel = store.showingLayerPanel = store.showingMainPanel = false
+  }
+}
 
 function clickedMoreDetails() {
   let z = getUrlParams()

@@ -65,7 +65,7 @@
       .nearby-project-row(v-for="(prj,index) in nearbyProjects" @click="clickedNearbyProject(prj.project_number)")
         h5.nearby-row(v-if="index > 0") {{prj.project_name}}
 
-  #layer-widgets
+  #layer-widgets(:class="{shrunken: isPanelHidden}")
     button.ui.tiny.grey.icon.button(
       data-tooltip="Projects"
       v-on:click="clickedShowMainPanel"
@@ -114,8 +114,8 @@
 
 
   transition(name="slide")
-    .panel.sidepanel(v-if="showingLayerPanel"
-                     v-bind:class="{ shrunken: isPanelHidden}"
+    .panel.sidepanel(v-if="showingLayerPanel || isMobile"
+                     v-bind:class="{ shrunken: isPanelHidden || (isMobile && !showingLayerPanel) }"
                      v-touch:swipe="swipeHandler"
     )
       #preheader
@@ -145,8 +145,8 @@
 
   transition(name="slide")
     .panel.sidepanel(v-touch:swipe="swipeHandler"
-                     v-if="showingFilterPanel"
-                     v-bind:class="{ shrunken: isPanelHidden}"
+                     v-if="showingFilterPanel || isMobile"
+                     v-bind:class="{ shrunken: isPanelHidden || (isMobile && !showingFilterPanel)}"
     )
       .some-flair
       .information-panel(v-cloak)
@@ -200,8 +200,8 @@
                   .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
 
   transition(name="slide")
-    .panel.sidepanel(v-if="showingMainPanel && isMobile"
-                     v-bind:class="{ shrunken: isPanelHidden}"
+    .panel.sidepanel(v-if="isMobile"
+                     v-bind:class="{ shrunken: !showingMainPanel}"
                      v-touch:swipe="swipeHandler"
     )
       .some-flair
@@ -413,22 +413,13 @@ let _districtColors = [
 ]
 
 function switchPanel(panelToActivate) {
-  store.isPanelHidden = true
-  const delay =
-    store.showingMainPanel || store.showingLayerPanel || store.showingFilterPanel ? 400 : 0
+  store.showingMainPanel = store.showingLayerPanel = store.showingFilterPanel = false
+  store.isPanelHidden = panelToActivate == null
 
-  setTimeout(function() {
-    store.showingMainPanel = store.showingLayerPanel = store.showingFilterPanel = false
-    store.isPanelHidden = panelToActivate == null
-
-    if (panelToActivate) {
-      store[panelToActivate] = true
-    }
-  }, delay)
+  if (panelToActivate) store[panelToActivate] = true
 
   if (panelToActivate === 'showingFilterPanel') {
     setTimeout(function() {
-      // eslint-disable-next-line
       $('.ui.dropdown').dropdown()
     }, delay + 250)
   }
@@ -1312,6 +1303,7 @@ h4 {
   grid-column: 3 / 4;
   position: relative;
   margin-bottom: 25px;
+  transition: transform 0.4s;
   z-index: 7;
 }
 
@@ -1333,14 +1325,14 @@ h4 {
   margin-right: 0px;
   max-height: 100%;
   padding: 0px 15px 0px 15px;
-  transition: margin 0.4s;
+  transition: transform 0.4s, width 0.4s;
   width: 400px;
   overflow-y: hidden;
   z-index: 5;
 }
 
 .shrunken {
-  margin-right: -394px;
+  transform: translateX(394px);
 }
 
 #preheader {
@@ -1680,15 +1672,14 @@ li {
     margin-top: auto;
     margin-right: 0px;
     padding: 0px 15px 20px 15px;
-    transition: margin 0.5s;
+    transition: transform 0.5s;
     width: 100%;
     height: auto;
     z-index: 4;
   }
 
   .shrunken {
-    margin-right: 0px;
-    margin-bottom: -1000px;
+    transform: translateY(800px);
   }
 
   #layer-widgets {

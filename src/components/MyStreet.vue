@@ -65,7 +65,7 @@
       .nearby-project-row(v-for="(prj,index) in nearbyProjects" @click="clickedNearbyProject(prj.project_number)")
         h5.nearby-row(v-if="index > 0") {{prj.project_name}}
 
-  #layer-widgets(:class="{shrunken: isPanelHidden}")
+  #layer-widgets
     button.ui.tiny.grey.icon.button(
       data-tooltip="Projects"
       v-on:click="clickedShowMainPanel"
@@ -1325,14 +1325,14 @@ h4 {
   margin-right: 0px;
   max-height: 100%;
   padding: 0px 15px 0px 15px;
-  transition: transform 0.4s, width 0.4s;
+  transition: transform 0.4s, margin 0.4s;
   width: 400px;
   overflow-y: hidden;
   z-index: 5;
 }
 
 .shrunken {
-  transform: translateX(394px);
+  margin-right: -394px;
 }
 
 #preheader {
@@ -1679,6 +1679,7 @@ li {
   }
 
   .shrunken {
+    margin-right: 0px;
     transform: translateY(800px);
   }
 

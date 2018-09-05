@@ -635,7 +635,7 @@ function mapSegments(cmpsegJson) {
       segment['geometry'] +
       '</Placemark></kml>'
 
-    let polygon = segment['shape'] && segment['shape'].includes('Polygon')
+    let polygon = segment.geometry && segment.geometry.includes('Polygon')
 
     _projectStylesById[id] = getNormalStyle(segment)
 
@@ -753,7 +753,8 @@ function getNormalStyle(segment) {
     weight: store.isMobile ? 5 : 3,
   }
 
-  let polygon = segment['shape'] && segment['shape'].includes('Polygon')
+  console.dir(segment)
+  let polygon = segment.geometry && segment.geometry.includes('Polygon')
 
   if (polygon) {
     style.color = '#a3c0'

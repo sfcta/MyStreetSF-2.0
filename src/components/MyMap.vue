@@ -753,12 +753,12 @@ function getNormalStyle(segment) {
     weight: store.isMobile ? 5 : 3,
   }
 
-  console.dir(segment)
   let polygon = segment.geometry && segment.geometry.includes('Polygon')
 
   if (polygon) {
     style.color = '#a3c0'
-    style.fillColor = '#8482'
+    style.fillColor = '#848'
+    style.fillOpacity = 0.1
     style.weight = 3
   }
 

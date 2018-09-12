@@ -73,9 +73,8 @@
         h3.billy-header(:style="color") For More Information
         table
           tr.project-details
-            td.project-details: b Link to Project
-            td.project-details.col2
-              a(v-bind:href="geojson.project_details_page" target="_blank") {{ geojson.project_details_page }}
+            td.project-details(colspan=2)
+              a(v-bind:href="forMoreInfoLink" target="_blank") {{ forMoreInfoLinkText }}
 
   .footer
     .banner2
@@ -109,6 +108,8 @@ let store = {
   color: TRUE_COLOR.TRANSIT,
   description: '',
   details: [],
+  forMoreInfoLink: '',
+  forMoreInfoLinkText: '',
   geojson: {},
   isCitywide: false,
   project: '',
@@ -184,6 +185,16 @@ function setProjectDetails() {
   store.description = store.geojson['description'] || store.project_name
   store.project_number = store.geojson['project_number']
   store.color = { color: generateColorFromDb() }
+
+  let link = store.geojson['project_details_link']
+  if (link) {
+    store.forMoreInfoLink = link
+    store.forMoreInfoLinkText = link
+  } else {
+    store.forMoreInfoLinkText = 'mystreetsf@sfcta.org'
+    store.forMoreInfoLink =
+      'mailto:mysftreetsf@sfcta.org?subject=MyStreetSF Website: ' + store.project_name
+  }
 
   if ('Citywide' === store.geojson.districts) {
     store.isCitywide = true

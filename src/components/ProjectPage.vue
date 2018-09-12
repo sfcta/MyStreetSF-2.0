@@ -128,7 +128,7 @@ export default {
       return store.project_name.replace('&', '%26')
     },
     currentRoute: function() {
-      let port = window.location.port != 80 ? ':' + window.location.port : ''
+      let port = window.location.port !== 80 ? ':' + window.location.port : ''
       return (
         window.location.protocol +
         '//' +
@@ -196,7 +196,7 @@ function setProjectDetails() {
       'mailto:mysftreetsf@sfcta.org?subject=MyStreetSF Website: ' + store.project_name
   }
 
-  if ('Citywide' === store.geojson.districts) {
+  if (store.geojson.districts === 'Citywide') {
     store.isCitywide = true
     store.backButtonIcon = 'th' // back button icon th==table of dots
     store.backButtonText = 'VIEW CITYWIDE PROJECTS'

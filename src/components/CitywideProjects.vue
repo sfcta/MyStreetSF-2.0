@@ -135,21 +135,6 @@ function setupEventListeners() {
   })
 }
 
-// i found this on the interweb but it's too slow
-// https://stackoverflow.com/questions/22423951/wrap-text-from-bottom-to-top
-function fixLineBreaks() {
-  let x = document.getElementsByClassName('bottom-left')
-  for (let title of x) {
-    var width = 1
-    var originalHeight = $(title).height()
-    var spacer = $('<div style="float:right;height:1px;"/>').prependTo(title)
-    while (originalHeight == $(title).height()) {
-      spacer.width(++width)
-    }
-    spacer.width(--width)
-  }
-}
-
 function searchTermChanged(term) {
   console.log('CITYWIDESEARCH: ' + term)
   store.searchTerm = term.toLowerCase()

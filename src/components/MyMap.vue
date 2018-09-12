@@ -98,7 +98,7 @@ function synchronizeExtraLayer(tag) {
     return z.tag === tag
   })[0]
 
-  if (layer.show != mymap.hasLayer(layer.id)) toggleMapLayer(layer)
+  if (layer.show !== mymap.hasLayer(layer.id)) toggleMapLayer(layer)
 }
 
 let _alreadyLoaded = new Set()
@@ -296,7 +296,7 @@ function clickedAnywhereOnMap(map) {
 
 function setInitialMapExtentIfNecessary() {
   let hash = window.location.hash
-  if (hash.indexOf('zoom') == -1 || hash.indexOf('center') == -1) {
+  if (hash.indexOf('zoom') === -1 || hash.indexOf('center') === -1) {
     mymap.fitBounds([[37.82, -122.37], [37.71, -122.505]])
   }
 }
@@ -344,7 +344,6 @@ function mounted() {
   EventBus.$emit(EVENT.SET_PREVENT_OVERSCROLL, true)
 }
 
-let _hoverPopup
 let _hoverPopupTimer
 
 function updatePanelHelpText() {
@@ -534,7 +533,7 @@ async function queryServer() {
     let resp = await fetch(geoUrl)
     store.cacheDb = await resp.json()
     store.nowMoloading = false
-    await promiseMapSegments(store.cacheDb)
+    await mapSegments(store.cacheDb)
   } catch (error) {
     // console.log('map error: ' + error)
   } finally {
@@ -611,12 +610,8 @@ async function loadSupervisorDistricts() {
   }
 }
 
-function promiseMapSegments(segJson) {
-  return new Promise(r => mapSegments(segJson))
-}
-
 // add segments to the map by using metric data to color
-function mapSegments(cmpsegJson) {
+async function mapSegments(cmpsegJson) {
   let fundStrings = []
 
   for (let segment of cmpsegJson) {
@@ -720,7 +715,7 @@ function resetStyles(mobile) {
     let prj = store.prjCache[id]
     let style = getNormalStyle(prj)
 
-    style.opacity = fillOpacity
+    style.opacity = opacity
     style.fillOpacity = opacity
 
     _projectStylesById[id] = style
@@ -791,24 +786,6 @@ function generateColorForSegment(segment) {
 function updatePanelDetails(id) {
   let prj = BigStore.state.prjCache[id]
 
-  let district = ''
-  if (prj['district1']) district += '1, '
-  if (prj['district2']) district += '2, '
-  if (prj['district3']) district += '3, '
-  if (prj['district4']) district += '4, '
-  if (prj['district5']) district += '5, '
-  if (prj['district6']) district += '6, '
-  if (prj['district7']) district += '7, '
-  if (prj['district8']) district += '8, '
-  if (prj['district9']) district += '9, '
-  if (prj['district10']) district += '10, '
-  if (prj['district11']) district += '11, '
-  if (district) {
-    district = 'District ' + district.slice(0, -2)
-  } else {
-    district = 'Citywide'
-  }
-
   // generate permalink
   let permalink = prj['project_number'].toLowerCase()
 
@@ -864,6 +841,8 @@ function clickedOnFeature(e) {
   clickedStyle.fillColor = clickedStyle.truecolor
   clickedStyle.radius = 12
   clickedStyle.weight = 12
+  clickedStyle.fillOpacity = 0.5
+
   target.setStyle(clickedStyle)
 
   updatePanelDetails(id)
@@ -1035,7 +1014,7 @@ function hoverFeature(e) {
 
   // the long timeout keeps the highlight from selecting areas every time
   // the short timeout keeps the highlight from flashing too much on mouse movement
-  let timeout = polygon ? 50 : 15
+  let timeout = polygon ? 30 : 10
 
   clearTimeout(popupTimeout)
   popupTimeout = setTimeout(function() {

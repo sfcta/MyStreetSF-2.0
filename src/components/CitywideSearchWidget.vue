@@ -14,38 +14,14 @@
 'use strict'
 
 import 'babel-polyfill'
-import * as turf from '@turf/turf'
 
 // Shared stuff across all components
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
-let keywordExtractor = require('keyword-extractor')
-let geocoding = require('mapbox-geocoding')
-
-let BUFFER_DISTANCE_METERS_SHORT = 25
-let BUFFER_DISTANCE_METERS_LONG = 275
-
-let _extraLayers = {
-  'layer-sup-districts': {
-    name: 'Supervisorial District Boundaries',
-    geojson: 'https://api.sfcta.org/api/sup_district_boundaries',
-  },
-}
-
-let _projectsByTag = {}
-let _tagList = []
-
-let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
+// let keywordExtractor = require('keyword-extractor')
+// let _tagList = []
 
 let store = BigStore.state
-
-const GEO_VIEW = 'mystreet2_all'
-
-let styles = {
-  normal: { color: '#3c6', weight: 6, opacity: 1.0 },
-  selected: { color: '#39f', weight: 8, opacity: 1.0 },
-  popup: { color: '#36f', weight: 10, opacity: 1.0 },
-}
 
 function mounted() {
   if (BigStore.debug) console.log('CITYWIDE SEARCH WIDGET')
@@ -76,33 +52,8 @@ export default {
   },
 }
 
-// some important global variables.
-let _selectedProject, _selectedStyle
-let _hoverProject, _hoverStyle
-
 function selectedTagsChanged() {
   console.log(store.selectedTags)
-}
-
-function generateColorForSegment(segment) {
-  let defaultColor = '#0071c6'
-
-  let projectCategory = segment.project_group
-
-  // no category? use blue.
-  if (!projectCategory) return defaultColor
-
-  // icon name in db? convert to a color code.
-  switch (projectCategory) {
-    case 'Transit':
-      return '#0071c6'
-    case 'Streets':
-      return '#21ba45'
-    case 'Plans and Programs':
-      return '#fc4'
-    default:
-      return defaultColor
-  }
 }
 
 function updateFilters() {
@@ -111,6 +62,7 @@ function updateFilters() {
 
 let _queryString
 
+/*
 async function fetchTagResults(terms) {
   console.log({ TAGLIST: _tagList })
   let answer = []
@@ -162,27 +114,13 @@ async function fetchSearchResults(terms) {
     console.log(error)
   }
 }
+*/
 
 function termChanged() {
   console.log(store.terms)
   _queryString = store.terms.trim()
 
   EventBus.$emit(EVENT.SEARCH_TERM_CHANGED, _queryString)
-}
-
-function fetchAddressResults(_queryString) {
-  geocoding.geocode('mapbox.places', _queryString, function(err, geoData) {
-    console.log({ err: err, data: geoData })
-    if (geoData.features.length) {
-      for (let address of geoData.features) {
-        let i = address.place_name.indexOf(', San Francisco')
-        if (i > 0) address.place_name = address.place_name.substring(0, i)
-      }
-      store.addressSearchResults = geoData['features']
-    } else {
-      store.addressSearchResults = []
-    }
-  })
 }
 
 let _hoverSearchLastId

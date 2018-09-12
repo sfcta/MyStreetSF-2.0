@@ -14,8 +14,6 @@
             li Click any project for info, and check "More Details" for timing, expenditures, and more.
             li Use the filters on the right to reduce clutter: see just the projects you're interested in
 
-
-
           div(style="margin-top:20px;")
             button.small.ui.right.floated.violet.button(@click="clickedToggleHelp") OK, GOT IT
             |&nbsp;&nbsp;
@@ -111,7 +109,6 @@
     )
       i.clone.outline.icon
       | Layers
-
 
   transition(name="slide")
     .panel.sidepanel(v-if="showingLayerPanel || isMobile"
@@ -325,7 +322,6 @@
 'use strict'
 
 import 'babel-polyfill'
-import * as turf from '@turf/turf'
 
 // components
 import CitywideProjects from '@/components/CitywideProjects'
@@ -336,30 +332,13 @@ import SearchWidget from '@/components/SearchWidget'
 // Shared stuff across all components
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
-let L = require('leaflet')
 let jsonexport = require('jsonexport')
 let keywordExtractor = require('keyword-extractor')
-let omnivore = require('leaflet-omnivore')
 let geocoding = require('mapbox-geocoding')
-
-const BUFFER_DISTANCE_METERS_SHORT = 25
-const BUFFER_DISTANCE_METERS_LONG = 275
-
-const defaultPanelTitle = 'Select any project<br/>to learn more about it.'
 
 let store = BigStore.state
 
-let _projectsByTag = {}
 let _tagList = []
-
-const API_SERVER = 'https://api.sfcta.org/api/'
-const GEO_VIEW = 'mystreet2_all'
-
-let styles = {
-  normal: { color: '#3c6', weight: 6, opacity: 1.0 },
-  selected: { color: '#39f', weight: 8, opacity: 1.0 },
-  popup: { color: '#36f', weight: 10, opacity: 1.0 },
-}
 
 function clickedFunds(e) {
   BigStore.state.filterFund = e.target.dataset.fund
@@ -398,20 +377,6 @@ function clickedToggleLayer(tag) {
   EventBus.$emit(EVENT.MAP_TOGGLE_LAYER, layer)
 }
 
-let _districtColors = [
-  '#e62',
-  '#fd0',
-  '#e62',
-  '#fd0',
-  '#00f',
-  '#2e3',
-  '#2e3',
-  '#fd0',
-  '#e22',
-  '#fd0',
-  '#00f',
-]
-
 function switchPanel(panelToActivate) {
   store.showingMainPanel = store.showingLayerPanel = store.showingFilterPanel = false
   store.isPanelHidden = panelToActivate == null
@@ -420,8 +385,9 @@ function switchPanel(panelToActivate) {
 
   if (panelToActivate === 'showingFilterPanel') {
     setTimeout(function() {
+      // eslint-disable-next-line
       $('.ui.dropdown').dropdown()
-    }, delay + 250)
+    }, 250)
   }
 }
 
@@ -472,19 +438,6 @@ function clickedFilter(e) {
   updateFilters()
 }
 
-function clickedAnywhereOnMap(map) {
-  // undo selection, if user clicked on base map
-  if (map.originalEvent.target.id === 'mymap') {
-    BigStore.state.infoTitle = defaultPanelTitle
-    BigStore.state.infoDetails = ''
-    BigStore.state.infoUrl = ''
-    removeHighlightFromPreviousSelection()
-
-    // drop panel if user is just clicking around
-    if (store.isMobile) store.isPanelHidden = true
-  }
-}
-
 function mounted() {
   // semantic requires this line for dropdowns to work
   // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
@@ -515,7 +468,7 @@ function switchingToDesktop() {
 
 function addEscapeKeyListener() {
   document.addEventListener('keydown', e => {
-    if (e.keyCode == 27) {
+    if (e.keyCode === 27) {
       store.nearbyProjects = []
       store.showDownload = false
       store.showHelp = false
@@ -526,13 +479,11 @@ function addEscapeKeyListener() {
 function determineMobile() {
   let MOBILE_LIMIT = 768
 
-  var w = window,
-    d = document,
-    e = d.documentElement,
-    g = d.getElementsByTagName('body')[0],
-    x = w.innerWidth || e.clientWidth || g.clientWidth
-
-  _calculatedWidth = true
+  let w = window
+  let d = document
+  let e = d.documentElement
+  let g = d.getElementsByTagName('body')[0]
+  let x = w.innerWidth || e.clientWidth || g.clientWidth
 
   return x <= MOBILE_LIMIT
 }
@@ -548,11 +499,11 @@ function activateMapSettings(p) {
 
   if (p.filter) {
     let filter = parseInt(p.filter)
-    store.filterStreets = (filter & 1) == 1
-    store.filterTransit = (filter & 2) == 2
-    store.filterAreas = (filter & 4) == 4
-    store.filterComplete = (filter & 8) == 8
-    store.filterUnderway = (filter & 16) == 16
+    store.filterStreets = (filter & 1) === 1
+    store.filterTransit = (filter & 2) === 2
+    store.filterAreas = (filter & 4) === 4
+    store.filterComplete = (filter & 8) === 8
+    store.filterUnderway = (filter & 16) === 16
   }
 
   if (p.center && p.zoom) EventBus.$emit(EVENT.SET_MAP_VIEW, p)
@@ -598,8 +549,6 @@ function nameOfFilterDistrict(i) {
   return 'District ' + i
 }
 
-let _calculatedWidth = false
-
 export default {
   name: 'MyStreet',
   components: { CitywideProjects, CitywideSearchWidget, MyMap, SearchWidget },
@@ -639,12 +588,8 @@ export default {
     clickedToggleHelp,
     clickedToggleLayer,
     clickedDistrict,
-    clickedSearch,
-    clickedSearchTag,
     devClickedToggleDistrictOption,
     downloadData,
-    hoverAddress,
-    hoverSearch,
     mobileToggleMainPanel,
     mobileToggleFilterPanel,
     mobileToggleLayerSelector,
@@ -669,9 +614,6 @@ export default {
   },
 }
 
-let _selectedProject, _selectedStyle
-let _hoverProject, _hoverStyle
-
 function swipeHandler(direction) {
   if (store.isMobile && direction === 'bottom') {
     clickedShowHide()
@@ -680,8 +622,6 @@ function swipeHandler(direction) {
 }
 
 function clickedMoreDetails() {
-  let z = getUrlParams()
-
   EventBus.$emit('MAP_SET_PROJECT', store.projectNumber)
   store.nearbyProjects = []
 
@@ -727,10 +667,10 @@ async function downloadData(filtered) {
 
 function sendDownloadFileToUser(csv) {
   let blob = new Blob([csv])
-  if (window.navigator.msSaveOrOpenBlob)
+  if (window.navigator.msSaveOrOpenBlob) {
     // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
     window.navigator.msSaveBlob(blob, 'sfcta-mystreets-data.csv')
-  else {
+  } else {
     var a = window.document.createElement('a')
     a.href = window.URL.createObjectURL(blob, { type: 'text/csv' })
     a.download = 'sfcta-mystreets-data.csv'
@@ -740,50 +680,8 @@ function sendDownloadFileToUser(csv) {
   }
 }
 
-async function queryServer() {
-  const geoUrl = API_SERVER + GEO_VIEW
-  // const geoUrl = '/static/mystreet2_all.json'
-
-  try {
-    let resp = await fetch(geoUrl)
-    let jsonData = await resp.json()
-    mapSegments(jsonData)
-  } catch (error) {
-    console.log('map error: ' + error)
-  }
-}
-
-let _districtLayersInverted = {}
-let _districtLayers = {}
-let _districtOverlay
-
 function showDistrictOverlay(district) {
   EventBus.$emit(EVENT.MAP_SHOW_DISTRICT_OVERLAY, district)
-}
-
-function generateColorForSegment(segment) {
-  let defaultColor = '#0071c6'
-
-  let projectCategory = segment.project_group
-
-  // no category? use blue.
-  if (!projectCategory) return defaultColor
-
-  // icon name in db? convert to a color code.
-  switch (projectCategory) {
-    case 'Transit':
-      return '#0071c6'
-    case 'Streets':
-      return '#21ba45'
-    case 'Plans and Programs':
-      return '#fc4'
-    default:
-      return defaultColor
-  }
-}
-
-function removeHighlightFromPreviousSelection() {
-  if (_selectedProject) _selectedProject.setStyle(_selectedStyle)
 }
 
 function clickedToggleHelp() {
@@ -794,150 +692,6 @@ function clickedLearnMore() {
   window.open('https://www.sfcta.org/mystreetsf-projects-map', '_blank')
 }
 
-function clickedOnFeature(e) {
-  if (BigStore.debug) console.log(e)
-  let id
-  let target
-
-  if (e in BigStore.state.layers) {
-    // search box!
-    id = e
-    target = BigStore.state.layers[id]
-  } else {
-    // For some reason, Leaflet handles points and polygons
-    // differently, hence the weirdness for fetching the id of the selected feature.
-    target = e.target
-    if (target) id = target.options.id
-    if (!id) id = e.layer.options.id
-  }
-
-  removeHighlightFromPreviousSelection()
-
-  // Remember what the thing looked like before we hovered or clicked on it
-  _selectedStyle = _hoverStyle
-
-  try {
-    if (!_selectedStyle) _selectedStyle = e.layer.options.style
-    if (!_selectedStyle) {
-      _selectedStyle = JSON.parse(JSON.stringify(e.layer.options))
-    }
-  } catch (err) {
-    let z = target.options
-    _selectedStyle = {
-      color: z.color,
-      fillColor: z.fillColor,
-      radius: z.radius,
-      weight: z.weight,
-      truecolor: z.truecolor,
-    }
-  }
-
-  // save this project as the selected project; it's no longer just being hovered over!
-  _hoverProject = null
-  _selectedProject = target
-
-  let clickedStyle = JSON.parse(JSON.stringify(styles.popup))
-  clickedStyle.color = Color(_selectedStyle.truecolor).darken(0.4)
-  clickedStyle.fillColor = _selectedStyle.truecolor
-  clickedStyle.radius = 12
-  clickedStyle.weight = 8
-  target.setStyle(clickedStyle)
-
-  updatePanelDetails(id)
-}
-
-function getLayersNearLatLng(latlng, distanceInMeters) {
-  let lat = latlng.lat
-  let lng = latlng.lng
-
-  let clickPoint = turf.point([lng, lat]) // turf uses long-lat, leaflet uses lat-long :-O
-  let clickBuffer = turf.buffer(clickPoint, distanceInMeters, {
-    units: 'meters',
-  })
-
-  return getLayersNearBufferedPoint(clickPoint, clickBuffer)
-}
-
-function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
-  let insideLayers = []
-
-  let numLayers = Object.keys(_projectIdsCurrentlyOnMap).length
-  console.log(numLayers)
-  let keys = numLayers === 0 ? BigStore.state.layers : _projectIdsCurrentlyOnMap
-
-  for (let key in keys) {
-    let layer = BigStore.state.layers[key]
-    let geoJson = layer.toGeoJSON()
-    let features = geoJson.features
-
-    for (let feature of features) {
-      try {
-        if (isPointInsideFeature(clickPoint, clickBuffer, feature)) {
-          insideLayers.push(key) // BigStore.state.layers[key])
-        }
-      } catch (e) {
-        console.log({ msg: 'feature failed', feature: feature })
-      }
-    }
-  }
-  return insideLayers
-}
-
-function isPointInsideFeature(clickPoint, clickBuffer, feature) {
-  let featureType = turf.getType(feature)
-  try {
-    switch (featureType) {
-      case 'Point':
-      case 'MultiPoint':
-        return turf.booleanPointInPolygon(feature, clickBuffer)
-      case 'LineString':
-      case 'MultiLineString':
-        return turf.booleanCrosses(feature, clickBuffer)
-      case 'Polygon':
-      case 'MultiPolygon':
-        return turf.booleanContains(feature, clickPoint)
-      case 'GeometryCollection':
-        for (let subfeature of feature.geometry.geometries) {
-          if (isPointInsideFeature(clickPoint, clickBuffer, subfeature)) {
-            return true
-          }
-        }
-        return false
-      default:
-        console.log('what? ' + featureType)
-        console.log(feature)
-        return false
-    }
-  } catch (e) {
-    console.log({ feature: feature, error: e })
-  }
-  return false
-}
-
-let popupTimeout
-
-function isTargetAPolygon(target) {
-  try {
-    if (target.feature.geometry.type.includes('Polygon')) return true
-  } catch (e) {}
-
-  try {
-    if (target.feature.geometry.geometries[0].type.includes('Polygon')) {
-      return true
-    }
-  } catch (e) {}
-
-  return false
-}
-
-function isTargetAPoint(target) {
-  try {
-    if (target.feature.geometry.type === 'Point') return true
-    return target.feature.geometry.geometries[0].type === 'Point'
-  } catch (error) {}
-  return false
-}
-
 function clickedDistrict(district) {
   if (BigStore.debug) console.log('Chose District', district)
   BigStore.state.filterDistrict = parseInt(district)
@@ -946,18 +700,9 @@ function clickedDistrict(district) {
   showDistrictOverlay(district)
 }
 
-let _projectIdsCurrentlyOnMap = {}
-
 function updateFilters() {
   store.showDownload = false
   EventBus.$emit(EVENT.UPDATE_FILTERS, 0)
-}
-
-function unHoverFeature(e) {
-  // Remove highlight from previous selection
-  if (_hoverProject) {
-    _hoverProject.setStyle(_hoverStyle)
-  }
 }
 
 // ---------- SEARCH PANEL ----------------------
@@ -1041,49 +786,6 @@ function fetchAddressResults(_queryString) {
       BigStore.state.addressSearchResults = []
     }
   })
-}
-
-let _hoverSearchLastId
-
-function hoverSearch(id) {
-  if (id === _hoverSearchLastId) return
-
-  _hoverSearchLastId = id
-  hoverFeature(id)
-}
-
-function clickedSearch(id) {
-  clickedOnFeature(id)
-}
-
-function clickedSearchTag(tag) {
-  if (BigStore.state.filterTags.has(tag)) {
-    BigStore.state.filterTags.delete(tag)
-  } else {
-    BigStore.state.filterTags.add(tag)
-  }
-  console.log({ ACTIVE_TAGS: BigStore.state.filterTags })
-  BigStore.state.filterKey++
-  updateFilters()
-}
-
-let _addressMarker
-
-function hoverAddress(address) {
-  // console.log(address)
-}
-
-function showProjectsNearAddress(latlng) {
-  let projects = getLayersNearLatLng(latlng, BUFFER_DISTANCE_METERS_LONG)
-
-  let results = []
-  for (let project of projects) {
-    results.push({
-      id: project,
-      name: BigStore.state.prjCache[project].project_name,
-    })
-  }
-  BigStore.state.results = results
 }
 </script>
 

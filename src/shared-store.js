@@ -22,7 +22,6 @@ export const EVENT = {
 }
 
 let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
-let _projectsByTag = {}
 let _tagList = []
 
 let _extraLayers = [

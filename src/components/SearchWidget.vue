@@ -40,7 +40,6 @@
 'use strict'
 
 import 'babel-polyfill'
-import * as turf from '@turf/turf'
 
 // Shared stuff across all components
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
@@ -48,42 +47,9 @@ import { BigStore, EventBus, EVENT } from '../shared-store.js'
 let keywordExtractor = require('keyword-extractor')
 let geocoding = require('mapbox-geocoding')
 
-let BUFFER_DISTANCE_METERS_SHORT = 25
-let BUFFER_DISTANCE_METERS_LONG = 275
-
-let _projectsByTag = {}
 let _tagList = []
 
-let defaultPanelTitle = 'Select any project<br/>to learn more about it.'
-
 let store = BigStore.state
-
-const GEO_VIEW = 'mystreet2_all'
-
-let styles = {
-  normal: { color: '#3c6', weight: 6, opacity: 1.0 },
-  selected: { color: '#39f', weight: 8, opacity: 1.0 },
-  popup: { color: '#36f', weight: 10, opacity: 1.0 },
-}
-
-function clickedFilter(e) {
-  let id = e.target.id
-
-  if (id === 'btn-transit') store.filterTransit = !store.filterTransit
-  if (id === 'btn-streets') store.filterStreets = !store.filterStreets
-  if (id === 'btn-areas') store.filterAreas = !store.filterAreas
-
-  if (id === 'btn-complete') {
-    store.filterComplete = !store.filterComplete
-    if (store.filterComplete) store.filterUnderway = false
-  }
-  if (id === 'btn-underway') {
-    store.filterUnderway = !store.filterUnderway
-    if (store.filterUnderway) store.filterComplete = false
-  }
-
-  updateFilters()
-}
 
 function mounted() {}
 
@@ -121,33 +87,8 @@ export default {
   },
 }
 
-// some important global variables.
-let _selectedProject, _selectedStyle
-let _hoverProject, _hoverStyle
-
 function selectedTagsChanged() {
   console.log(store.selectedTags)
-}
-
-function generateColorForSegment(segment) {
-  let defaultColor = '#0071c6'
-
-  let projectCategory = segment.project_group
-
-  // no category? use blue.
-  if (!projectCategory) return defaultColor
-
-  // icon name in db? convert to a color code.
-  switch (projectCategory) {
-    case 'Transit':
-      return '#0071c6'
-    case 'Streets':
-      return '#21ba45'
-    case 'Plans and Programs':
-      return '#fc4'
-    default:
-      return defaultColor
-  }
 }
 
 function updateFilters() {

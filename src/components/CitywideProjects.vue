@@ -9,7 +9,7 @@
   h3.project-heading(v-if="transitProjects.length > 0") TRANSIT PROJECTS
   transition-group.visualizations(name="flip-list" tag="ul")
     li.viz-thumbnail(v-for="prj in transitProjects" v-bind:key="prj.project_number")
-      router-link(:to="'/projects/' + prj.project_number")
+      a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-images/'+projectImages[prj.project_number] : '/static/bus-seats.jpg'")
           h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
@@ -19,7 +19,7 @@
   h3.project-heading(v-if="streetProjects.length > 0" style="background-color: #21ba45") STREET PROJECTS
   transition-group.visualizations(name="flip-list" tag="ul")
     li.viz-thumbnail(v-for="prj in streetProjects" v-bind:key="prj.project_number")
-      router-link(:to="'/projects/' + prj.project_number" v-if="!prj.hide")
+      a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-images/'+projectImages[prj.project_number] : '/static/asphalt.jpg'")
           h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
@@ -29,7 +29,7 @@
   h3.project-heading(v-if="planningProjects.length > 0" style="background-color: #bb9b3a") PLANS AND STUDIES
   transition-group.visualizations(name="flip-list" tag="ul")
     li.viz-thumbnail(v-for="prj in planningProjects" v-bind:key="prj.project_number")
-      router-link(:to="'/projects/' + prj.project_number")
+      a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-images/'+projectImages[prj.project_number] : '/static/blur.jpg'")
           h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}

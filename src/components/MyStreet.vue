@@ -166,15 +166,15 @@
 
           h5 CATEGORY:
 
-          button#btn-streets.tiny.ui.grey.button(
-                v-on:click="clickedFilter"
-                v-bind:class="{ active: filterStreets, green: filterStreets}"
-          ) Streets
-
           button#btn-transit.tiny.ui.grey.button(
                 v-on:click="clickedFilter"
                 v-bind:class="{ active: filterTransit, blue: filterTransit}"
           ) Transit
+
+          button#btn-streets.tiny.ui.grey.button(
+                v-on:click="clickedFilter"
+                v-bind:class="{ active: filterStreets, green: filterStreets}"
+          ) Streets
 
           button#btn-areas.tiny.ui.grey.button(
                 v-on:click="clickedFilter"
@@ -217,7 +217,7 @@
         p.mobile-squish {{ clippedInfoDetails }}
         h3(v-if="!infoUrl" style="text-align: center")
           span(v-html="helptext.PRETEXT")
-          router-link(:to="helptext.LINK_URL")
+          a(:href="helptext.LINK_URL" target="_blank")
             span(style="color: #fc4"
                   v-html="helptext.LINK_TEXT")
 
@@ -273,15 +273,15 @@
 
         h5 CATEGORY:
 
-        button#btn-streets.tiny.ui.grey.button(
-               v-on:click="clickedFilter"
-               v-bind:class="{ active: filterStreets, green: filterStreets}"
-        ) Streets
-
         button#btn-transit.tiny.ui.grey.button(
                v-on:click="clickedFilter"
                v-bind:class="{ active: filterTransit, blue: filterTransit}"
         ) Transit
+
+        button#btn-streets.tiny.ui.grey.button(
+               v-on:click="clickedFilter"
+               v-bind:class="{ active: filterStreets, green: filterStreets}"
+        ) Streets
 
         button#btn-areas.tiny.ui.grey.button(
                v-on:click="clickedFilter"
@@ -685,7 +685,7 @@ function clickedMoreDetails() {
   EventBus.$emit('MAP_SET_PROJECT', store.projectNumber)
   store.nearbyProjects = []
 
-  this.$router.push(store.infoUrl)
+  window.open(store.infoUrl, '_blank')
 }
 
 function clickedDownload() {

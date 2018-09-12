@@ -1562,7 +1562,7 @@ h2.noSelection {
 #helpbox {
   background-color: #48f;
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.4);
-  grid-row: 2 / 3;
+  grid-row: 1 / 4;
   grid-column: 1 / 4;
   z-index: 30;
   width: minmax(min-content, 150px);
@@ -1573,9 +1573,9 @@ h2.noSelection {
 
 #downloadbox {
   box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.4);
-  grid-row: 2 / 3;
+  grid-row: 1 / 4;
   grid-column: 1 / 4;
-  z-index: 30;
+  z-index: 40;
   background-color: #48f;
   width: minmax(min-content, 150px);
   max-width: 500px;

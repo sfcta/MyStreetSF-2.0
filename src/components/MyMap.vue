@@ -1017,7 +1017,7 @@ function hoverFeature(e) {
   }
 
   let style = {
-    color: points ? '#f5fe' : normal.truecolor,
+    color: normal.truecolor,
     fillColor: normal.fillColor,
     opacity: 1.0,
     radius: 7,

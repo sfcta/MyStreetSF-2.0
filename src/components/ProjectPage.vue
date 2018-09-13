@@ -128,7 +128,9 @@ export default {
       return store.project_name.replace('&', '%26')
     },
     currentRoute: function() {
-      let port = window.location.port !== 80 ? ':' + window.location.port : ''
+      let port = ''
+      if (window.location.port && window.location.port !== 80) port = ':' + window.location.port
+
       return (
         window.location.protocol +
         '//' +

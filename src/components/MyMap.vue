@@ -388,8 +388,8 @@ function setupEventListeners() {
     clickedAddress(address)
   })
 
-  EventBus.$on(EVENT.MAP_HOVER_FEATURE, id => {
-    hoverFeature(id)
+  EventBus.$on(EVENT.MAP_HIGHLIGHT_PROJECT, id => {
+    highlightProject(id)
   })
 
   EventBus.$on(EVENT.CLICKED_ON_FEATURE, id => {
@@ -417,32 +417,30 @@ function activateTags(tags) {
   }
 }
 
-function updateHoverPopup(id, nearbyProjects, latlng, containerPoint) {
-  removeOldHoverPopup()
-  showHoverPopupAfterDelay(id, nearbyProjects, latlng, containerPoint, 1000)
-}
-
-function removeOldHoverPopup() {
-  clearTimeout(_hoverPopupTimer)
-  mymap.closePopup()
-}
-
 let _lastNearbyList = []
 let _showNearbyTick = false
 let _containerPoint = null
 
-function showHoverPopupAfterDelay(id, nearbyProjectIDs, latlng, containerPoint, delay) {
+function showHoverPopupAfterDelay(id, latlng, containerPoint, delay) {
   // no popups on mobile
   if (store.isMobile) return
 
-  _containerPoint = containerPoint
-  _lastNearbyList = buildPopupContent(id, nearbyProjectIDs)
+  // popup will only show if another popup hasn't shown itself first.
   _showNearbyTick = true
 
-  setTimeout(function() {
+  // stop old popup
+  clearTimeout(_hoverPopupTimer)
+
+  // start new popup timer
+  _hoverPopupTimer = setTimeout(function() {
     if (_showNearbyTick) {
+      _containerPoint = containerPoint
+      let nearbyProjectIDs = getLayersNearLatLng(latlng, BUFFER_DISTANCE_METERS_SHORT)
+      _lastNearbyList = buildPopupContent(id, nearbyProjectIDs)
+
       store.nearbyProjects = _lastNearbyList
       store.popupLocation = { left: _containerPoint.x + 'px', top: _containerPoint.y + 'px' }
+
       _showNearbyTick = false
     }
   }, delay)
@@ -814,7 +812,6 @@ function clickedLearnMore() {
 }
 
 function clickedOnFeature(e) {
-  if (BigStore.debug) console.log(e)
   let id
   let target
 
@@ -838,7 +835,6 @@ function clickedOnFeature(e) {
 
   let clickedStyle = JSON.parse(JSON.stringify(_projectStylesById[id]))
   clickedStyle.color = DARK_COLOR_LOOKUP[clickedStyle.truecolor]
-
   clickedStyle.fillColor = clickedStyle.truecolor
   clickedStyle.radius = 12
   clickedStyle.weight = 12
@@ -971,19 +967,15 @@ function hoverFeature(e) {
   // don't hover ANYTHING if we're on mobile
   if (store.isMobile) return
 
-  let target
+  // points, polygons, and lines have different structures:
+  let id = e.layer ? e.layer.options.id : e.target.options.id
 
-  // deal w search clicks first
-  if (e in BigStore.state.layers) {
-    target = BigStore.state.layers[e]
-  } else {
-    target = e.target
-  }
+  highlightProject(id)
+  showHoverPopupAfterDelay(id, e.latlng, e.containerPoint, 750)
+}
 
-  // For some reason, Leaflet handles points and polygons
-  // differently, hence the weirdness for fetching the id of the selected feature.
-  let id = target.options.id
-  if (!id) id = e.layer.options.id
+function highlightProject(id) {
+  let target = BigStore.state.layers[id]
 
   let polygon = isTargetAPolygon(target)
   let points = isTargetAPoint(target)
@@ -1023,9 +1015,6 @@ function hoverFeature(e) {
   }, timeout)
 
   _hoverProject = id
-
-  let nearbyProjects = getLayersNearLatLng(e.latlng, BUFFER_DISTANCE_METERS_SHORT)
-  updateHoverPopup(id, nearbyProjects, e.latlng, e.containerPoint)
 }
 
 function clickedDistrict(district) {
@@ -1787,7 +1776,7 @@ td {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 1s;
+  transition: opacity 0.5s;
 }
 .fade-enter,
 .fade-leave-to {

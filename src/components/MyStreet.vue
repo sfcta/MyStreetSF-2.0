@@ -46,10 +46,8 @@
             .or
             button.ui.violet.button(@click="downloadData(filtered=false)") Everything
 
-  #nearbyprojects.ui.segment(v-if="nearbyProjects.length>0" class="ui segment"
-    :style="popupLocation")
-
-    .thing(@click="clickedNearbyProject(0)")
+  #nearbyprojects.ui.segment(v-show="nearbyProjects.length>0" class="ui segment" :style="popupLocation")
+    .thing(v-if="nearbyProjects.length > 0" @click="clickedNearbyProject(0)" @mouseover="hoverAboveNearbyItem(0)")
       h5.nearby-title
        button.ui.tiny.compact.pink.icon.button(
           @click="clickedCloseNearby"
@@ -60,7 +58,10 @@
     .other-projects(v-if="nearbyProjects.length > 1")
       h5.black(style="font-size:11px; margin-left:5px; padding-top:5px;") ALSO NEARBY:
       hr(style="margin: 0px 8px 5px 5px;")
-      .nearby-project-row(v-for="(prj,index) in nearbyProjects" @click="clickedNearbyProject(index)")
+      .nearby-project-row(v-for="(prj,index) in nearbyProjects"
+         @click="clickedNearbyProject(index)"
+         @mouseover="hoverAboveNearbyItem(index)"
+      )
         h5.nearby-row(v-if="index > 0") {{prj.project_name}}
 
   #layer-widgets
@@ -494,6 +495,11 @@ function determineMobile() {
   return x <= MOBILE_LIMIT
 }
 
+function hoverAboveNearbyItem(index) {
+  let project = store.nearbyProjects[index]
+  EventBus.$emit(EVENT.MAP_HIGHLIGHT_PROJECT, project.project_number)
+}
+
 function handleHash() {
   if (BigStore.debug) console.log('HANDLE HASH: ' + window.location.hash)
   let p = getUrlParams()
@@ -596,6 +602,7 @@ export default {
     clickedDistrict,
     devClickedToggleDistrictOption,
     downloadData,
+    hoverAboveNearbyItem,
     mobileToggleMainPanel,
     mobileToggleFilterPanel,
     mobileToggleLayerSelector,
@@ -1231,7 +1238,7 @@ td {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s;
+  transition: opacity 0.25s;
 }
 .fade-enter,
 .fade-leave-to {
@@ -1292,20 +1299,19 @@ h2.noSelection {
 }
 
 #nearbyprojects {
+  box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
+  color: black;
+  font-size: 8px;
   grid-row: 1 / 4;
   grid-column: 1 / 4;
-  box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.25);
-  font-size: 8px;
-  z-index: 2;
-  width: 280px;
-  margin: 10px 10px 5px 5px;
-  padding: 0px 0px 5px 5px;
-  color: black;
-  position: fixed;
   left: 0px;
+  margin: 10px 10px 5px 5px;
+  opacity: 0.93;
+  padding: 0px 0px 5px 5px;
+  position: fixed;
   top: 0px;
+  width: 280px;
   z-index: 22;
-  transition: visibility 1s 1s, opacity 0.5s linear;
 }
 
 .black {

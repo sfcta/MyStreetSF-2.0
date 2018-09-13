@@ -716,9 +716,6 @@ function resetStyles(mobile) {
     style.fillOpacity = opacity
 
     _projectStylesById[id] = style
-
-    // let layer = store.layers[id]
-    // layer.setStyle(_projectStylesById[id])
   }
 }
 
@@ -930,25 +927,25 @@ function isPointInsideFeature(clickPoint, clickBuffer, feature) {
 
 let popupTimeout
 
-function isTargetAPolygon(target) {
-  try {
-    if (target.feature.geometry.type.includes('Polygon')) return true
-  } catch (e) {}
+function isTargetAPolygon(id) {
+  let prj = store.prjCache[id]
+  if (!prj) return
 
   try {
-    if (target.feature.geometry.geometries[0].type.includes('Polygon')) {
-      return true
-    }
+    if (prj.geometry.includes('Polygon')) return true
   } catch (e) {}
 
   return false
 }
 
-function isTargetAPoint(target) {
+function isTargetAPoint(id) {
+  let prj = store.prjCache[id]
+  if (!prj) return
+
   try {
-    if (target.feature.geometry.type === 'Point') return true
-    return target.feature.geometry.geometries[0].type === 'Point'
-  } catch (error) {}
+    if (prj.geometry.includes('Point')) return true
+  } catch (e) {}
+
   return false
 }
 
@@ -975,10 +972,8 @@ function hoverFeature(e) {
 }
 
 function highlightProject(id) {
-  let target = BigStore.state.layers[id]
-
-  let polygon = isTargetAPolygon(target)
-  let points = isTargetAPoint(target)
+  let isPolygon = isTargetAPolygon(id)
+  let isPoints = isTargetAPoint(id)
 
   let normal = _projectStylesById[id]
 
@@ -993,7 +988,7 @@ function highlightProject(id) {
     fillColor: normal.fillColor,
     opacity: 1.0,
     radius: 7,
-    weight: points ? 4 : 6,
+    weight: isPoints ? 4 : 6,
   }
 
   let polygonStyle = {
@@ -1007,11 +1002,11 @@ function highlightProject(id) {
 
   // the long timeout keeps the highlight from selecting areas every time
   // the short timeout keeps the highlight from flashing too much on mouse movement
-  let timeout = polygon ? 30 : 10
+  let timeout = isPolygon ? 30 : 10
 
   clearTimeout(popupTimeout)
   popupTimeout = setTimeout(function() {
-    target.setStyle(polygon ? polygonStyle : style)
+    BigStore.state.layers[id].setStyle(isPolygon ? polygonStyle : style)
   }, timeout)
 
   _hoverProject = id
@@ -1031,7 +1026,6 @@ let _oldZoom = 0
 
 function movedMap() {
   updateURLHash()
-  // if (mymap.getZoom() != _oldZoom) resetStyles()
 }
 
 function updateURLHash() {

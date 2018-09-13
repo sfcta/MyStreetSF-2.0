@@ -14,9 +14,8 @@ import * as turf from '@turf/turf'
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let L = require('leaflet')
-let Color = require('color')
 let keywordExtractor = require('keyword-extractor')
-let omnivore = require('leaflet-omnivore')
+let omnivore = require('@mapbox/leaflet-omnivore')
 let geocoding = require('mapbox-geocoding')
 
 let BUFFER_DISTANCE_METERS_SHORT = 25
@@ -732,7 +731,8 @@ function getProjectDotRadius(segment) {
   return 6
 }
 
-let TRUE_COLOR = { TRANSIT: '#0071c6', STREETS: '#21ba45', PLANS: '#eb4' }
+const TRUE_COLOR = { TRANSIT: '#0071c6', STREETS: '#21ba45', PLANS: '#eb4' }
+const DARK_COLOR_LOOKUP = { '#0071c6': '#004477', '#21ba45': '#147029', '#eb4': '#a87a0f' }
 
 function getNormalStyle(segment) {
   let truecolor = generateColorForSegment(segment) // actual project color;
@@ -837,7 +837,8 @@ function clickedOnFeature(e) {
   _hoverProject = null
 
   let clickedStyle = JSON.parse(JSON.stringify(_projectStylesById[id]))
-  clickedStyle.color = Color(clickedStyle.truecolor).darken(0.4)
+  clickedStyle.color = DARK_COLOR_LOOKUP[clickedStyle.truecolor]
+
   clickedStyle.fillColor = clickedStyle.truecolor
   clickedStyle.radius = 12
   clickedStyle.weight = 12

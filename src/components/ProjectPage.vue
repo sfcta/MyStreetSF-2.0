@@ -95,7 +95,7 @@ import 'isomorphic-fetch'
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let L = require('leaflet')
-let omnivore = require('leaflet-omnivore')
+let omnivore = require('@mapbox/leaflet-omnivore')
 
 let mymap
 let theme = 'light'

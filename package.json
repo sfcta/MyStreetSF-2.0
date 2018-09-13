@@ -20,10 +20,10 @@
     "deploy": "npm run build && cp _dist/index.html _dist/200.html && surge -d mystreet2.surge.sh _dist"
   },
   "dependencies": {
+    "@mapbox/leaflet-omnivore": "^0.3.4",
     "@turf/turf": "^5.1.6",
     "babel-polyfill": "^6.23.0",
     "babel-runtime": "^6.26.0",
-    "color": "^3.0.0",
     "debounce": "^1.1.0",
     "es6-promise": "^4.2.4",
     "isomorphic-fetch": "^2.2.1",
@@ -31,7 +31,6 @@
     "jsonexport": "^2.2.1",
     "keyword-extractor": "0.0.15",
     "leaflet": "^1.3.1",
-    "leaflet-omnivore": "^0.3.4",
     "mapbox-geocoding": "^0.1.5",
     "node-yaml": "^3.1.1",
     "static-eval": "^2.0.0",

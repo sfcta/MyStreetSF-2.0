@@ -307,6 +307,7 @@ function mounted() {
   mymap = L.map('mymap', { zoomSnap: 0.25 })
   mymap.zoomControl.setPosition('topright')
 
+  mymap.fitBounds([[37.82, -122.37], [37.71, -122.505]])
   setInitialMapExtentIfNecessary()
 
   let url =
@@ -683,8 +684,7 @@ async function mapSegments(cmpsegJson) {
       BigStore.addLayer(id, layer)
       _projectIdsCurrentlyOnMap[id] = true
     } catch (e) {
-      // console.log('couldnt: ' + id)
-      // console.log(segment)
+      console.error('couldnt: ' + id)
     }
   }
 
@@ -1079,8 +1079,14 @@ function updateURLHash() {
 
   if (xlayer) hashParams.xlayer = xlayer
 
-  hashParams.zoom = mymap.getZoom()
-  hashParams.center = mymap.getCenter().lat.toFixed(3) + ',' + mymap.getCenter().lng.toFixed(3)
+  try {
+    hashParams.zoom = mymap.getZoom()
+    hashParams.center = mymap.getCenter().lat.toFixed(3) + ',' + mymap.getCenter().lng.toFixed(3)
+  } catch (e) {
+    // so what
+    console.error(e)
+    // setInitialMapExtentIfNecessary()
+  }
 
   if (store.devDistrictOption) hashParams.showall = store.devDistrictOption
 

@@ -49,7 +49,7 @@
   #nearbyprojects.ui.segment(v-if="nearbyProjects.length>0" class="ui segment"
     :style="popupLocation")
 
-    .thing(@click="clickedNearbyProject(nearbyProjects[0].project_number)")
+    .thing(@click="clickedNearbyProject(0)")
       h5.nearby-title
        button.ui.tiny.compact.pink.icon.button(
           @click="clickedCloseNearby"
@@ -60,7 +60,7 @@
     .other-projects(v-if="nearbyProjects.length > 1")
       h5.black(style="font-size:11px; margin-left:5px; padding-top:5px;") ALSO NEARBY:
       hr(style="margin: 0px 8px 5px 5px;")
-      .nearby-project-row(v-for="(prj,index) in nearbyProjects" @click="clickedNearbyProject(prj.project_number)")
+      .nearby-project-row(v-for="(prj,index) in nearbyProjects" @click="clickedNearbyProject(index)")
         h5.nearby-row(v-if="index > 0") {{prj.project_name}}
 
   #layer-widgets
@@ -239,7 +239,7 @@
         br
         h2.noSelection(v-show="!infoUrl" v-html="infoTitle")
         h2.clickableLink(v-show="infoUrl")
-          router-link(:to="infoUrl") {{infoTitle}}
+          a(target="_blank" :href="infoUrl") {{infoTitle}}
 
         p  {{ infoDetails }}
         h3(v-if="!infoUrl" style="text-align: center")
@@ -347,8 +347,12 @@ function clickedFunds(e) {
   updateFilters()
 }
 
-function clickedNearbyProject(projectNumber) {
-  store.infoTitle = 'HI ' + projectNumber
+function clickedNearbyProject(index) {
+  // nothing to do if there are no nearby projects (yes this happens)
+  if (store.nearbyProjects.length === 0) return
+
+  let projectNumber = store.nearbyProjects[index].project_number
+  store.infoTitle = 'Project ' + projectNumber
   EventBus.$emit(EVENT.CLICKED_ON_FEATURE, projectNumber)
 }
 
@@ -439,12 +443,14 @@ function clickedFilter(e) {
 }
 
 function mounted() {
+  //
   // semantic requires this line for dropdowns to work
   // https://stackoverflow.com/questions/25347315/semantic-ui-dropdown-menu-do-not-work
   // eslint-disable-next-line
   $('.ui.dropdown').dropdown()
 
   store.isMobile = determineMobile()
+
   handleHash()
   addEscapeKeyListener()
 

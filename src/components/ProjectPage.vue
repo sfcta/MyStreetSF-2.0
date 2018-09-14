@@ -66,7 +66,7 @@
         h3.billy-header(:style="color") Detailed Project Information
         table
           tr.project-details(v-for="row in details")
-            td.project-details: b {{ row[0] }}
+            td.project-details: b(v-html='row[0]')
             td.project-details.col2 {{ row[1] }}
 
       .for-more-info
@@ -220,7 +220,10 @@ function setProjectDetails() {
   if (cost && cost.charAt(cost.length - 3) === '.') cost = cost.substring(0, cost.length - 3)
 
   store.details.push(['Phase(s)', phase])
-  store.details.push(['Percent Complete of Funded Phase(s)', store.geojson['percent_complete']])
+  store.details.push([
+    'Percent&nbsp;Complete of Funded Phase(s)',
+    store.geojson['percent_complete'],
+  ])
   store.details.push(['Open for Use', openForUse])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Location', store.geojson['project_location']])

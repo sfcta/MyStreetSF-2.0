@@ -37,8 +37,18 @@ let mymap
 const API_SERVER = 'https://api.sfcta.org/api/'
 const GEO_VIEW = 'mystreet2_all'
 
-// hard code the giant areas so they stay on the bottom layer of the map
-const _bigAreas = [407, 477, 79, 363, 366, 17]
+// hard code the giant polygons so they stay on the bottom layer of the map
+const _bigAreas = [
+  '138-907011',
+  '144-901036',
+  '138-907006',
+  '144-907052',
+  '144-901018',
+  '144-907078',
+  '514-907004',
+  '139-907072',
+  '144-901004',
+]
 
 function clickedFunds(e) {
   store.filterFund = e.target.dataset.fund

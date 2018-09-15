@@ -188,7 +188,7 @@ function setProjectDetails() {
   store.project_number = store.geojson['project_number']
   store.color = { color: generateColorFromDb() }
 
-  let link = store.geojson['project_details_link']
+  let link = store.geojson['project_details_page']
   if (link) {
     store.forMoreInfoLink = link
     store.forMoreInfoLinkText = link

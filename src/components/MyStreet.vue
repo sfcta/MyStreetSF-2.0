@@ -6,40 +6,41 @@
       .mybox(style="background-color: white")
         hr
         .myotherbox(style="padding: 20px 15px; margin-top: -10px;")
-          p This map shows transportation projects funded by the Transportation Authority or which we help oversee in our role as the Congestion Management Agency for San Francisco.
+          div.scrollhelperbox
+            p This map shows transportation projects funded by the Transportation Authority or which we help oversee in our role as the Congestion Management Agency for San Francisco.
 
-          h3.black(style="margin-top:10px") How to use this map
-          hr(style="margin-bottom:5px")
-          ul
-            li
-              b Click any project
-              |
-              | for a brief project description.
-            li
-              b Use filters
-              |
-              | to narrow by status, category, and more.
-            li
-              b Use the search bar
-              |
-              | to find projects by project name, location, keyword, and project type.
-            li
-              b Click the citywide projects link
-              |
-              | for a gallery of projects that are not location-specific so they don’t appear on the map (e.g. Muni vehicle procurements, paratransit operations).
-            li
-              b Use the Map Layers icon
-              |
-              | to overlay the High Injury Network, Supervisorial Districts, and Communities of Concern.
-            li
-              b Download map data
-              |
-              | to get information for specific projects or the entire data set in a .CSV format. For a subset of data, apply the filters you want (e.g. Underway Transit), click the Download button, then click “Filtered Projects”.
+            h3.black(style="margin-top:10px") How to use this map
+            hr(style="margin-bottom:5px")
+            ul
+              li
+                b Click any project
+                |
+                | for a brief project description.
+              li
+                b Use filters
+                |
+                | to narrow by status, category, and more.
+              li
+                b Use the search bar
+                |
+                | to find projects by project name, location, keyword, and project type.
+              li
+                b Click the citywide projects link
+                |
+                | for a gallery of projects that are not location-specific so they don’t appear on the map (e.g. Muni vehicle procurements, paratransit operations).
+              li
+                b Use the Map Layers icon
+                |
+                | to overlay the High Injury Network, Supervisorial Districts, and Communities of Concern.
+              li
+                b Download map data
+                |
+                | to get information for specific projects or the entire data set in a .CSV format. For a subset of data, apply the filters you want (e.g. Underway Transit), click the Download button, then click “Filtered Projects”.
 
-          p Projects that are underway are updated on a quarterly basis and new projects are added upon approval. We cannot guarantee the accuracy or completeness of the information shown on the map. If you have questions or comments, please contact us at
-            =" "
-            a(href="mailto:mystreetsf@sfcta.org") mystreetsf@sfcta.org
-            | .
+            p Projects that are underway are updated on a quarterly basis and new projects are added upon approval. We cannot guarantee the accuracy or completeness of the information shown on the map. If you have questions or comments, please contact us at
+              =" "
+              a(href="mailto:mystreetsf@sfcta.org") mystreetsf@sfcta.org
+              | .
 
           div(style="margin-top:15px;")
             button.small.ui.right.floated.violet.button(@click="clickedToggleHelp") OK, GOT IT
@@ -739,6 +740,7 @@ function showDistrictOverlay(district) {
 
 function clickedToggleHelp() {
   BigStore.state.showHelp = !BigStore.state.showHelp
+  swipeHandler('bottom')
 }
 
 function clickedLearnMore() {
@@ -1506,6 +1508,15 @@ li {
     margin-top: 0px;
     text-align: justify;
     line-height: 1.3em;
+  }
+
+  #helpbox {
+    margin: auto 8px;
+  }
+
+  .scrollhelperbox {
+    max-height: 60vh;
+    overflow-y: auto;
   }
 }
 </style>

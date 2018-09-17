@@ -17,7 +17,7 @@
     "test": "npm run unit",
     "lint": "eslint --ext .js,.vue src test/unit",
     "build": "node build/build.js",
-    "deploy": "npm run build && cp _dist/index.html _dist/200.html && surge -d mystreet2.surge.sh _dist"
+    "deploy": "npm run build && cp docs/index.html docs/200.html && surge -d mystreet2.surge.sh docs"
   },
   "dependencies": {
     "@mapbox/leaflet-omnivore": "^0.3.4",

@@ -2,25 +2,48 @@
 #container
   transition(name="fade")
     #helpbox.ui.segment(v-show="showHelp" class="ui segment")
-      h3(style="margin-left: 10px") MyStreet San Francisco
+      h3(style="margin-left: 10px") MyStreetSF
       .mybox(style="background-color: white")
         hr
-        .myotherbox(style="padding: 25px 25px")
-          p Use this map to explore the many transportation investments happening all across San Francisco.
+        .myotherbox(style="padding: 20px 15px; margin-top: -10px;")
+          p This map shows transportation projects funded by the Transportation Authority or which we help oversee in our role as the Congestion Management Agency for San Francisco.
 
           h3.black(style="margin-top:10px") How to use this map
           hr(style="margin-bottom:5px")
           ul
-            li Click any project for info, and check "More Details" for timing, expenditures, and more.
-            li Use the filters on the right to reduce clutter: see just the projects you're interested in
+            li
+              b Click any project
+              |
+              | for a brief project description.
+            li
+              b Use filters
+              |
+              | to narrow by status, category, and more.
+            li
+              b Use the search bar
+              |
+              | to find projects by project name, location, keyword, and project type.
+            li
+              b Click the citywide projects link
+              |
+              | for a gallery of projects that are not location-specific so they don’t appear on the map (e.g. Muni vehicle procurements, paratransit operations).
+            li
+              b Use the Map Layers icon
+              |
+              | to overlay the High Injury Network, Supervisorial Districts, and Communities of Concern.
+            li
+              b Download map data
+              |
+              | to get information for specific projects or the entire data set in a .CSV format. For a subset of data, apply the filters you want (e.g. Underway Transit), click the Download button, then click “Filtered Projects”.
 
-          div(style="margin-top:20px;")
+          p Projects that are underway are updated on a quarterly basis and new projects are added upon approval. We cannot guarantee the accuracy or completeness of the information shown on the map. If you have questions or comments, please contact us at
+            =" "
+            a(href="mailto:mystreetsf@sfcta.org") mystreetsf@sfcta.org
+            | .
+
+          div(style="margin-top:15px;")
             button.small.ui.right.floated.violet.button(@click="clickedToggleHelp") OK, GOT IT
-            |&nbsp;&nbsp;
-            button.small.ui.right.floated.basic.violet.button(
-              @click="clickedLearnMore"
-              style="margin-right:5px"
-            ) Learn more about MyStreet SF&hellip;
+            a(href="https://www.sfcta.org/mystreetsf-projects-map" target="_blank") Learn more about MyStreetSF&hellip;
 
   transition(name="fade")
     #downloadbox.ui.segment(v-cloak v-show="showDownload" class="ui segment")
@@ -120,7 +143,7 @@
         .some-flair(v-if="isMobile")
         .product-title(v-if="!isMobile")
           hr
-          h3.apptitle MyStreet SF
+          h3.apptitle MyStreetSF
           hr
 
         br(v-if="!isMobile")
@@ -222,18 +245,20 @@
   .panel.sidepanel(v-if="showingMainPanel && !isMobile" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr
-      h4.apptitle: a(href="/") MyStreet SF
+      h4.apptitle: a(href="/") MyStreetSF
 
       .helpbar
         button.ui.right.labeled.icon.violet.tiny.button(
+          style="padding: 8px 0px"
           @click="clickedToggleHelp")
           i.icon.info
-          | What is this?
+          | About this map
         |&nbsp;&nbsp;
         button.ui.right.labeled.icon.violet.tiny.button(
+          style="padding: 8px 0px; margin-bottom: 2px;"
           @click="clickedLearnMore")
           i.icon.right.arrow
-          | Learn More
+          | Learn more&hellip;
       hr
 
     .information-panel(v-cloak)

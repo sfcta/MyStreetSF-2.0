@@ -71,10 +71,7 @@
 
       .for-more-info
         h3.billy-header(:style="color") For More Information
-        table
-          tr.project-details
-            td.project-details(colspan=2)
-              a(v-bind:href="forMoreInfoLink" target="_blank") {{ forMoreInfoLinkText }}
+        p: a(v-bind:href="forMoreInfoLink" target="_blank") {{ forMoreInfoLinkText }}
 
   .footer
     .banner2
@@ -156,7 +153,6 @@ function clickedBack() {
 }
 
 async function mounted(component) {
-  console.log('HEERE')
   let id = component.$route.params.id
 
   if (BigStore.debug) console.log({ project_id: id })
@@ -189,6 +185,8 @@ function setProjectDetails() {
   store.color = { color: generateColorFromDb() }
 
   let link = store.geojson['project_details_page']
+  if (link === 'mystreetsf@sfcta.org') link = null
+
   if (link) {
     store.forMoreInfoLink = link
     store.forMoreInfoLinkText = link

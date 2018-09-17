@@ -77,7 +77,7 @@
           @click="clickedCloseNearby"
           style="float:right;"
         ): i.close.icon
-       | {{ nearbyProjects[0].project_name}}
+       | {{ trimmedProjectName(nearbyProjects[0]) }}
 
     .other-projects(v-if="nearbyProjects.length > 1")
       h5.black(style="font-size:11px; margin-left:5px; padding-top:5px;") ALSO NEARBY:
@@ -86,7 +86,7 @@
          @click="clickedNearbyProject(index)"
          @mouseover="hoverAboveNearbyItem(index)"
       )
-        h5.nearby-row(v-if="index > 0") {{prj.project_name}}
+        h5.nearby-row(v-if="index > 0") {{ trimmedProjectName(prj)}}
 
   #layer-widgets
     button.ui.tiny.grey.icon.button(
@@ -256,7 +256,6 @@
             @click="clickedLearnMore")
             i.icon.right.arrow
             | Learn more&hellip;
-
 
   .panel.sidepanel(v-if="showingMainPanel && !isMobile" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
@@ -650,6 +649,7 @@ export default {
     nameOfFilterDistrict,
     swipeHandler,
     termChanged,
+    trimmedProjectName,
   },
   watch: {
     terms: termChanged,
@@ -673,6 +673,13 @@ function swipeHandler(direction) {
     clickedShowHide()
     store.showingFilterPanel = store.showingLayerPanel = store.showingMainPanel = false
   }
+}
+
+function trimmedProjectName(prj) {
+  const TRIM_AT = 85
+  let name = prj.project_name
+  if (name.length < TRIM_AT) return name
+  return name.substring(0, TRIM_AT) + '\u2026'
 }
 
 function clickedMoreDetails() {
@@ -1371,6 +1378,7 @@ li {
   color: black;
   padding-top: 2px;
   min-height: 30px;
+  font-size: 12px;
 }
 
 .nearby-title:hover {
@@ -1380,10 +1388,13 @@ li {
 .nearby-row {
   color: #666;
   font-weight: 400;
-  font-size: 13px;
+  font-size: 11px;
   padding-top: 2px;
-  padding-left: 5px;
-  height: 40px;
+  line-height: 1.1;
+  padding-left: 10px;
+  padding-right: 5px;
+  margin-left: -5px;
+  height: 27px;
 }
 
 .nearby-row:hover {

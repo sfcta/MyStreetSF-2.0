@@ -465,6 +465,11 @@ function buildPopupContent(id, nearbyProjectIDs) {
     projects.push(store.prjCache[nearby])
   }
 
+  projects.sort(function(a, b) {
+    if (a.project_name < b.project_name) return -1
+    if (a.project_name > b.project_name) return 1
+    return 0
+  })
   return projects
 }
 

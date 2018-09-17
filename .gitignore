@@ -40,3 +40,4 @@ bundles
 bundle.js
 .jekyll-metadata
 *bundle.js*
+docs/

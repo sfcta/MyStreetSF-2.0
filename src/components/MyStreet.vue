@@ -242,6 +242,21 @@
             span(style="color: #fc4"
                   v-html="helptext.LINK_TEXT")
 
+        .helpbar(v-if="!infoUrl")
+          br
+          button.ui.right.labeled.icon.violet.tiny.button(
+            style="padding: 8px 0px"
+            @click="clickedToggleHelp")
+            i.icon.info
+            | About this map
+          |&nbsp;&nbsp;
+          button.ui.right.labeled.icon.violet.tiny.button(
+            style="padding: 8px 0px; margin-bottom: 2px;"
+            @click="clickedLearnMore")
+            i.icon.right.arrow
+            | Learn more&hellip;
+
+
   .panel.sidepanel(v-if="showingMainPanel && !isMobile" v-bind:class="{ shrunken: isPanelHidden}")
     #preheader
       hr

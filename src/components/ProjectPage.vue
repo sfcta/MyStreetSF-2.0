@@ -71,7 +71,7 @@
 
       .for-more-info
         h3.billy-header(:style="color") For More Information
-        p: a(v-bind:href="forMoreInfoLink" target="_blank") {{ forMoreInfoLinkText }}
+        p: a(v-bind:href="forMoreInfoLink" target="_blank") {{ forMoreInfoLinkText.length < 85 ? forMoreInfoLinkText : forMoreInfoLinkText.substring(0,85)+'&hellip;' }}
 
   .footer
     .banner2

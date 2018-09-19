@@ -1,9 +1,10 @@
 'use strict'
 const fs = require('fs')
 
-const FOLDER = '../static/project-images/'
+// script expects the THUMB_FOLDER env variable to be set
+const FOLDER = process.env.THUMB_FOLDER
 
-console.log('ok')
+console.log('scanning: ' + FOLDER)
 
 let images = {}
 

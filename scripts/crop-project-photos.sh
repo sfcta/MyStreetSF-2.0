@@ -9,11 +9,14 @@
 #
 set -ex
 
-FOLDER=../static/project-images
+SRC_FOLDER=~/gdrive-okbecause/mystreet-project-images
+
+THUMB_FOLDER=../static/project-thumbnails
 
 # TO-DO should pull images from google-drive first
+cp $SRC_FOLDER/* $THUMB_FOLDER
 
-for image in $FOLDER/{*.JPG,*.PNG,*.jpg,*.png};
+for image in $THUMB_FOLDER/{*.JPG,*.jpg,*.png};
 do
     gm convert \
           -geometry 500x500^ \
@@ -25,6 +28,6 @@ do
 done
 
 # create the JSON lookup file
-node process-project-images.js
+THUMB_FOLDER=$THUMB_FOLDER node process-project-images.js
 
-rm $FOLDER/{*.JPG,*.PNG,*.jpg,*.png}
+rm $THUMB_FOLDER/{*.JPG,*.jpg,*.png}

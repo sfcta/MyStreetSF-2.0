@@ -11,7 +11,7 @@
     li.viz-thumbnail(v-for="prj in transitProjects" v-bind:key="prj.project_number")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
-          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-processed-thumbnails/'+projectImages[prj.project_number] : '/static/bus-seats.jpg'")
+          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/bus-seats.jpg'")
           h5.thumbnail-title.bottom-left: span {{ prj.project_name }}
         p.footnote {{prj.sponsor}}
   br(v-if="transitProjects.length > 0")
@@ -21,7 +21,7 @@
     li.viz-thumbnail(v-for="prj in streetProjects" v-bind:key="prj.project_number")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
-          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-processed-thumbnails/'+projectImages[prj.project_number] : '/static/asphalt.jpg'")
+          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/asphalt.jpg'")
           h5.thumbnail-title.bottom-left.streets: span {{ prj.project_name }}
         p.footnote {{prj.sponsor}}
   br(v-if="streetProjects.length > 0")
@@ -31,7 +31,7 @@
     li.viz-thumbnail(v-for="prj in planningProjects" v-bind:key="prj.project_number")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
-          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-processed-thumbnails/'+projectImages[prj.project_number] : '/static/blur.jpg'")
+          img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/blur.jpg'")
           h5.thumbnail-title.bottom-left.plans: span {{ prj.project_name }}
         p.footnote {{prj.sponsor}}
   br(v-if="planningProjects.length > 0")
@@ -102,7 +102,7 @@ async function mounted(component) {
 }
 
 async function fetchImages() {
-  let url = '/static/project-processed-thumbnails/project-images.json'
+  let url = '/static/project-thumbnails/project-images.json'
   try {
     let resp = await fetch(url)
     let jsonData = await resp.json()

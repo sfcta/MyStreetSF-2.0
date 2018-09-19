@@ -1,7 +1,6 @@
 _dist
 /semantic
 
-/static/project-image-sources
 .ruby-version
 .pug-cache
 
@@ -40,4 +39,6 @@ bundles
 bundle.js
 .jekyll-metadata
 *bundle.js*
+
+# GitHub Pages build folder
 docs/

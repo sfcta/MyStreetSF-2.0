@@ -12,9 +12,11 @@ curl -Ss -X GET -H "X-USER-TOKEN: e050e01c-3176-cad7-b714-f8f75a6adb6d" \
 
 # Does file exist and have size greater than 0
 if [ ! -s /tmp/portal-dump.csv ]; then
-        exit 0
+	exit 0
 fi
+
 
 psql -q -f import-portal-data.sql geo &> $LOGFILE
 
 rm /tmp/portal-dump.csv
+

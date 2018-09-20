@@ -17,4 +17,4 @@ fs.readdirSync(FOLDER).forEach(file => {
 
 console.log(images)
 
-fs.writeFileSync(FOLDER + 'project-images.json', JSON.stringify(images, null, 2), 'utf-8')
+fs.writeFileSync(FOLDER + '/project-images.json', JSON.stringify(images, null, 2), 'utf-8')

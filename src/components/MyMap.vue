@@ -984,7 +984,7 @@ function unHoverFeature(id) {
   if (isTargetAPolygon(id)) store.layers[id].bringToBack()
 
   // if project is already selected, don't de-select it
-  if (_selectedProject == id) {
+  if (_selectedProject === id) {
     clickedOnFeature(id)
     return
   }
@@ -1009,7 +1009,7 @@ function hoverFeature(e) {
 }
 
 function highlightProject(id) {
-  if (id == _selectedProject) return
+  if (id === _selectedProject) return
 
   let isPolygon = isTargetAPolygon(id)
   let isPoints = isTargetAPoint(id)

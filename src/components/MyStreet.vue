@@ -1529,4 +1529,12 @@ li {
     overflow-y: auto;
   }
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  /* IE10+ CSS styles go here */
+  .sidepanel {
+    width: 200px;
+    height: 500px;
+  }
+}
 </style>

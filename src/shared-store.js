@@ -12,6 +12,7 @@ export const EVENT = {
   UPDATE_FILTERS: 'map-update-filters',
   CLICKED_ADDRESS: 'clicked-address',
   CLICKED_ON_FEATURE: 'clicked-on-feature',
+  HOVER_ON_FEATURE: 'hover-on-feature',
   REMOVE_ADDRESS_MARKER: 'remove-address-marker',
   SEARCH_TERM_CHANGED: 'search-term-changed',
   SET_MAP_PROJECT: 'set-map-project',

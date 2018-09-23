@@ -194,7 +194,7 @@ function hoverSearch(id) {
   if (id === _hoverSearchLastId) return
 
   _hoverSearchLastId = id
-  EventBus.$emit(EVENT.CLICKED_ON_FEATURE, id)
+  EventBus.$emit(EVENT.HOVER_ON_FEATURE, id)
 }
 
 function clickedSearch(id) {

@@ -275,7 +275,7 @@ function clickedFilter(e) {
 }
 
 function clickedAnywhereOnMap(map) {
-  if (!store.isMobile()) return
+  if (!store.isMobile) return
 
   // undo selection, if user clicked on base map
   if (map.originalEvent.target.id === 'mymap') {
@@ -406,6 +406,13 @@ function setupEventListeners() {
 
   EventBus.$on(EVENT.CLICKED_ON_FEATURE, id => {
     clickedOnFeature(id)
+  })
+
+  EventBus.$on(EVENT.HOVER_ON_FEATURE, id => {
+    highlightProject(id)
+
+    let layer = store.layers[id]
+    layer.bringToFront()
   })
 
   EventBus.$on(EVENT.REMOVE_ADDRESS_MARKER, id => {
@@ -855,6 +862,8 @@ function clickedOnFeature(e) {
 
   target.setStyle(clickedStyle)
 
+  if (isTargetAPolygon(id)) store.layers[id].bringToBack()
+
   updatePanelDetails(id)
   makeSureMobileUsersSeeTheirSelection()
 }
@@ -968,6 +977,14 @@ function isTargetAPoint(id) {
 function unHoverFeature(id) {
   _showNearbyTick = false
 
+  if (isTargetAPolygon(id)) store.layers[id].bringToBack()
+
+  // if project is already selected, don't de-select it
+  if (_selectedProject == id) {
+    clickedOnFeature(id)
+    return
+  }
+
   if (_projectStylesById.hasOwnProperty(id)) {
     BigStore.state.layers[id].setStyle(_projectStylesById[id])
   } else {
@@ -988,6 +1005,8 @@ function hoverFeature(e) {
 }
 
 function highlightProject(id) {
+  if (id == _selectedProject) return
+
   let isPolygon = isTargetAPolygon(id)
   let isPoints = isTargetAPoint(id)
 
@@ -1000,7 +1019,7 @@ function highlightProject(id) {
   }
 
   let style = {
-    color: normal.truecolor,
+    color: '#f5fe', // normal.truecolor,
     fillColor: normal.fillColor,
     opacity: 1.0,
     radius: 7,
@@ -1008,7 +1027,7 @@ function highlightProject(id) {
   }
 
   let polygonStyle = {
-    color: normal.truecolor,
+    color: '#f5fe', // normal.truecolor,
     fillColor: normal.truecolor,
     fillOpacity: 0.3,
     opacity: 1.0,

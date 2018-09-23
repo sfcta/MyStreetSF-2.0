@@ -537,7 +537,7 @@ function determineMobile() {
 
 function hoverAboveNearbyItem(index) {
   let project = store.nearbyProjects[index]
-  EventBus.$emit(EVENT.MAP_HIGHLIGHT_PROJECT, project.project_number)
+  EventBus.$emit(EVENT.HOVER_ON_FEATURE, project.project_number)
 }
 
 function handleHash() {

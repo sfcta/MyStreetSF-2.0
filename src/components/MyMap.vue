@@ -467,18 +467,22 @@ function showHoverPopupAfterDelay(id, latlng, containerPoint, delay) {
 
 function buildPopupContent(id, nearbyProjectIDs) {
   let projects = []
-  projects.push(store.prjCache[id])
 
   for (let nearby of nearbyProjectIDs) {
     if (nearby === id) continue
     projects.push(store.prjCache[nearby])
   }
 
+  // sort all the non-clicked nearby projects
   projects.sort(function(a, b) {
     if (a.project_name < b.project_name) return -1
     if (a.project_name > b.project_name) return 1
     return 0
   })
+
+  // add actual clicked project to top of list
+  projects.unshift(store.prjCache[id])
+
   return projects
 }
 

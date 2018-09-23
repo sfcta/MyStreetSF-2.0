@@ -275,6 +275,8 @@ function clickedFilter(e) {
 }
 
 function clickedAnywhereOnMap(map) {
+  if (!store.isMobile()) return
+
   // undo selection, if user clicked on base map
   if (map.originalEvent.target.id === 'mymap') {
     // drop panel if user is just clicking around

@@ -517,7 +517,6 @@ export default {
     termChanged: termChanged,
   },
   watch: {
-    terms: termChanged,
     selectedTags: selectedTagsChanged,
     showingMainPanel: function() {
       // initialize dropdowns if main panel is showing
@@ -1311,6 +1310,11 @@ function removeAddressMarker() {
 
 function clickedAddress(address) {
   console.log({ clickedAddress: address })
+
+  removeAddressMarker()
+
+  if (!address) return
+
   let lng = address.center[0]
   let lat = address.center[1]
 
@@ -1320,13 +1324,11 @@ function clickedAddress(address) {
   store.addressSearchResults.push([])
   store.addressSearchResults.pop()
 
-  removeAddressMarker()
-
   _addressMarker = L.circle([lat, lng], {
     color: 'red',
     fillColor: '#f63',
     fillOpacity: 0.6,
-    radius: 250,
+    radius: 175,
   })
   _addressMarker.addTo(mymap)
 

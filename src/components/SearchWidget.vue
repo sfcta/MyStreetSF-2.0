@@ -164,6 +164,16 @@ function termChanged() {
 }
 
 function fetchAddressResults(_queryString) {
+  // For now, we are going to ignore addresses that do not begin with a number.
+  // This means you can't search for landmarks, but it also means that nothing
+  // will get returned when you search "Broadway" which is what SFCTA wants.
+
+  let addressField = parseInt(_queryString, 10)
+  if (Number.isNaN(addressField)) {
+    store.addressSearchResults = []
+    return
+  }
+
   geocoding.geocode('mapbox.places', _queryString, function(err, geoData) {
     console.log({ err: err, data: geoData })
     if (geoData.features.length) {

@@ -652,7 +652,6 @@ export default {
     trimmedProjectName,
   },
   watch: {
-    terms: termChanged,
     selectedTags: selectedTagsChanged,
     showingMainPanel: function() {
       // initialize dropdowns if main panel is showing

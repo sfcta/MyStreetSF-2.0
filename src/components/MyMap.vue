@@ -275,34 +275,39 @@ function clickedFilter(e) {
 }
 
 function clickedAnywhereOnMap(map) {
+  // don't clear map on desktop
   if (!store.isMobile) return
 
   // undo selection, if user clicked on base map
   if (map.originalEvent.target.id === 'mymap') {
-    // drop panel if user is just clicking around
-    if (store.isMobile) {
-      store.isPanelHidden = true
-      setTimeout(function() {
-        store.showingMainPanel = false
-        store.showingFilterPanel = false
-        store.showingLayerPanel = false
-      }, 300)
-    }
-
-    let delay = store.isMobile ? 500 : 0
-    setTimeout(function() {
-      store.infoTitle = defaultPanelTitle
-      store.infoDetails = ''
-      store.infoUrl = ''
-      store.infoProject = ''
-      store.nearbyProjects = []
-      store.showHelp = false
-      store.showDownload = false
-
-      removeHighlightFromPreviousSelection()
-      updateURLHash()
-    }, delay)
+    clearMap()
   }
+}
+
+function clearMap() {
+  // drop panel if user is just clicking around
+  if (store.isMobile) {
+    store.isPanelHidden = true
+    setTimeout(function() {
+      store.showingMainPanel = false
+      store.showingFilterPanel = false
+      store.showingLayerPanel = false
+    }, 300)
+  }
+
+  let delay = store.isMobile ? 500 : 0
+  setTimeout(function() {
+    store.infoTitle = defaultPanelTitle
+    store.infoDetails = ''
+    store.infoUrl = ''
+    store.infoProject = ''
+    store.nearbyProjects = []
+    store.showHelp = false
+    store.showDownload = false
+
+    removeHighlightFromPreviousSelection()
+    updateURLHash()
+  }, delay)
 }
 
 function setInitialMapExtentIfNecessary() {
@@ -378,6 +383,10 @@ function setupEventListeners() {
 
   EventBus.$on(EVENT.MAP_TOGGLE_LAYER, layer => {
     toggleMapLayer(layer)
+  })
+
+  EventBus.$on(EVENT.CLEAR_MAP, () => {
+    clearMap()
   })
 
   EventBus.$on(EVENT.MAP_SHOW_DISTRICT_OVERLAY, district => {

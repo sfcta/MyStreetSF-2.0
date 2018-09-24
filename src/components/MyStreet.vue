@@ -288,14 +288,19 @@
           router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
 
     #bottom-panel(v-cloak)
-      .details-link
-        button.ui.button.small.pink.compact(
-          v-if="infoUrl"
-          @click="clickedMoreDetails"
-          style="margin:2px 0px 0px 5px;"
-          ) More Details&hellip;
-
       .pickers
+        .details-link
+          button.ui.button.small.basic.pink.compact(
+            v-if="infoUrl"
+            @click="clearMap"
+            style="float:left;"
+            ) Clear Map
+          button.ui.button.small.right.pink.compact(
+            v-if="infoUrl"
+            @click="clickedMoreDetails"
+            style="float: right; margin-right: 0px;"
+            ) More Details&hellip;
+
         hr
         h5 STATUS:
 
@@ -626,6 +631,7 @@ export default {
     mounted()
   },
   methods: {
+    clearMap,
     clickedCloseNearby,
     clickedCloseDownload,
     clickedDownload,
@@ -679,6 +685,10 @@ function trimmedProjectName(prj) {
   let name = prj.project_name
   if (name.length < TRIM_AT) return name
   return name.substring(0, TRIM_AT) + '\u2026'
+}
+
+function clearMap() {
+  EventBus.$emit(EVENT.CLEAR_MAP)
 }
 
 function clickedMoreDetails() {
@@ -1168,8 +1178,8 @@ h4 {
 #bottom-panel {
   grid-row: 3 / 4;
   grid-column: 1 / 2;
-  display: table-row;
-  text-align: right;
+  display: flex;
+  flex-direction: vertical;
   vertical-align: bottom;
   margin-bottom: 0px;
 }
@@ -1247,7 +1257,7 @@ h5 {
 }
 
 .details-link {
-  text-align: right;
+  height: 32px;
   margin-top: 10px;
   margin-right: 0px;
 }

@@ -5,6 +5,7 @@
 import Vue from 'vue'
 export const EventBus = new Vue()
 export const EVENT = {
+  CLEAR_MAP: 'clear-map',
   MAP_HIGHLIGHT_PROJECT: 'map-hover-feature',
   MAP_RESIZE: 'map-force-resize-animation',
   MAP_TOGGLE_LAYER: 'map-toggle-layer',

@@ -433,4 +433,17 @@ td {
 h2.noSelection {
   text-align: center;
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  #search-widget {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    color: black;
+    margin: 10px 10px 10px 10px;
+    width: 350px;
+    z-index: 5;
+  }
+}
 </style>

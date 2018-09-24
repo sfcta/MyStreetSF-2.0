@@ -18,6 +18,24 @@
   .banner2
 
   #project-detail-container
+    #main-column
+      h1 {{ project_name }}
+
+      .brief-info
+        h3.billy-header(:style="color") Brief Project Description
+        p.project-description {{ description }}
+
+      .detailed-info
+        h3.billy-header(:style="color") Detailed Project Information
+        table
+          tr.project-details(v-for="row in details")
+            td.project-details: b(v-html='row[0]')
+            td.project-details.col2 {{ row[1] }}
+
+      .for-more-info
+        h3.billy-header(:style="color") For More Information
+        p: a(v-bind:href="forMoreInfoLink" target="_blank") {{ forMoreInfoLinkText.length < 85 ? forMoreInfoLinkText : forMoreInfoLinkText.substring(0,85)+'&hellip;' }}
+
     #nav-column
       #nav-links(v-if="project_name")
         button.ui.button.small.basic.labeled.icon.violet(@click="clickedBack" style="width:100%;")
@@ -54,24 +72,6 @@
           :href="'mailto:?&subject=' + cleanProjectName + '&body=Check out the SFCTA MyStreet project page for:%0D%0A%0D%0A' + cleanProjectName + '%0D%0A' + currentRoute"
           title="Email")
           img(src="../assets/email.png")
-
-    #main-column
-      h1 {{ project_name }}
-
-      .brief-info
-        h3.billy-header(:style="color") Brief Project Description
-        p.project-description {{ description }}
-
-      .detailed-info
-        h3.billy-header(:style="color") Detailed Project Information
-        table
-          tr.project-details(v-for="row in details")
-            td.project-details: b(v-html='row[0]')
-            td.project-details.col2 {{ row[1] }}
-
-      .for-more-info
-        h3.billy-header(:style="color") For More Information
-        p: a(v-bind:href="forMoreInfoLink" target="_blank") {{ forMoreInfoLinkText.length < 85 ? forMoreInfoLinkText : forMoreInfoLinkText.substring(0,85)+'&hellip;' }}
 
   .footer
     .banner2
@@ -1077,6 +1077,20 @@ a {
     padding: 0px 10px 20px 15px;
     display: flex;
     flex-direction: column-reverse;
+  }
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  #project-detail-container {
+    display: flex;
+    max-width: 1100px;
+    margin: 0px auto;
+    padding: 20px 40px;
+    overflow-y: auto;
+  }
+
+  #nav-column {
+    margin-left: 40px;
   }
 }
 </style>

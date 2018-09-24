@@ -8,7 +8,9 @@
 
   h3.project-heading(v-if="transitProjects.length > 0") TRANSIT PROJECTS
   transition-group.visualizations(name="flip-list" tag="ul")
-    li.viz-thumbnail(v-for="prj in transitProjects" v-bind:key="prj.project_number")
+    li.viz-thumbnail(v-for="(prj,i) in transitProjects"
+                     :key="prj.project_number"
+                     :class="{'new-row': i%4==3}")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/bus-seats.jpg'")
@@ -18,7 +20,8 @@
 
   h3.project-heading(v-if="streetProjects.length > 0" style="background-color: #21ba45") STREET PROJECTS
   transition-group.visualizations(name="flip-list" tag="ul")
-    li.viz-thumbnail(v-for="prj in streetProjects" v-bind:key="prj.project_number")
+    li.viz-thumbnail(v-for="(prj,i) in streetProjects" v-bind:key="prj.project_number"
+                         :class="{'new-row': i%4==3}")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/asphalt.jpg'")
@@ -28,7 +31,8 @@
 
   h3.project-heading(v-if="planningProjects.length > 0" style="background-color: #bb9b3a") PLANS AND STUDIES
   transition-group.visualizations(name="flip-list" tag="ul")
-    li.viz-thumbnail(v-for="prj in planningProjects" v-bind:key="prj.project_number")
+    li.viz-thumbnail(v-for="(prj,i) in planningProjects" v-bind:key="prj.project_number"
+                           :class="{'new-row': i%4==3}")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/blur.jpg'")
@@ -971,18 +975,21 @@ a {
   .bottom-left {
     font-size: 1.1rem;
   }
+
+  .ie-table-break {
+    display: none;
+  }
 }
 
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
   /* IE10+ CSS styles go here */
   #zcontainer {
-    background-color: #ddd;
-    display: flex;
+    display: block;
     height: 100%;
     max-height: 100%;
-    margin: 0px 0px 0px 0px;
-    padding: 0px 0px 0px 0px;
-    overflow: hidden;
+    margin: 0px 400px 0px 0px;
+    padding: 25px 0px 0px 15px;
+    overflow-y: scroll;
   }
 
   #layer-widgets {
@@ -1005,6 +1012,21 @@ a {
   #bottom-panel {
     position: absolute;
     bottom: 0px;
+  }
+
+  .visualizations {
+    justify-content: center;
+    list-style: none;
+    padding-left: 0px;
+    margin-bottom: 0px;
+  }
+
+  .viz-thumbnail {
+    /* padding-left: 10px; */
+  }
+
+  .new-row {
+    display: table-row;
   }
 }
 </style>

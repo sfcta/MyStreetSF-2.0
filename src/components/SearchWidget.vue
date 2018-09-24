@@ -559,6 +559,7 @@ h2.noSelection {
     margin: 10px 80px 10px 10px;
   }
 }
+
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
   #search-widget {
     position: absolute;

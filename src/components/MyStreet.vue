@@ -1571,5 +1571,19 @@ li {
     bottom: 0px;
     padding-right: 15px;
   }
+
+  #helpbox {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 10px 10px;
+  }
+
+  #downloadbox {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 10px 10px;
+  }
 }
 </style>

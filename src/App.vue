@@ -57,4 +57,10 @@ h6 {
   overflow-y: hidden;
   overscroll-behavior: contain;
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .leaflet-right .leaflet-control {
+    margin-right: 410px;
+  }
+}
 </style>

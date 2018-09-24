@@ -559,4 +559,16 @@ h2.noSelection {
     margin: 10px 80px 10px 10px;
   }
 }
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  #search-widget {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    color: black;
+    margin: 10px 10px 10px 10px;
+    width: 350px;
+    z-index: 5;
+  }
+}
 </style>

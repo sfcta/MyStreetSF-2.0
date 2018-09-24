@@ -1879,4 +1879,12 @@ h2.noSelection {
     z-index: 1;
   }
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  #mymap {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+}
 </style>

@@ -1,5 +1,7 @@
 <template lang="pug">
 #container
+  component(v-bind:is="whichSearchWidget")
+  component(v-bind:is="mainComponent")
   transition(name="fade")
     #helpbox.ui.segment(v-show="showHelp" class="ui segment")
       h3(style="margin-left: 10px") MyStreetSF
@@ -360,8 +362,6 @@
             td.agency-logo
               a.agency-link(target="_blank" href="http://www.sfcta.org/")
                 img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
-  component(v-bind:is="whichSearchWidget")
-  component(v-bind:is="mainComponent")
 </template>
 
 <script>
@@ -378,7 +378,7 @@ import SearchWidget from '@/components/SearchWidget'
 // Shared stuff across all components
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
-let jsonexport = require('jsonexport')
+let jsonexport = require('jsonexport/dist')
 let keywordExtractor = require('keyword-extractor')
 let geocoding = require('mapbox-geocoding')
 
@@ -1181,7 +1181,7 @@ h4 {
   display: flex;
   flex-direction: vertical;
   vertical-align: bottom;
-  margin-bottom: 0px;
+  margin-bottom: -5px;
 }
 
 .agency a {
@@ -1542,9 +1542,34 @@ li {
 
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
   /* IE10+ CSS styles go here */
+  #container {
+    display: flex;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  #layer-widgets {
+    position: absolute;
+    bottom: 0;
+    right: 400px;
+    margin-bottom: 25px;
+  }
+
+  .shrunken {
+    margin-right: -394px;
+    right: 0px;
+  }
+
   .sidepanel {
-    width: 200px;
-    height: 500px;
+    position: absolute;
+    right: 0px;
+    width: 400px;
+  }
+
+  #bottom-panel {
+    position: absolute;
+    bottom: 0px;
+    padding-right: 15px;
   }
 }
 </style>

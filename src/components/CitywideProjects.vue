@@ -972,4 +972,39 @@ a {
     font-size: 1.1rem;
   }
 }
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  /* IE10+ CSS styles go here */
+  #zcontainer {
+    background-color: #ddd;
+    display: flex;
+    height: 100%;
+    max-height: 100%;
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+    overflow: hidden;
+  }
+
+  #layer-widgets {
+    border-radius: 7px 0px 0px 7px;
+    background-color: #555;
+    position: absolute;
+    bottom: 0;
+    right: 400px;
+    margin-bottom: 25px;
+    transition: transform 0.4s;
+    z-index: 7;
+  }
+
+  .sidepanel {
+    position: absolute;
+    right: 0;
+    width: 400px;
+  }
+
+  #bottom-panel {
+    position: absolute;
+    bottom: 0px;
+  }
+}
 </style>

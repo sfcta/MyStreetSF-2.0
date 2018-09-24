@@ -90,7 +90,7 @@
       )
         h5.nearby-row(v-if="index > 0") {{ trimmedProjectName(prj)}}
 
-  #layer-widgets
+  #layer-widgets(:class="{ 'ie-shrunken': isPanelHidden}")
     button.ui.tiny.grey.icon.button(
       data-tooltip="Projects"
       v-on:click="clickedShowMainPanel"
@@ -1553,11 +1553,11 @@ li {
     bottom: 0;
     right: 400px;
     margin-bottom: 25px;
+    transition: transform 0.4s, margin 0.4s;
   }
 
-  .shrunken {
-    margin-right: -394px;
-    right: 0px;
+  .ie-shrunken {
+    margin-right: -395px;
   }
 
   .sidepanel {

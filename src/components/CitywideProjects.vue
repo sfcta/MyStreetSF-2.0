@@ -7,10 +7,19 @@
   br
 
   h3.project-heading(v-if="transitProjects.length > 0") TRANSIT PROJECTS
-  transition-group.visualizations(name="flip-list" tag="ul")
+
+  transition-group.visualizations.ie-show(name="flip-list" tag="ul"
+    v-for="rrow in transitRows" :key="'a'+rrow")
+    li.viz-thumbnail(v-for="i in [0,1,2]" :key="rrow*3+i" v-if="transitProjects.length > i+rrow*3")
+      a(:href="'/projects/' + transitProjects[i+rrow*3].project_number" target='_blank')
+        .image-text-box
+          img.thumbnail-image(:src="projectImages[transitProjects[rrow*3+i].project_number] ? '/static/project-thumbnails/'+projectImages[transitProjects[rrow*3+i].project_number] : '/static/bus-seats.jpg'")
+          h5.thumbnail-title.bottom-left: span {{ transitProjects[rrow*3+i].project_name }}
+        p.footnote {{transitProjects[rrow*3+i].sponsor}}
+
+  transition-group.visualizations.ie-hide(name="flip-list" tag="ul")
     li.viz-thumbnail(v-for="(prj,i) in transitProjects"
-                     :key="prj.project_number"
-                     :class="{'new-row': i%4==3}")
+                     :key="prj.project_number")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/bus-seats.jpg'")
@@ -19,9 +28,18 @@
   br(v-if="transitProjects.length > 0")
 
   h3.project-heading(v-if="streetProjects.length > 0" style="background-color: #21ba45") STREET PROJECTS
-  transition-group.visualizations(name="flip-list" tag="ul")
-    li.viz-thumbnail(v-for="(prj,i) in streetProjects" v-bind:key="prj.project_number"
-                         :class="{'new-row': i%4==3}")
+
+  transition-group.visualizations.ie-show(name="flip-list" tag="ul"
+    v-for="rrow in streetRows" :key="'b'+rrow")
+    li.viz-thumbnail(v-for="i in [0,1,2]" :key="rrow*3+i" v-if="streetProjects.length > i+rrow*3")
+      a(:href="'/projects/' + streetProjects[i+rrow*3].project_number" target='_blank')
+        .image-text-box
+          img.thumbnail-image(:src="projectImages[streetProjects[rrow*3+i].project_number] ? '/static/project-thumbnails/'+projectImages[streetProjects[rrow*3+i].project_number] : '/static/asphalt.jpg'")
+          h5.thumbnail-title.bottom-left: span {{ streetProjects[rrow*3+i].project_name }}
+        p.footnote {{streetProjects[rrow*3+i].sponsor}}
+
+  transition-group.visualizations.ie-hide(name="flip-list" tag="ul")
+    li.viz-thumbnail(v-for="(prj,i) in streetProjects" v-bind:key="prj.project_number")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/asphalt.jpg'")
@@ -30,9 +48,18 @@
   br(v-if="streetProjects.length > 0")
 
   h3.project-heading(v-if="planningProjects.length > 0" style="background-color: #bb9b3a") PLANS AND STUDIES
-  transition-group.visualizations(name="flip-list" tag="ul")
-    li.viz-thumbnail(v-for="(prj,i) in planningProjects" v-bind:key="prj.project_number"
-                           :class="{'new-row': i%4==3}")
+
+  transition-group.visualizations.ie-show(name="flip-list" tag="ul"
+    v-for="rrow in planningRows" :key="'c'+rrow")
+    li.viz-thumbnail(v-for="i in [0,1,2]" :key="rrow*3+i" v-if="planningProjects.length > i+rrow*3")
+      a(:href="'/projects/' + planningProjects[i+rrow*3].project_number" target='_blank')
+        .image-text-box
+          img.thumbnail-image(:src="projectImages[planningProjects[rrow*3+i].project_number] ? '/static/project-thumbnails/'+projectImages[planningProjects[rrow*3+i].project_number] : '/static/blur.jpg'")
+          h5.thumbnail-title.bottom-left: span {{ planningProjects[rrow*3+i].project_name }}
+        p.footnote {{planningProjects[rrow*3+i].sponsor}}
+
+  transition-group.visualizations.ie-hide(name="flip-list" tag="ul")
+    li.viz-thumbnail(v-for="(prj,i) in planningProjects" v-bind:key="prj.project_number")
       a(:href="'/projects/' + prj.project_number" target='_blank')
         .image-text-box
           img.thumbnail-image(:src="projectImages[prj.project_number] ? '/static/project-thumbnails/'+projectImages[prj.project_number] : '/static/blur.jpg'")
@@ -67,6 +94,17 @@ export default {
   name: 'CitywideProjects',
   data() {
     return store
+  },
+  computed: {
+    transitRows: function() {
+      return [...Array(Math.ceil(store.transitProjects.length / 3)).keys()]
+    },
+    planningRows: function() {
+      return [...Array(Math.ceil(store.planningProjects.length / 3)).keys()]
+    },
+    streetRows: function() {
+      return [...Array(Math.ceil(store.streetProjects.length / 3)).keys()]
+    },
   },
   created: function() {
     store.sharedState.whichSearchWidget = 'CitywideSearchWidget'
@@ -952,6 +990,13 @@ a {
   position: absolute;
 }
 
+.ie-hide {
+  display: show;
+}
+.ie-show {
+  display: none;
+}
+
 @media only screen and (max-width: 768px) {
   .viz-thumbnail {
     width: 10rem;
@@ -974,10 +1019,6 @@ a {
 
   .bottom-left {
     font-size: 1.1rem;
-  }
-
-  .ie-table-break {
-    display: none;
   }
 }
 
@@ -1019,14 +1060,26 @@ a {
     list-style: none;
     padding-left: 0px;
     margin-bottom: 0px;
+    margin: 0px 0px;
   }
 
   .viz-thumbnail {
-    /* padding-left: 10px; */
+    padding: 8px;
+  }
+  .ie-show {
+    display: block;
+  }
+  .ie-hide {
+    display: none;
   }
 
-  .new-row {
-    display: table-row;
+  .thumbnail-title {
+    background-color: #6633cc;
+    opacity: 0.85;
+  }
+
+  .project-heading {
+    margin-right: 50px;
   }
 }
 </style>

@@ -276,7 +276,12 @@ function clickedFilter(e) {
 
 function clickedAnywhereOnMap(map) {
   // don't clear map on desktop
-  if (!store.isMobile) return
+  if (!store.isMobile) {
+    store.nearbyProjects = []
+    store.showHelp = false
+    store.showDownload = false
+    return
+  }
 
   // undo selection, if user clicked on base map
   if (map.originalEvent.target.id === 'mymap') {

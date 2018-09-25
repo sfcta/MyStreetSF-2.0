@@ -707,11 +707,15 @@ async function mapSegments(cmpsegJson) {
     BigStore.addCacheItem(id, segment)
 
     // validate KML
+
+    kml = kml.replace('</coordinates<', '</coordinates><')
+
     var oParser = new DOMParser()
     var oDOM = oParser.parseFromString(kml, 'text/xml')
     // print the name of the root element or error message
     if (oDOM.documentElement.nodeName === 'parsererror') {
       console.log('## Error while parsing row id ' + id)
+      console.log(kml)
     }
 
     // add KML to the map

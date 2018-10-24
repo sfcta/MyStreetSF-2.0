@@ -336,7 +336,7 @@ function mounted() {
     theme +
     '-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}'
   let token =
-    'pk.eyJ1IjoicHNyYyIsImEiOiJjaXFmc2UxanMwM3F6ZnJtMWp3MjBvZHNrIn0._Dmske9er0ounTbBmdRrRQ'
+    'pk.eyJ1Ijoic2ZjdGEiLCJhIjoiY2pubHk1MXVmMDE4cDNrbXprYW1janI5dCJ9.co1dzs7A6xB80jN7plQ1Yg'
   let attribution =
     '<a href="http://openstreetmap.org">OpenStreetMap</a> | ' +
     '<a href="http://mapbox.com">Mapbox</a>'

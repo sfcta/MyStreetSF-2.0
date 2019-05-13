@@ -3,6 +3,7 @@ _dist
 
 .ruby-version
 .pug-cache
+.vscode
 
 projects*.yml
 

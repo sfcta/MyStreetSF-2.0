@@ -353,15 +353,9 @@
 
         // logo panel
         .make-some-space
-        table#table-logo
-          tr
-            td.agency-logo: h4.agency: b
-              a(target="_blank"
-                href="http://www.sfcta.org/"
-              ) SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY
-            td.agency-logo
-              a.agency-link(target="_blank" href="http://www.sfcta.org/")
-                img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
+        #table-logo
+          a.agency-link(target="_blank" href="https://www.sfcta.org/")
+            img.img-logo(src="../assets/sfcta-logo.png")
 </template>
 
 <script>
@@ -1195,16 +1189,15 @@ h4 {
   color: #ccc;
 }
 
-td.agency-logo {
-  margin: 0px 0px;
-  padding: 2px 0px 0px 0px;
-  vertical-align: middle;
-  text-align: right;
-}
-
 #table-logo {
   margin: 5px 0px;
   border-top: 1px solid #ccc;
+  text-align: center;
+}
+
+.img-logo {
+  margin-top: 5px;
+  height: 55px;
 }
 
 .apptitle {
@@ -1248,6 +1241,7 @@ h5 {
 }
 
 .pickers {
+  width: 100%;
   text-align: left;
 }
 
@@ -1281,17 +1275,6 @@ h4 {
 h5 {
   margin-top: 4px;
   margin-bottom: 4px;
-}
-
-table {
-  vertical-align: top;
-}
-
-td {
-  text-align: left;
-  vertical-align: top;
-  padding: 6px 10px;
-  margin: 5px 5px;
 }
 
 .fade-enter-active,

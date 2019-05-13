@@ -5,16 +5,9 @@
       .banner1-title(v-cloak)
         h1(style="color:white") MyStreet SF
         p Project Details: {{ geojson['sponsor'] }} Project {{project_number}}
-      .banner1-logo
-        table#table-logo
-          tr
-            td.agency-logo: h4.agency: b
-              a(target="_blank"
-                href="http://www.sfcta.org/"
-              ) SAN&nbsp;FRANCISCO&nbsp;COUNTY<br/>TRANSPORTATION&nbsp;AUTHORITY
-            td.agency-logo
-              a.agency-link(target="_blank" href="http://www.sfcta.org/")
-                img.img-logo(src="../assets/sfcta-logo-144.png" width="60")
+      .agency-logo
+        a.agency-link(target="_blank" href="https://www.sfcta.org/")
+          img.img-logo(src="../assets/sfcta-logo.png")
   .banner2
 
   #project-detail-container
@@ -569,10 +562,11 @@ h4 {
   color: #ccc;
 }
 
-td.agency-logo {
+.agency-logo {
   margin: 0px 0px;
+  margin-top: auto;
   padding: 2px 0px 0px 0px;
-  vertical-align: middle;
+  vertical-align: bottom;
   text-align: right;
 }
 
@@ -1040,6 +1034,11 @@ a {
 
 .banner1-title {
   margin-top: 20px;
+}
+
+.img-logo {
+  margin-top: auto;
+  height: 55px;
 }
 
 @media only screen and (max-width: 768px) {

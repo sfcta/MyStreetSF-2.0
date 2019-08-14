@@ -211,16 +211,18 @@ function setProjectDetails() {
   if (cost && cost.charAt(cost.length - 3) === '.') cost = cost.substring(0, cost.length - 3)
 
   store.details.push(['Phase(s)', phase])
+  /*
   store.details.push([
     'Percent&nbsp;Complete of Funded Phase(s)',
     store.geojson['percent_complete'],
   ])
+  */
   store.details.push(['Open for Use', openForUse])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Location', store.geojson['project_location']])
   store.details.push(['District(s)', store.geojson['districts']])
   store.details.push(['Total Project Cost', cost])
-  store.details.push(['Funding Sources', store.geojson['funding_sources']])
+  store.details.push(['Funding&nbsp;Sources', store.geojson['funding_sources']])
   // store.details.push(['Tags', store.geojson['project_tags']])
 }
 

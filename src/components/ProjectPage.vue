@@ -126,7 +126,7 @@ export default {
         '//' +
         window.location.hostname +
         port +
-        '/project/' +
+        '/projects/' +
         store.project_number
       )
     },

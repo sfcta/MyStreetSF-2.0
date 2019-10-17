@@ -754,7 +754,7 @@ function clickedToggleHelp() {
 }
 
 function clickedLearnMore() {
-  window.open('https://www.sfcta.org/mystreetsf-projects-map', '_blank')
+  window.open('https://www.sfcta.org/tools-data/maps', '_blank')
 }
 
 function clickedDistrict(district) {
@@ -1192,7 +1192,7 @@ h4 {
 #table-logo {
   margin: 5px 0px;
   border-top: 1px solid #ccc;
-  text-align: center;
+  text-align: left;
 }
 
 .img-logo {

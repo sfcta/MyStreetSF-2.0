@@ -1195,7 +1195,7 @@ function updateFilters() {
     if (!store.devDistrictOption) {
       if (district > 0) {
         let districtColName = 'district' + district
-        isCorrectDistrict = prj[districtColName] === 1
+        isCorrectDistrict = prj[districtColName] === 'Y'
       }
     }
 

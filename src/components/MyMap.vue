@@ -1167,7 +1167,7 @@ function updateFilters() {
     if (showAll) {
       show = true
     } else {
-      if (!prj) {
+      if (!prj || !prj.project_group) {
         show = false
       } else {
         if (transit && prj.project_group.includes('Transit')) show = true

@@ -50,6 +50,8 @@ const _bigAreas = [
   '144-901004',
 ]
 
+let propKRename = 'PROP K/Half-Cent Sales Tax'
+
 function clickedFunds(e) {
   store.filterFund = e.target.dataset.fund
   if (BigStore.debug) console.log({ FUND: store.filterFund })
@@ -741,6 +743,7 @@ async function mapSegments(cmpsegJson) {
 
   // convert funding source to a unique set
   let funds = Array.from(new Set(fundStrings))
+  if (funds.indexOf('PROP K') > -1) funds[funds.indexOf('PROP K')] = propKRename
   store.fundSources = funds.sort()
   if (store.fundSources[0] === '') store.fundSources.splice(0, 1) // remove blanks at beginning
 
@@ -1180,7 +1183,11 @@ function updateFilters() {
 
     // now check FUNDING SOURCE
     let funds = store.filterFund
-    let isCorrectFund = !funds || prj.funding_sources.includes(funds)
+    let isCorrectFund = !funds
+    if (funds === propKRename) funds = 'PROP K'
+    if (prj.funding_sources) {
+      isCorrectFund = isCorrectFund || prj.funding_sources.includes(funds)
+    }
 
     // now check STATUS
     let isCorrectStatus = complete === underway // true if both or neither are checked

@@ -207,8 +207,7 @@ function setProjectDetails() {
     openForUse = 'N/A'
   }
 
-  let cost = (store.geojson['project_cost_estimate'] || '').replaceAll(/[$,.]/g, '')
-  cost = parseInt(cost) || ''
+  let cost = parseInt((store.geojson['project_cost_estimate'] || '').replace(/[$,]/g, ''))
   cost = cost.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
   store.details.push(['Phase(s)', phase])

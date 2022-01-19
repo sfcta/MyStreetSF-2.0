@@ -39,8 +39,8 @@ let _extraLayers = [
   },
   {
     tag: 'comm',
-    name: 'Communities of Concern',
-    geojson: '/static/comm-concern-supp-2017.geo.json',
+    name: 'Equity Priority Communities',
+    geojson: '/static/comm-concern-supp-2021.geo.json',
   },
 ]
 

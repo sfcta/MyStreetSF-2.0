@@ -31,16 +31,22 @@ let _extraLayers = [
     tag: 'dists',
     name: 'Supervisorial District Boundaries',
     geojson: '/static/sup-districts.geo.json',
+    help: 'Includes geographic boundaries of San Francisco Supervisorial districts'
   },
   {
     tag: 'injuries',
     name: 'High Injury Network',
     geojson: '/static/high-injury-network.geo.json',
+    help: 'Includes a network of streets that has a higher incidence of severe and fatal crashes'
   },
   {
     tag: 'comm',
     name: 'Equity Priority Communities',
     geojson: '/static/comm-concern-supp-2021.geo.json',
+    help: `
+      Includes a diverse cross-section of populations and communities that could be considered disadvantaged or vulnerable now and in the future.
+      Equity Priority Communities can have high levels of households with minority or low-income status, seniors, people who have limited English proficiency, people who have disabilities, and more.
+    `
   },
 ]
 

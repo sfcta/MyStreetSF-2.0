@@ -33,7 +33,7 @@
               li
                 b Use the Map Layers icon
                 |
-                | to overlay the High Injury Network, Supervisorial Districts, and Communities of Concern.
+                | to overlay the High Injury Network, Supervisorial Districts, and Equity Priority Communities.
               li
                 b Download map data
                 |
@@ -45,8 +45,7 @@
               | .
 
           div(style="margin-top:15px;")
-            button.small.ui.right.floated.violet.button(@click="clickedToggleHelp") OK, GOT IT
-            a(href="https://www.sfcta.org/mystreetsf-projects-map" target="_blank") Learn more about MyStreetSF&hellip;
+            button.small.ui.violet.button(@click="clickedToggleHelp") OK, GOT IT
 
   transition(name="fade")
     #downloadbox.ui.segment(v-cloak v-show="showDownload" class="ui segment")
@@ -155,8 +154,14 @@
         br
         br
 
-        #layer-thingies(v-for="layer in extraLayers")
+        .layer-selectors(v-for="layer in extraLayers")
           label {{layer.name}}
+          button.ui.icon.button.basic.blue.circular(
+            style="border: none; box-shadow: none !important; margin-left: 10px"
+            :data-tooltip="layer.help"
+            v-on:click="clickedShowLayerSelector"
+          )
+            i.icon.question.circle.outline
           br
           .ui.toggle.checkbox.layer-selectors
             input(@click="clickedToggleLayer(layer.tag)"
@@ -1521,6 +1526,15 @@ li {
     max-height: 60vh;
     overflow-y: auto;
   }
+}
+
+[data-tooltip] {
+  z-index: 9;
+}
+
+.layer-selectors [data-tooltip]::after {
+  white-space: normal;
+  width: 300px;
 }
 
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {

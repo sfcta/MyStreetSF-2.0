@@ -1,0 +1,10 @@
+#!/bin/bash
+
+commit_comment="${1:-Deploy to production}"
+
+echo "Deploying MyStreet to production with comment $commit_comment"
+
+npm run build
+git add --force docs
+git commit -m "$commit_comment"
+git push

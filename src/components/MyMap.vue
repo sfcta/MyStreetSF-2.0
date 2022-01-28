@@ -14,7 +14,6 @@ import * as turf from '@turf/turf'
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let L = require('leaflet')
-let keywordExtractor = require('keyword-extractor')
 let omnivore = require('@mapbox/leaflet-omnivore')
 let geocoding = require('mapbox-geocoding')
 
@@ -564,7 +563,7 @@ async function queryServer() {
 
       let resp = await fetch(BigStore.api.href, {
         headers: {
-          'X_USER_TOKEN': 'b8cd0d1f-4e37-4274-b612-cf830bbe0e73'
+          'X_USER_TOKEN': BigStore.api.api_token
         }
       })
 
@@ -825,7 +824,7 @@ function generateColorForSegment(segment) {
 
 function updatePanelDetails(id) {
   let prj = BigStore.state.prjCache[id]
-  if(!prj) return;
+  if(!prj) return
 
   // generate permalink
   let permalink = prj['project_number'].toLowerCase()
@@ -875,7 +874,7 @@ function clickedOnFeature(e) {
   updatePanelDetails(id)
 
   // Some projects are description only and have no geometry; skip map layer logic if so
-  if(!target || !target.geometry) return;
+  if(!target || !target.geometry) return
 
   // save this project as the selected project; it's no longer just being hovered over!
   _starterProject = _selectedProject = id
@@ -1237,41 +1236,6 @@ function updateFilters() {
       continue
     }
   }
-}
-
-// ---------- SEARCH PANEL ----------------------
-let _queryString
-
-async function fetchTagResults(terms) {
-  let answer = []
-  let termsLower = terms.toLowerCase()
-  for (let tag of _tagList) {
-    let cleaned = tag.replace(/\//g, ' ')
-    let keywords = keywordExtractor.extract(cleaned)
-    for (let word of keywords) {
-      if (word.startsWith(termsLower)) {
-        answer.push(tag)
-        break
-      }
-    }
-  }
-  store.tagresults = answer
-  store.filterKey++
-}
-
-function fetchAddressResults(_queryString) {
-  geocoding.geocode('mapbox.places', _queryString, function(err, geoData) {
-    console.log({ err: err, data: geoData })
-    if (geoData.features.length) {
-      for (let address of geoData.features) {
-        let i = address.place_name.indexOf(', San Francisco')
-        if (i > 0) address.place_name = address.place_name.substring(0, i)
-      }
-      store.addressSearchResults = geoData['features']
-    } else {
-      store.addressSearchResults = []
-    }
-  })
 }
 
 let _hoverSearchLastId

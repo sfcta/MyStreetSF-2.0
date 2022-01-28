@@ -281,10 +281,9 @@ async function fetchCitywideProjects() {
   const filter = '?district=Citywide'
 
   const geoUrl = BigStore.api.href + filter
-  if (BigStore.debug) console.log(geoUrl)
 
   try {
-    let resp = await fetch(geoUrl)
+    let resp = await fetch(geoUrl, { headers: { 'X_USER_TOKEN': BigStore.api.api_token } })
     let jsonData = await resp.json()
     if (BigStore.debug) console.log({ CITYWIDE: jsonData })
     return jsonData

@@ -378,12 +378,8 @@ import SearchWidget from '@/components/SearchWidget'
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let jsonexport = require('jsonexport/dist')
-let keywordExtractor = require('keyword-extractor')
-let geocoding = require('mapbox-geocoding')
 
 let store = BigStore.state
-
-let _tagList = []
 
 function clickedFunds(e) {
   BigStore.state.filterFund = e.target.dataset.fund
@@ -776,39 +772,6 @@ function updateFilters() {
   EventBus.$emit(EVENT.UPDATE_FILTERS, 0)
 }
 
-// ---------- SEARCH PANEL ----------------------
-let _queryString
-
-async function fetchTagResults(terms) {
-  let answer = []
-  let termsLower = terms.toLowerCase()
-  for (let tag of _tagList) {
-    let cleaned = tag.replace(/\//g, ' ')
-    let keywords = keywordExtractor.extract(cleaned)
-    for (let word of keywords) {
-      if (word.startsWith(termsLower)) {
-        answer.push(tag)
-        break
-      }
-    }
-  }
-  BigStore.state.tagresults = answer
-}
-
-function fetchAddressResults(_queryString) {
-  geocoding.geocode('mapbox.places', _queryString, function(err, geoData) {
-    console.log({ address_results_err: err, data: geoData })
-    if (geoData.features.length) {
-      for (let address of geoData.features) {
-        let i = address.place_name.indexOf(', San Francisco')
-        if (i > 0) address.place_name = address.place_name.substring(0, i)
-      }
-      BigStore.state.addressSearchResults = geoData['features']
-    } else {
-      BigStore.state.addressSearchResults = []
-    }
-  })
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

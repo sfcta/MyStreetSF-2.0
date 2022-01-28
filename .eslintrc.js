@@ -26,5 +26,8 @@ module.exports = {
     'no-unused-vars': process.env.NODE_ENV === 'production' ? 2 : 1,
     'comma-dangle': ['off', 'ignore'],
     'space-before-function-paren': ['error', 'never'],
+    'keyword-spacing': 'off',
+    'padded-blocks': 'off',
+    'semi': 'off'
   },
 }

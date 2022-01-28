@@ -234,10 +234,9 @@ async function fetchProjectInfo(id) {
   const filter = '?project_number=' + id
 
   const geoUrl = BigStore.api.href + filter
-  if (BigStore.debug) console.log(geoUrl)
 
   try {
-    let resp = await fetch(geoUrl)
+    let resp = await fetch(geoUrl, { headers: { 'X_USER_TOKEN': BigStore.api.api_token } })
     let jsonData = await resp.json()
 
     if (jsonData[0]) return jsonData[0]

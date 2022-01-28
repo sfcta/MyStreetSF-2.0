@@ -129,8 +129,8 @@ async function fetchSearchResults(terms) {
   const matchingProjects = searcher.search(terms)
   const result = matchingProjects.map((project) => {
     return {
-      "id": project["project_number"],
-      "name": project["project_name"]
+      'id': project['project_number'],
+      'name': project['project_name']
     }
   });
 

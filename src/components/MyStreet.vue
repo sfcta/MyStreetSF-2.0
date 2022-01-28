@@ -573,8 +573,10 @@ function activateMapSettings(p) {
 
   if (p.tags) EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
 
-  if (p.project) EventBus.$emit(EVENT.CLICKED_ON_FEATURE, p.project)
-  if (p.project) EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
+  if (p.project) {
+    EventBus.$emit(EVENT.CLICKED_ON_FEATURE, p.project)
+    EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
+  }
 
   if (p.showall) store.devDistrictOption = true
 
@@ -653,7 +655,6 @@ export default {
     mobileToggleLayerSelector,
     nameOfFilterDistrict,
     swipeHandler,
-    termChanged,
     trimmedProjectName,
   },
   watch: {
@@ -792,55 +793,6 @@ async function fetchTagResults(terms) {
     }
   }
   BigStore.state.tagresults = answer
-}
-
-async function fetchSearchResults(terms) {
-  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search'
-
-  let fancySearch = searchAPI + '?terms=@@.{'
-  fancySearch += terms + '}'
-  fancySearch = fancySearch.replace(/ /g, ',')
-
-  let simpleSearch = searchAPI + '?select=id,name&name=ilike.'
-  let query = terms.replace(/ /g, '*')
-  simpleSearch += `*${query}*`
-
-  try {
-    // first try smart keyword search
-    console.log(fancySearch)
-    let resp = await fetch(fancySearch)
-    let jsonData = await resp.json()
-
-    // if no results, try simple text search
-    if (terms === _queryString && jsonData.length === 0) {
-      console.log('nuthin')
-      console.log(simpleSearch)
-      resp = await fetch(simpleSearch)
-      jsonData = await resp.json()
-    }
-
-    // update list ONLY if query has not changed while we were fetching
-    if (terms === _queryString) {
-      BigStore.state.results = jsonData
-    }
-  } catch (error) {
-    console.log('search error')
-    console.log(error)
-  }
-}
-
-function termChanged() {
-  console.log(BigStore.state.terms)
-  _queryString = BigStore.state.terms.trim()
-
-  if (_queryString) fetchTagResults(_queryString)
-  else BigStore.state.tagresults = []
-
-  if (_queryString) fetchSearchResults(_queryString)
-  else BigStore.state.results = []
-
-  if (_queryString) fetchAddressResults(_queryString)
-  else BigStore.state.addressSearchResults = []
 }
 
 function fetchAddressResults(_queryString) {

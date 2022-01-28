@@ -231,11 +231,9 @@ async function fetchProjectInfo(id) {
   if (store.sharedState.prjCache[id]) return store.sharedState.prjCache[id]
   id = id.toUpperCase()
 
-  const API_SERVER = 'https://api.sfcta.org/api/'
-  const GEO_VIEW = 'mystreet2_all'
-  const FILTER = '?project_number=eq.' + id
+  const filter = '?project_number=' + id
 
-  const geoUrl = API_SERVER + GEO_VIEW + FILTER
+  const geoUrl = BigStore.api.href + filter
   if (BigStore.debug) console.log(geoUrl)
 
   try {

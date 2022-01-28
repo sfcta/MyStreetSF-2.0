@@ -50,10 +50,33 @@ let _extraLayers = [
   },
 ]
 
+// Get API host based on env
+let apiHost;
+switch(process.env.NODE_ENV) {
+  case "development":
+    if(process.env.DEBUG) console.log("Using dev API (localhost:5000)")
+    apiHost = "http://localhost:5000";
+    break;
+  case "staging":
+    if(process.env.DEBUG) console.log("Using staging API (propk-upgrade.herokuapp.com)")
+    apiHost = "https://propk-upgrade.herokuapp.com";
+    break;
+  case "production":
+    apiHost = "https://portal.sfcta.org";
+}
+
+const apiPath ="/api/v1/project_locations";
+
 // Shared common state storage. state object should ONLY be read.
 // Use methods to modify state.
 export const BigStore = {
-  debug: true,
+  env: process.env,
+  debug: process.env.DEBUG || false,
+  api: {
+    host: apiHost,
+    path: apiPath,
+    href: apiHost + apiPath
+  },
   state: {
     layers: {},
     prjCache: {},

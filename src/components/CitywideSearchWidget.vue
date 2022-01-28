@@ -62,60 +62,6 @@ function updateFilters() {
 
 let _queryString
 
-/*
-async function fetchTagResults(terms) {
-  console.log({ TAGLIST: _tagList })
-  let answer = []
-  let termsLower = terms.toLowerCase()
-  for (let tag of _tagList) {
-    let cleaned = tag.replace(/\//g, ' ')
-    let keywords = keywordExtractor.extract(cleaned)
-    for (let word of keywords) {
-      if (word.startsWith(termsLower)) {
-        answer.push(tag)
-        break
-      }
-    }
-  }
-  store.tagresults = answer
-}
-
-async function fetchSearchResults(terms) {
-  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search'
-
-  let fancySearch = searchAPI + '?terms=@@.{'
-  fancySearch += terms + '}'
-  fancySearch = fancySearch.replace(/ /g, ',')
-
-  let simpleSearch = searchAPI + '?select=id,name&name=ilike.'
-  let query = terms.replace(/ /g, '*')
-  simpleSearch += `*${query}*`
-
-  try {
-    // first try smart keyword search
-    console.log(fancySearch)
-    let resp = await fetch(fancySearch)
-    let jsonData = await resp.json()
-
-    // if no results, try simple text search
-    if (terms === _queryString && jsonData.length === 0) {
-      console.log('nuthin')
-      console.log(simpleSearch)
-      resp = await fetch(simpleSearch)
-      jsonData = await resp.json()
-    }
-
-    // update list ONLY if query has not changed while we were fetching
-    if (terms === _queryString) {
-      store.results = jsonData
-    }
-  } catch (error) {
-    console.log('search error')
-    console.log(error)
-  }
-}
-*/
-
 function termChanged() {
   console.log(store.terms)
   _queryString = store.terms.trim()

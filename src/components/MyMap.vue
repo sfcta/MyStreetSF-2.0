@@ -34,9 +34,6 @@ let store = BigStore.state
 let theme = 'light'
 let mymap
 
-const API_SERVER = 'https://api.sfcta.org/api/'
-const GEO_VIEW = 'mystreet2_all'
-
 // hard code the giant polygons so they stay on the bottom layer of the map
 const _bigAreas = [
   '138-907011',
@@ -428,7 +425,7 @@ function setupEventListeners() {
     highlightProject(id)
 
     let layer = store.layers[id]
-    layer.bringToFront()
+    if(layer) layer.bringToFront()
   })
 
   EventBus.$on(EVENT.REMOVE_ADDRESS_MARKER, id => {
@@ -542,8 +539,7 @@ export default {
     devClickedToggleDistrictOption: devClickedToggleDistrictOption,
     hoverAddress: hoverAddress,
     hoverSearch: hoverSearch,
-    nameOfFilterDistrict: nameOfFilterDistrict,
-    termChanged: termChanged,
+    nameOfFilterDistrict: nameOfFilterDistrict
   },
   watch: {
     selectedTags: selectedTagsChanged,
@@ -562,21 +558,22 @@ function selectedTagsChanged() {
 }
 
 async function queryServer() {
-  const geoUrl = API_SERVER + GEO_VIEW
-
-  if (store.cacheDb) {
-    await mapSegments(store.cacheDb)
-    return
-  }
-
   try {
-    store.nowMoloading = true
-    let resp = await fetch(geoUrl)
-    store.cacheDb = await resp.json()
-    store.nowMoloading = false
+    if(!store.cacheDb) {
+      store.nowMoloading = true
+
+      let resp = await fetch(BigStore.api.href, {
+        headers: {
+          'X_USER_TOKEN': 'b8cd0d1f-4e37-4274-b612-cf830bbe0e73'
+        }
+      })
+
+      store.cacheDb = await resp.json()
+    }
+
     await mapSegments(store.cacheDb)
   } catch (error) {
-    // console.log('map error: ' + error)
+    if(BigStore.debug) console.log('map error: ' + error)
   } finally {
     store.nowMoloading = false
   }
@@ -656,7 +653,7 @@ async function mapSegments(cmpsegJson) {
   let fundStrings = []
 
   for (let segment of cmpsegJson) {
-    if (segment['geometry'] == null) continue
+    // if (segment['geometry'] == null) continue
 
     let id = segment['project_number']
 
@@ -828,6 +825,7 @@ function generateColorForSegment(segment) {
 
 function updatePanelDetails(id) {
   let prj = BigStore.state.prjCache[id]
+  if(!prj) return;
 
   // generate permalink
   let permalink = prj['project_number'].toLowerCase()
@@ -860,11 +858,11 @@ function clickedOnFeature(e) {
   let id
   let target
 
-  if (e in BigStore.state.layers) {
+  if (e in store.layers) {
     // search box!
     id = e
-    target = BigStore.state.layers[id]
-  } else {
+    target = store.layers[id]
+  } else if(typeof e === 'object') {
     // For some reason, Leaflet handles points and polygons
     // differently, hence the weirdness for fetching the id of the selected feature.
     target = e.target
@@ -873,6 +871,11 @@ function clickedOnFeature(e) {
   }
 
   removeHighlightFromPreviousSelection()
+
+  updatePanelDetails(id)
+
+  // Some projects are description only and have no geometry; skip map layer logic if so
+  if(!target || !target.geometry) return;
 
   // save this project as the selected project; it's no longer just being hovered over!
   _starterProject = _selectedProject = id
@@ -889,7 +892,6 @@ function clickedOnFeature(e) {
 
   if (isTargetAPolygon(id)) store.layers[id].bringToBack()
 
-  updatePanelDetails(id)
   makeSureMobileUsersSeeTheirSelection()
 }
 
@@ -1048,7 +1050,7 @@ function highlightProject(id) {
     fillColor: normal.fillColor,
     opacity: 1.0,
     radius: 7,
-    weight: isPoints ? 4 : 6,
+    weight: isPoints ? 4 : 6
   }
 
   let polygonStyle = {
@@ -1057,7 +1059,7 @@ function highlightProject(id) {
     fillOpacity: 0.3,
     opacity: 1.0,
     radius: 10,
-    weight: 6,
+    weight: 6
   }
 
   // the long timeout keeps the highlight from selecting areas every time
@@ -1255,55 +1257,6 @@ async function fetchTagResults(terms) {
   }
   store.tagresults = answer
   store.filterKey++
-}
-
-async function fetchSearchResults(terms) {
-  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search'
-
-  let fancySearch = searchAPI + '?terms=@@.{'
-  fancySearch += terms + '}'
-  fancySearch = fancySearch.replace(/ /g, ',')
-
-  let simpleSearch = searchAPI + '?select=id,name&name=ilike.'
-  let query = terms.replace(/ /g, '*')
-  simpleSearch += `*${query}*`
-
-  try {
-    // first try smart keyword search
-    console.log(fancySearch)
-    let resp = await fetch(fancySearch)
-    let jsonData = await resp.json()
-
-    // if no results, try simple text search
-    if (terms === _queryString && jsonData.length === 0) {
-      console.log('nuthin')
-      console.log(simpleSearch)
-      resp = await fetch(simpleSearch)
-      jsonData = await resp.json()
-    }
-
-    // update list ONLY if query has not changed while we were fetching
-    if (terms === _queryString) {
-      store.results = jsonData
-    }
-  } catch (error) {
-    console.log('search error')
-    console.log(error)
-  }
-}
-
-function termChanged() {
-  console.log(store.terms)
-  _queryString = store.terms.trim()
-
-  if (_queryString) fetchTagResults(_queryString)
-  else store.tagresults = []
-
-  if (_queryString) fetchSearchResults(_queryString)
-  else store.results = []
-
-  if (_queryString) fetchAddressResults(_queryString)
-  else store.addressSearchResults = []
 }
 
 function fetchAddressResults(_queryString) {

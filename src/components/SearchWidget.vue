@@ -120,7 +120,7 @@ async function fetchSearchResults(terms) {
 
   const searcher = new FuzzySearch(
     store.cacheDb,
-    ['project_name', 'description'],
+    ['project_number', 'project_name', 'description'],
     {
       sort: true
     }

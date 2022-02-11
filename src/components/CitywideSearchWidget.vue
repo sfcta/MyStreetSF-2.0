@@ -18,8 +18,6 @@ import 'babel-polyfill'
 // Shared stuff across all components
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
-// let keywordExtractor = require('keyword-extractor')
-// let _tagList = []
 
 let store = BigStore.state
 

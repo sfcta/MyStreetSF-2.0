@@ -570,7 +570,7 @@ function activateMapSettings(p) {
   if (p.tags) EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
 
   if (p.project) {
-    EventBus.$emit(EVENT.CLICKED_ON_FEATURE, p.project)
+    // EventBus.$emit(EVENT.CLICKED_ON_FEATURE, p.project)
     EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
   }
 

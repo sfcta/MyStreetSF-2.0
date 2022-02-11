@@ -867,6 +867,8 @@ function clickedOnFeature(e) {
     target = e.target
     if (target) id = target.options.id
     if (!id) id = e.layer.options.id
+  } else {
+    return;
   }
 
   removeHighlightFromPreviousSelection()
@@ -874,7 +876,7 @@ function clickedOnFeature(e) {
   updatePanelDetails(id)
 
   // Some projects are description only and have no geometry; skip map layer logic if so
-  if(!target || !target.geometry) return
+  // if(!target || !target.feature.geometry) return
 
   // save this project as the selected project; it's no longer just being hovered over!
   _starterProject = _selectedProject = id

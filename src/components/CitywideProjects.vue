@@ -278,7 +278,7 @@ async function fetchCitywideProjects() {
   // if (store.sharedState.prjCache[id]) return store.sharedState.prjCache[id]
   // id = id.toUpperCase()
 
-  const filter = '?district=Citywide'
+  const filter = '?districts=Citywide'
 
   const geoUrl = BigStore.api.href + filter
 

@@ -18,7 +18,6 @@ import 'babel-polyfill'
 // Shared stuff across all components
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
-
 let store = BigStore.state
 
 function mounted() {

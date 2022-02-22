@@ -1194,8 +1194,8 @@ function updateFilters() {
 
     // now check STATUS
     let isCorrectStatus = complete === underway // true if both or neither are checked
-    if (complete && prj.status.includes('Closed')) isCorrectStatus = true
-    if (underway && prj.status.includes('Active')) isCorrectStatus = true
+    if (complete && prj.status === 'closed') isCorrectStatus = true
+    if (underway && ['active', 'closeout_pending'].includes(prj.status)) isCorrectStatus = true
 
     // now check DISTRICT
     let district = store.filterDistrict

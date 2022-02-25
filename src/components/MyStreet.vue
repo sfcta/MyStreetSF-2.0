@@ -416,8 +416,7 @@ function clickedToggleLayer(tag) {
     return z.tag === tag
   })[0]
 
-  if (!layer.show) layer.show = true
-  else layer.show = !layer.show
+  layer.show = !layer.show
 
   EventBus.$emit(EVENT.MAP_TOGGLE_LAYER, layer)
 }

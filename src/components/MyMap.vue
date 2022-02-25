@@ -158,10 +158,10 @@ async function addHighInjuryNetworkLayer(extraLayer) {
     group.bringToBack()
     extraLayer.id = group
 
-    console.log(group)
+    if (BigStore.debug) console.log(group)
     synchronizeExtraLayer('injuries')
   } catch (error) {
-    console.log('map error: ' + error)
+    if (BigStore.debug) console.log('map error: ' + error)
   }
 }
 
@@ -196,9 +196,9 @@ async function addCommunitiesOfConcernLayer(extraLayer) {
     extraLayer.id = group
 
     synchronizeExtraLayer('comm')
-    console.log(group)
+    if (BigStore.debug) console.log(group)
   } catch (error) {
-    console.log('map error: ' + error)
+    if (BigStore.debug) console.log('map error: ' + error)
   }
 }
 
@@ -237,9 +237,9 @@ async function addSupDistrictLayer(extraLayer) {
     extraLayer.id = group
 
     synchronizeExtraLayer('dists')
-    console.log(group)
+    if (BigStore.debug) console.log(group)
   } catch (error) {
-    console.log('map error: ' + error)
+    if (BigStore.debug) console.log('map error: ' + error)
   }
 }
 
@@ -361,6 +361,9 @@ function mounted() {
   updatePanelHelpText()
   loadSupervisorDistricts()
   setupEventListeners()
+  store.extraLayers.forEach((layer) => {
+    if(layer.show) toggleMapLayer(layer)
+  });
   EventBus.$emit(EVENT.SET_PREVENT_OVERSCROLL, true)
 }
 
@@ -441,7 +444,7 @@ function setupEventListeners() {
 }
 
 function activateTags(tags) {
-  console.log('ACTIVATING TAGS: ' + tags)
+  if (BigStore.debug) console.log('ACTIVATING TAGS: ' + tags)
   let tagArray = tags.split(',')
   for (let tag of tagArray) {
     clickedSearchTag(tag)
@@ -588,7 +591,7 @@ function showDistrictOverlay(district) {
     try {
       mymap.removeLayer(_districtOverlay)
     } catch (e) {
-      console.log(e)
+      if (BigStore.debug) console.log(e)
     }
     _districtOverlay = null
   }
@@ -643,7 +646,7 @@ async function loadSupervisorDistricts() {
     }
     if (store.filterDistrict > -1) showDistrictOverlay(store.filterDistrict)
   } catch (error) {
-    // console.log('map error: ' + error)
+    if (BigStore.debug) console.log('map error: ' + error)
   }
 }
 
@@ -712,8 +715,8 @@ async function mapSegments(cmpsegJson) {
     var oDOM = oParser.parseFromString(kml, 'text/xml')
     // print the name of the root element or error message
     if (oDOM.documentElement.nodeName === 'parsererror') {
-      console.log('## Error while parsing row id ' + id)
-      console.log(kml)
+      if (BigStore.debug) console.log('## Error while parsing row id ' + id)
+      if (BigStore.debug) console.log(kml)
     }
 
     // add KML to the map
@@ -934,7 +937,7 @@ function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
           insideLayers.push(key)
         }
       } catch (e) {
-        // console.log({ msg: 'feature failed', feature: feature })
+        if (BigStore.debug) console.log({ msg: 'feature failed', feature: feature })
       }
     }
   }
@@ -973,7 +976,7 @@ function isPointInsideFeature(clickPoint, clickBuffer, feature) {
         return false
     }
   } catch (e) {
-    // console.log({ feature: feature, error: e })
+    if (BigStore.debug) console.log({ feature: feature, error: e })
   }
   return false
 }
@@ -1278,7 +1281,7 @@ function removeAddressMarker() {
 }
 
 function clickedAddress(address) {
-  console.log({ clickedAddress: address })
+  if (BigStore.debug) console.log({ clickedAddress: address })
 
   removeAddressMarker()
 

@@ -378,6 +378,8 @@ function updatePanelHelpText() {
 }
 
 function setupEventListeners() {
+  if(store.mapListenersSet) return;
+
   EventBus.$on(EVENT.MAP_RESIZE, payload => {
     if (BigStore.debug) console.log(`got a map resize event`)
     for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
@@ -441,6 +443,8 @@ function setupEventListeners() {
   EventBus.$on(EVENT.ACTIVE_TAGS, tags => {
     activateTags(tags)
   })
+
+  store.mapListenersSet = true
 }
 
 function activateTags(tags) {

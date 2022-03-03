@@ -127,6 +127,7 @@ export const BigStore = {
     whichSearchWidget: 'SearchWidget',
     tagresults: [],
     tags: _tagList,
+    mapListenersSet: false
   },
 
   addCacheItem(key, value) {

@@ -412,9 +412,9 @@ function clickedShowHide(e) {
 function clickedToggleLayer(tag) {
   if (BigStore.debug) console.log('toggle layer', tag)
 
-  let layer = store.extraLayers.filter(z => {
+  let layer = store.extraLayers.find(z => {
     return z.tag === tag
-  })[0]
+  })
 
   layer.show = !layer.show
 
@@ -569,7 +569,6 @@ function activateMapSettings(p) {
   if (p.tags) EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
 
   if (p.project) {
-    // EventBus.$emit(EVENT.CLICKED_ON_FEATURE, p.project)
     EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
   }
 

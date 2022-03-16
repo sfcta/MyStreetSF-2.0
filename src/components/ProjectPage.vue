@@ -210,15 +210,18 @@ function setProjectDetails() {
     if(openForUseDate) openForUse = openForUseDate.toLocaleDateString();
   }
 
-  let cost = parseInt((store.geojson['project_cost_estimate'] || '').replace(/[$,]/g, ''))
-  cost = cost.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  let cost;
+  if(store.geojson['project_cost_estimate']) {
+    cost = parseInt((store.geojson['project_cost_estimate'] || '').replace(/[$,]/g, ''))
+    cost = cost.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  }
 
   store.details.push(['Phase(s)', phase])
-  store.details.push(['Open for Use', openForUse])
+  store.details.push(['Open for Use', openForUse || "N/A"])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Location', store.geojson['project_location']])
   store.details.push(['District(s)', store.geojson['districts']])
-  store.details.push(['Total Project Cost', cost])
+  if(cost) store.details.push(['Total Project Cost', cost])
   store.details.push(['Funding&nbsp;Sources', store.geojson['funding_sources']])
 }
 

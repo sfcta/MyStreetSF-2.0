@@ -364,6 +364,7 @@ function mounted() {
   store.extraLayers.forEach((layer) => {
     if(layer.show) toggleMapLayer(layer)
   });
+  showDistrictOverlay(store.filterDistrict);
   EventBus.$emit(EVENT.SET_PREVENT_OVERSCROLL, true)
 }
 

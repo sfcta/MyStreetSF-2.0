@@ -202,28 +202,24 @@ function setProjectDetails() {
     phase = phase.substring(0, phase.length - 3)
   }
 
-  let openForUse = store.geojson['project_expected_completion']
+  let openForUse;
   if (store.geojson['project_group'] === 'Plans and Programs') {
-    openForUse = 'N/A'
+    openForUse = 'N/A';
+  } else if(store.geojson['project_expected_completion']) {
+    const openForUseDate = new Date(store.geojson['project_expected_completion']);
+    if(openForUseDate) openForUse = openForUseDate.toLocaleDateString();
   }
 
   let cost = parseInt((store.geojson['project_cost_estimate'] || '').replace(/[$,]/g, ''))
   cost = cost.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
   store.details.push(['Phase(s)', phase])
-  /*
-  store.details.push([
-    'Percent&nbsp;Complete of Funded Phase(s)',
-    store.geojson['percent_complete'],
-  ])
-  */
   store.details.push(['Open for Use', openForUse])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Location', store.geojson['project_location']])
   store.details.push(['District(s)', store.geojson['districts']])
   store.details.push(['Total Project Cost', cost])
   store.details.push(['Funding&nbsp;Sources', store.geojson['funding_sources']])
-  // store.details.push(['Tags', store.geojson['project_tags']])
 }
 
 async function fetchProjectInfo(id) {

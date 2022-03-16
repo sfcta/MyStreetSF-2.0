@@ -100,6 +100,7 @@
       data-tooltip="Map Layers"
       v-on:click="clickedShowLayerSelector"
       v-bind:class="{ blue: showingLayerPanel}"
+      v-bind:disabled="is_citywide"
     ): i.clone.outline.icon
     br
     button.ui.icon.tiny.grey.button(
@@ -294,7 +295,7 @@
           span(v-html="helptext.PRETEXT")
           router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
 
-    #bottom-panel(v-cloak)
+    #bottom-panel(v-cloak v-if="is_map")
       .pickers
         .details-link
           button.ui.button.small.basic.pink.compact(
@@ -356,11 +357,11 @@
                 .item(@click="clickedFunds" v-bind:data-fund="null") All sources
                 .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
 
-        // logo panel
-        .make-some-space
-        #table-logo
-          a.agency-link(target="_blank" href="https://www.sfcta.org/")
-            img.img-logo(src="../assets/sfcta-logo.png")
+    // logo panel
+    .make-some-space
+    #table-logo
+      a.agency-link(target="_blank" href="https://www.sfcta.org/")
+        img.img-logo(src="../assets/sfcta-logo.png")
 </template>
 
 <script>
@@ -620,6 +621,12 @@ export default {
       if (store.infoDetails.length < 250) return store.infoDetails
       return store.infoDetails.substring(0, 250) + '...'
     },
+    is_citywide: function() {
+      return this.$route.path.includes('citywide');
+    },
+    is_map: function() {
+      return !this.is_citywide;
+    }
   },
   mounted: function() {
     if (this.$route.path.includes('citywide')) store.mainComponent = 'CitywideProjects'

@@ -207,7 +207,7 @@ function setProjectDetails() {
     openForUse = 'N/A';
   } else if(store.geojson['project_expected_completion']) {
     const openForUseDate = new Date(store.geojson['project_expected_completion']);
-    if(openForUseDate) openForUse = openForUseDate.toLocaleDateString();
+    if(openForUseDate) openForUse = openForUseDate.toLocaleDateString('en-US', { timeZone: 'UTC' });
   }
 
   let cost;

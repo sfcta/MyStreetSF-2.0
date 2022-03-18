@@ -217,7 +217,7 @@ function setProjectDetails() {
   }
 
   store.details.push(['Phase(s)', phase])
-  store.details.push(['Open for Use', openForUse || "N/A"])
+  store.details.push(['Open for Use', openForUse || 'N/A'])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Location', store.geojson['project_location']])
   store.details.push(['District(s)', store.geojson['districts']])

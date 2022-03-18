@@ -708,11 +708,11 @@ function clickedCloseDownload() {
 }
 
 function selectedTagsChanged() {
-  console.log(BigStore.state.selectedTags)
+  if (BigStore.debug) console.log(BigStore.state.selectedTags)
 }
 
 async function downloadData(filtered) {
-  if (BigStore.debug) console.log('DOWnLOAD FILTERED ' + filtered)
+  if (BigStore.debug) console.log('DOWNLOAD FILTERED ' + filtered)
 
   let data = []
 
@@ -720,15 +720,77 @@ async function downloadData(filtered) {
     for (const id of Object.keys(store.projectIDsCurrentlyOnMap)) {
       data.push(store.prjCache[id])
     }
-    console.log(Object.keys(store.layers))
+    if (BigStore.debug) console.log(Object.keys(store.layers))
   } else {
     data = Object.values(store.prjCache)
   }
 
-  jsonexport(data, function(err, csv) {
+  const cols = [
+    'resolution',
+    'project_number',
+    'project_name',
+    'project_location',
+    'project_type',
+    'type_bicycle',
+    'type_major_cap_projects',
+    'type_ped_safety',
+    'type_plans_studies',
+    'type_signs_signals',
+    'type_street_repair',
+    'type_transit_enhance',
+    'type_transit_rehab',
+    'type_tdm',
+    'sponsor',
+    'districts',
+    'district1',
+    'district2',
+    'district3',
+    'district4',
+    'district5',
+    'district6',
+    'district7',
+    'district8',
+    'district9',
+    'district10',
+    'district11',
+    'current_phase',
+    'phase_expected_completion',
+    'project_expected_completion',
+    'description',
+    'funding_sources',
+    'project_details_page',
+    'project_picture',
+    'picture_caption',
+    'geometry',
+    'prop_aa',
+    'prop_k',
+    'tfca',
+    'obag',
+    'reg_state_fed_funding',
+    'funding_source_codes',
+    'prop_k_yn',
+    'shape',
+    'icon_name',
+    'project_cost_estimate',
+    'percent_complete',
+    'status',
+    'project_group',
+    'project_tags',
+    'id'
+  ]
+
+  const csvData = data.map((prj) => {
+    const ret = {};
+    cols.forEach((c) => {
+      ret[c] = prj[c]
+    });
+    return ret;
+  })
+
+  jsonexport(csvData, function(err, csv) {
     if (err) {
       alert('Something went wrong; sorry. Please try again later.')
-      return console.log(err)
+      if (BigStore.debug) return console.log(err)
     }
     sendDownloadFileToUser(csv)
   })

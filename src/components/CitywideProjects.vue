@@ -278,15 +278,12 @@ async function fetchCitywideProjects() {
   // if (store.sharedState.prjCache[id]) return store.sharedState.prjCache[id]
   // id = id.toUpperCase()
 
-  const API_SERVER = 'https://api.sfcta.org/api/'
-  const GEO_VIEW = 'mystreet2_all'
-  const FILTER = '?districts=eq.Citywide'
+  const filter = '?districts=Citywide'
 
-  const geoUrl = API_SERVER + GEO_VIEW + FILTER
-  if (BigStore.debug) console.log(geoUrl)
+  const geoUrl = BigStore.api.href + filter
 
   try {
-    let resp = await fetch(geoUrl)
+    let resp = await fetch(geoUrl, { headers: { 'X_USER_TOKEN': BigStore.api.api_token } })
     let jsonData = await resp.json()
     if (BigStore.debug) console.log({ CITYWIDE: jsonData })
     return jsonData

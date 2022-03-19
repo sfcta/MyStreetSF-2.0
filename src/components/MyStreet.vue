@@ -100,6 +100,7 @@
       data-tooltip="Map Layers"
       v-on:click="clickedShowLayerSelector"
       v-bind:class="{ blue: showingLayerPanel}"
+      v-bind:disabled="is_citywide"
     ): i.clone.outline.icon
     br
     button.ui.icon.tiny.grey.button(
@@ -294,7 +295,7 @@
           span(v-html="helptext.PRETEXT")
           router-link(:to="helptext.LINK_URL"): span(style="color: #fc4" v-html="helptext.LINK_TEXT")
 
-    #bottom-panel(v-cloak)
+    #bottom-panel(v-cloak v-if="is_map")
       .pickers
         .details-link
           button.ui.button.small.basic.pink.compact(
@@ -356,11 +357,11 @@
                 .item(@click="clickedFunds" v-bind:data-fund="null") All sources
                 .item(v-for="fund in fundSources" @click="clickedFunds" :data-fund="fund") {{ fund }}
 
-        // logo panel
-        .make-some-space
-        #table-logo
-          a.agency-link(target="_blank" href="https://www.sfcta.org/")
-            img.img-logo(src="../assets/sfcta-logo.png")
+    // logo panel
+    .make-some-space
+    #table-logo
+      a.agency-link(target="_blank" href="https://www.sfcta.org/")
+        img.img-logo(src="../assets/sfcta-logo.png")
 </template>
 
 <script>
@@ -378,12 +379,8 @@ import SearchWidget from '@/components/SearchWidget'
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let jsonexport = require('jsonexport/dist')
-let keywordExtractor = require('keyword-extractor')
-let geocoding = require('mapbox-geocoding')
 
 let store = BigStore.state
-
-let _tagList = []
 
 function clickedFunds(e) {
   BigStore.state.filterFund = e.target.dataset.fund
@@ -416,12 +413,11 @@ function clickedShowHide(e) {
 function clickedToggleLayer(tag) {
   if (BigStore.debug) console.log('toggle layer', tag)
 
-  let layer = store.extraLayers.filter(z => {
+  let layer = store.extraLayers.find(z => {
     return z.tag === tag
-  })[0]
+  })
 
-  if (!layer.show) layer.show = true
-  else layer.show = !layer.show
+  layer.show = !layer.show
 
   EventBus.$emit(EVENT.MAP_TOGGLE_LAYER, layer)
 }
@@ -573,8 +569,9 @@ function activateMapSettings(p) {
 
   if (p.tags) EventBus.$emit(EVENT.ACTIVE_TAGS, p.tags)
 
-  if (p.project) EventBus.$emit(EVENT.CLICKED_ON_FEATURE, p.project)
-  if (p.project) EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
+  if (p.project) {
+    EventBus.$emit(EVENT.SET_MAP_PROJECT, p.project)
+  }
 
   if (p.showall) store.devDistrictOption = true
 
@@ -624,6 +621,12 @@ export default {
       if (store.infoDetails.length < 250) return store.infoDetails
       return store.infoDetails.substring(0, 250) + '...'
     },
+    is_citywide: function() {
+      return this.$route.path.includes('citywide');
+    },
+    is_map: function() {
+      return !this.is_citywide;
+    }
   },
   mounted: function() {
     if (this.$route.path.includes('citywide')) store.mainComponent = 'CitywideProjects'
@@ -653,7 +656,6 @@ export default {
     mobileToggleLayerSelector,
     nameOfFilterDistrict,
     swipeHandler,
-    termChanged,
     trimmedProjectName,
   },
   watch: {
@@ -706,11 +708,11 @@ function clickedCloseDownload() {
 }
 
 function selectedTagsChanged() {
-  console.log(BigStore.state.selectedTags)
+  if (BigStore.debug) console.log(BigStore.state.selectedTags)
 }
 
 async function downloadData(filtered) {
-  if (BigStore.debug) console.log('DOWnLOAD FILTERED ' + filtered)
+  if (BigStore.debug) console.log('DOWNLOAD FILTERED ' + filtered)
 
   let data = []
 
@@ -718,15 +720,77 @@ async function downloadData(filtered) {
     for (const id of Object.keys(store.projectIDsCurrentlyOnMap)) {
       data.push(store.prjCache[id])
     }
-    console.log(Object.keys(store.layers))
+    if (BigStore.debug) console.log(Object.keys(store.layers))
   } else {
     data = Object.values(store.prjCache)
   }
 
-  jsonexport(data, function(err, csv) {
+  const cols = [
+    'resolution',
+    'project_number',
+    'project_name',
+    'project_location',
+    'project_type',
+    'type_bicycle',
+    'type_major_cap_projects',
+    'type_ped_safety',
+    'type_plans_studies',
+    'type_signs_signals',
+    'type_street_repair',
+    'type_transit_enhance',
+    'type_transit_rehab',
+    'type_tdm',
+    'sponsor',
+    'districts',
+    'district1',
+    'district2',
+    'district3',
+    'district4',
+    'district5',
+    'district6',
+    'district7',
+    'district8',
+    'district9',
+    'district10',
+    'district11',
+    'current_phase',
+    'phase_expected_completion',
+    'project_expected_completion',
+    'description',
+    'funding_sources',
+    'project_details_page',
+    'project_picture',
+    'picture_caption',
+    'geometry',
+    'prop_aa',
+    'prop_k',
+    'tfca',
+    'obag',
+    'reg_state_fed_funding',
+    'funding_source_codes',
+    'prop_k_yn',
+    'shape',
+    'icon_name',
+    'project_cost_estimate',
+    'percent_complete',
+    'status',
+    'project_group',
+    'project_tags',
+    'id'
+  ]
+
+  const csvData = data.map((prj) => {
+    const ret = {};
+    cols.forEach((c) => {
+      ret[c] = prj[c]
+    });
+    return ret;
+  })
+
+  jsonexport(csvData, function(err, csv) {
     if (err) {
       alert('Something went wrong; sorry. Please try again later.')
-      return console.log(err)
+      if (BigStore.debug) return console.log(err)
     }
     sendDownloadFileToUser(csv)
   })
@@ -775,88 +839,6 @@ function updateFilters() {
   EventBus.$emit(EVENT.UPDATE_FILTERS, 0)
 }
 
-// ---------- SEARCH PANEL ----------------------
-let _queryString
-
-async function fetchTagResults(terms) {
-  let answer = []
-  let termsLower = terms.toLowerCase()
-  for (let tag of _tagList) {
-    let cleaned = tag.replace(/\//g, ' ')
-    let keywords = keywordExtractor.extract(cleaned)
-    for (let word of keywords) {
-      if (word.startsWith(termsLower)) {
-        answer.push(tag)
-        break
-      }
-    }
-  }
-  BigStore.state.tagresults = answer
-}
-
-async function fetchSearchResults(terms) {
-  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search'
-
-  let fancySearch = searchAPI + '?terms=@@.{'
-  fancySearch += terms + '}'
-  fancySearch = fancySearch.replace(/ /g, ',')
-
-  let simpleSearch = searchAPI + '?select=id,name&name=ilike.'
-  let query = terms.replace(/ /g, '*')
-  simpleSearch += `*${query}*`
-
-  try {
-    // first try smart keyword search
-    console.log(fancySearch)
-    let resp = await fetch(fancySearch)
-    let jsonData = await resp.json()
-
-    // if no results, try simple text search
-    if (terms === _queryString && jsonData.length === 0) {
-      console.log('nuthin')
-      console.log(simpleSearch)
-      resp = await fetch(simpleSearch)
-      jsonData = await resp.json()
-    }
-
-    // update list ONLY if query has not changed while we were fetching
-    if (terms === _queryString) {
-      BigStore.state.results = jsonData
-    }
-  } catch (error) {
-    console.log('search error')
-    console.log(error)
-  }
-}
-
-function termChanged() {
-  console.log(BigStore.state.terms)
-  _queryString = BigStore.state.terms.trim()
-
-  if (_queryString) fetchTagResults(_queryString)
-  else BigStore.state.tagresults = []
-
-  if (_queryString) fetchSearchResults(_queryString)
-  else BigStore.state.results = []
-
-  if (_queryString) fetchAddressResults(_queryString)
-  else BigStore.state.addressSearchResults = []
-}
-
-function fetchAddressResults(_queryString) {
-  geocoding.geocode('mapbox.places', _queryString, function(err, geoData) {
-    console.log({ address_results_err: err, data: geoData })
-    if (geoData.features.length) {
-      for (let address of geoData.features) {
-        let i = address.place_name.indexOf(', San Francisco')
-        if (i > 0) address.place_name = address.place_name.substring(0, i)
-      }
-      BigStore.state.addressSearchResults = geoData['features']
-    } else {
-      BigStore.state.addressSearchResults = []
-    }
-  })
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

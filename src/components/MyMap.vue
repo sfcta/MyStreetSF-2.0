@@ -14,7 +14,6 @@ import * as turf from '@turf/turf'
 import { BigStore, EventBus, EVENT } from '../shared-store.js'
 
 let L = require('leaflet')
-let keywordExtractor = require('keyword-extractor')
 let omnivore = require('@mapbox/leaflet-omnivore')
 let geocoding = require('mapbox-geocoding')
 
@@ -33,9 +32,6 @@ let store = BigStore.state
 
 let theme = 'light'
 let mymap
-
-const API_SERVER = 'https://api.sfcta.org/api/'
-const GEO_VIEW = 'mystreet2_all'
 
 // hard code the giant polygons so they stay on the bottom layer of the map
 const _bigAreas = [
@@ -162,10 +158,10 @@ async function addHighInjuryNetworkLayer(extraLayer) {
     group.bringToBack()
     extraLayer.id = group
 
-    console.log(group)
+    if (BigStore.debug) console.log(group)
     synchronizeExtraLayer('injuries')
   } catch (error) {
-    console.log('map error: ' + error)
+    if (BigStore.debug) console.log('map error: ' + error)
   }
 }
 
@@ -200,9 +196,9 @@ async function addCommunitiesOfConcernLayer(extraLayer) {
     extraLayer.id = group
 
     synchronizeExtraLayer('comm')
-    console.log(group)
+    if (BigStore.debug) console.log(group)
   } catch (error) {
-    console.log('map error: ' + error)
+    if (BigStore.debug) console.log('map error: ' + error)
   }
 }
 
@@ -241,9 +237,9 @@ async function addSupDistrictLayer(extraLayer) {
     extraLayer.id = group
 
     synchronizeExtraLayer('dists')
-    console.log(group)
+    if (BigStore.debug) console.log(group)
   } catch (error) {
-    console.log('map error: ' + error)
+    if (BigStore.debug) console.log('map error: ' + error)
   }
 }
 
@@ -365,6 +361,10 @@ function mounted() {
   updatePanelHelpText()
   loadSupervisorDistricts()
   setupEventListeners()
+  store.extraLayers.forEach((layer) => {
+    if(layer.show) toggleMapLayer(layer)
+  });
+  showDistrictOverlay(store.filterDistrict);
   EventBus.$emit(EVENT.SET_PREVENT_OVERSCROLL, true)
 }
 
@@ -379,6 +379,8 @@ function updatePanelHelpText() {
 }
 
 function setupEventListeners() {
+  if(store.mapListenersSet) return;
+
   EventBus.$on(EVENT.MAP_RESIZE, payload => {
     if (BigStore.debug) console.log(`got a map resize event`)
     for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
@@ -428,7 +430,7 @@ function setupEventListeners() {
     highlightProject(id)
 
     let layer = store.layers[id]
-    layer.bringToFront()
+    if(layer) layer.bringToFront()
   })
 
   EventBus.$on(EVENT.REMOVE_ADDRESS_MARKER, id => {
@@ -442,10 +444,12 @@ function setupEventListeners() {
   EventBus.$on(EVENT.ACTIVE_TAGS, tags => {
     activateTags(tags)
   })
+
+  store.mapListenersSet = true
 }
 
 function activateTags(tags) {
-  console.log('ACTIVATING TAGS: ' + tags)
+  if (BigStore.debug) console.log('ACTIVATING TAGS: ' + tags)
   let tagArray = tags.split(',')
   for (let tag of tagArray) {
     clickedSearchTag(tag)
@@ -542,8 +546,7 @@ export default {
     devClickedToggleDistrictOption: devClickedToggleDistrictOption,
     hoverAddress: hoverAddress,
     hoverSearch: hoverSearch,
-    nameOfFilterDistrict: nameOfFilterDistrict,
-    termChanged: termChanged,
+    nameOfFilterDistrict: nameOfFilterDistrict
   },
   watch: {
     selectedTags: selectedTagsChanged,
@@ -562,21 +565,22 @@ function selectedTagsChanged() {
 }
 
 async function queryServer() {
-  const geoUrl = API_SERVER + GEO_VIEW
-
-  if (store.cacheDb) {
-    await mapSegments(store.cacheDb)
-    return
-  }
-
   try {
-    store.nowMoloading = true
-    let resp = await fetch(geoUrl)
-    store.cacheDb = await resp.json()
-    store.nowMoloading = false
+    if(!store.cacheDb) {
+      store.nowMoloading = true
+
+      let resp = await fetch(BigStore.api.href, {
+        headers: {
+          'X_USER_TOKEN': BigStore.api.api_token
+        }
+      })
+
+      store.cacheDb = await resp.json()
+    }
+
     await mapSegments(store.cacheDb)
   } catch (error) {
-    // console.log('map error: ' + error)
+    if(BigStore.debug) console.log('map error: ' + error)
   } finally {
     store.nowMoloading = false
   }
@@ -592,7 +596,7 @@ function showDistrictOverlay(district) {
     try {
       mymap.removeLayer(_districtOverlay)
     } catch (e) {
-      console.log(e)
+      if (BigStore.debug) console.log(e)
     }
     _districtOverlay = null
   }
@@ -647,7 +651,7 @@ async function loadSupervisorDistricts() {
     }
     if (store.filterDistrict > -1) showDistrictOverlay(store.filterDistrict)
   } catch (error) {
-    // console.log('map error: ' + error)
+    if (BigStore.debug) console.log('map error: ' + error)
   }
 }
 
@@ -656,7 +660,7 @@ async function mapSegments(cmpsegJson) {
   let fundStrings = []
 
   for (let segment of cmpsegJson) {
-    if (segment['geometry'] == null) continue
+    // if (segment['geometry'] == null) continue
 
     let id = segment['project_number']
 
@@ -716,8 +720,8 @@ async function mapSegments(cmpsegJson) {
     var oDOM = oParser.parseFromString(kml, 'text/xml')
     // print the name of the root element or error message
     if (oDOM.documentElement.nodeName === 'parsererror') {
-      console.log('## Error while parsing row id ' + id)
-      console.log(kml)
+      if (BigStore.debug) console.log('## Error while parsing row id ' + id)
+      if (BigStore.debug) console.log(kml)
     }
 
     // add KML to the map
@@ -828,6 +832,7 @@ function generateColorForSegment(segment) {
 
 function updatePanelDetails(id) {
   let prj = BigStore.state.prjCache[id]
+  if(!prj) return
 
   // generate permalink
   let permalink = prj['project_number'].toLowerCase()
@@ -860,19 +865,26 @@ function clickedOnFeature(e) {
   let id
   let target
 
-  if (e in BigStore.state.layers) {
+  if (e in store.layers) {
     // search box!
     id = e
-    target = BigStore.state.layers[id]
-  } else {
+    target = store.layers[id]
+  } else if(typeof e === 'object') {
     // For some reason, Leaflet handles points and polygons
     // differently, hence the weirdness for fetching the id of the selected feature.
     target = e.target
     if (target) id = target.options.id
     if (!id) id = e.layer.options.id
+  } else {
+    return;
   }
 
   removeHighlightFromPreviousSelection()
+
+  updatePanelDetails(id)
+
+  // Some projects are description only and have no geometry; skip map layer logic if so
+  // if(!target || !target.feature.geometry) return
 
   // save this project as the selected project; it's no longer just being hovered over!
   _starterProject = _selectedProject = id
@@ -889,7 +901,6 @@ function clickedOnFeature(e) {
 
   if (isTargetAPolygon(id)) store.layers[id].bringToBack()
 
-  updatePanelDetails(id)
   makeSureMobileUsersSeeTheirSelection()
 }
 
@@ -931,7 +942,7 @@ function getLayersNearBufferedPoint(clickPoint, clickBuffer) {
           insideLayers.push(key)
         }
       } catch (e) {
-        // console.log({ msg: 'feature failed', feature: feature })
+        if (BigStore.debug) console.log({ msg: 'feature failed', feature: feature })
       }
     }
   }
@@ -970,7 +981,7 @@ function isPointInsideFeature(clickPoint, clickBuffer, feature) {
         return false
     }
   } catch (e) {
-    // console.log({ feature: feature, error: e })
+    if (BigStore.debug) console.log({ feature: feature, error: e })
   }
   return false
 }
@@ -1048,7 +1059,7 @@ function highlightProject(id) {
     fillColor: normal.fillColor,
     opacity: 1.0,
     radius: 7,
-    weight: isPoints ? 4 : 6,
+    weight: isPoints ? 4 : 6
   }
 
   let polygonStyle = {
@@ -1057,7 +1068,7 @@ function highlightProject(id) {
     fillOpacity: 0.3,
     opacity: 1.0,
     radius: 10,
-    weight: 6,
+    weight: 6
   }
 
   // the long timeout keeps the highlight from selecting areas every time
@@ -1191,8 +1202,8 @@ function updateFilters() {
 
     // now check STATUS
     let isCorrectStatus = complete === underway // true if both or neither are checked
-    if (complete && prj.status.includes('Closed')) isCorrectStatus = true
-    if (underway && prj.status.includes('Active')) isCorrectStatus = true
+    if (complete && prj.status === 'closed') isCorrectStatus = true
+    if (underway && ['active', 'closeout_pending'].includes(prj.status)) isCorrectStatus = true
 
     // now check DISTRICT
     let district = store.filterDistrict
@@ -1237,90 +1248,6 @@ function updateFilters() {
   }
 }
 
-// ---------- SEARCH PANEL ----------------------
-let _queryString
-
-async function fetchTagResults(terms) {
-  let answer = []
-  let termsLower = terms.toLowerCase()
-  for (let tag of _tagList) {
-    let cleaned = tag.replace(/\//g, ' ')
-    let keywords = keywordExtractor.extract(cleaned)
-    for (let word of keywords) {
-      if (word.startsWith(termsLower)) {
-        answer.push(tag)
-        break
-      }
-    }
-  }
-  store.tagresults = answer
-  store.filterKey++
-}
-
-async function fetchSearchResults(terms) {
-  let searchAPI = 'https://api.sfcta.org/api/mystreet2_search'
-
-  let fancySearch = searchAPI + '?terms=@@.{'
-  fancySearch += terms + '}'
-  fancySearch = fancySearch.replace(/ /g, ',')
-
-  let simpleSearch = searchAPI + '?select=id,name&name=ilike.'
-  let query = terms.replace(/ /g, '*')
-  simpleSearch += `*${query}*`
-
-  try {
-    // first try smart keyword search
-    console.log(fancySearch)
-    let resp = await fetch(fancySearch)
-    let jsonData = await resp.json()
-
-    // if no results, try simple text search
-    if (terms === _queryString && jsonData.length === 0) {
-      console.log('nuthin')
-      console.log(simpleSearch)
-      resp = await fetch(simpleSearch)
-      jsonData = await resp.json()
-    }
-
-    // update list ONLY if query has not changed while we were fetching
-    if (terms === _queryString) {
-      store.results = jsonData
-    }
-  } catch (error) {
-    console.log('search error')
-    console.log(error)
-  }
-}
-
-function termChanged() {
-  console.log(store.terms)
-  _queryString = store.terms.trim()
-
-  if (_queryString) fetchTagResults(_queryString)
-  else store.tagresults = []
-
-  if (_queryString) fetchSearchResults(_queryString)
-  else store.results = []
-
-  if (_queryString) fetchAddressResults(_queryString)
-  else store.addressSearchResults = []
-}
-
-function fetchAddressResults(_queryString) {
-  geocoding.geocode('mapbox.places', _queryString, function(err, geoData) {
-    console.log({ err: err, data: geoData })
-    if (geoData.features.length) {
-      for (let address of geoData.features) {
-        let i = address.place_name.indexOf(', San Francisco')
-        if (i > 0) address.place_name = address.place_name.substring(0, i)
-      }
-      store.addressSearchResults = geoData['features']
-    } else {
-      store.addressSearchResults = []
-    }
-  })
-}
-
 let _hoverSearchLastId
 
 function hoverSearch(id) {
@@ -1359,7 +1286,7 @@ function removeAddressMarker() {
 }
 
 function clickedAddress(address) {
-  console.log({ clickedAddress: address })
+  if (BigStore.debug) console.log({ clickedAddress: address })
 
   removeAddressMarker()
 

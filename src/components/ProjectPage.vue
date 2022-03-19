@@ -202,28 +202,27 @@ function setProjectDetails() {
     phase = phase.substring(0, phase.length - 3)
   }
 
-  let openForUse = store.geojson['project_expected_completion']
+  let openForUse;
   if (store.geojson['project_group'] === 'Plans and Programs') {
-    openForUse = 'N/A'
+    openForUse = 'N/A';
+  } else if(store.geojson['project_expected_completion']) {
+    const openForUseDate = new Date(store.geojson['project_expected_completion']);
+    if(openForUseDate) openForUse = openForUseDate.toLocaleDateString('en-US', { timeZone: 'UTC' });
   }
 
-  let cost = parseInt((store.geojson['project_cost_estimate'] || '').replace(/[$,]/g, ''))
-  cost = cost.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  let cost;
+  if(store.geojson['project_cost_estimate']) {
+    cost = parseInt((store.geojson['project_cost_estimate'] || '').replace(/[$,]/g, ''))
+    cost = cost.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  }
 
   store.details.push(['Phase(s)', phase])
-  /*
-  store.details.push([
-    'Percent&nbsp;Complete of Funded Phase(s)',
-    store.geojson['percent_complete'],
-  ])
-  */
-  store.details.push(['Open for Use', openForUse])
+  store.details.push(['Open for Use', openForUse || 'N/A'])
   store.details.push(['Lead Agency', store.geojson['sponsor']])
   store.details.push(['Location', store.geojson['project_location']])
   store.details.push(['District(s)', store.geojson['districts']])
-  store.details.push(['Total Project Cost', cost])
+  if(cost) store.details.push(['Total Project Cost', cost])
   store.details.push(['Funding&nbsp;Sources', store.geojson['funding_sources']])
-  // store.details.push(['Tags', store.geojson['project_tags']])
 }
 
 async function fetchProjectInfo(id) {
@@ -231,15 +230,12 @@ async function fetchProjectInfo(id) {
   if (store.sharedState.prjCache[id]) return store.sharedState.prjCache[id]
   id = id.toUpperCase()
 
-  const API_SERVER = 'https://api.sfcta.org/api/'
-  const GEO_VIEW = 'mystreet2_all'
-  const FILTER = '?project_number=eq.' + id
+  const filter = '?project_number=' + id
 
-  const geoUrl = API_SERVER + GEO_VIEW + FILTER
-  if (BigStore.debug) console.log(geoUrl)
+  const geoUrl = BigStore.api.href + filter
 
   try {
-    let resp = await fetch(geoUrl)
+    let resp = await fetch(geoUrl, { headers: { 'X_USER_TOKEN': BigStore.api.api_token } })
     let jsonData = await resp.json()
 
     if (jsonData[0]) return jsonData[0]

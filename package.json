@@ -17,6 +17,7 @@
     "test": "npm run unit",
     "lint": "eslint --ext .js,.vue src test/unit",
     "build": "node build/build.js",
+    "build-staging": "node build/build-staging.js",
     "deploy": "npm run build && cp docs/index.html docs/200.html && surge -d mystreet2.surge.sh docs"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "babel-runtime": "^6.26.0",
     "debounce": "^1.1.0",
     "es6-promise": "^4.2.4",
+    "fuzzy-search": "^3.2.1",
     "isomorphic-fetch": "^2.2.1",
     "js-cookie": "^2.1.4",
     "jsonexport": "^2.2.1",

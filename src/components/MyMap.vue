@@ -46,7 +46,7 @@ const _bigAreas = [
   '144-901004',
 ]
 
-let propKRename = 'PROP K/Half-Cent Sales Tax'
+let propKRename = 'Half-Cent Sales Tax (Prop K)'
 
 function clickedFunds(e) {
   store.filterFund = e.target.dataset.fund

@@ -620,39 +620,35 @@ function showDistrictOverlay(district) {
 async function loadSupervisorDistricts() {
   const geoUrl = store.extraLayers[0].geojson
 
-  try {
-    let jsonData
-    if (store.cacheSupervisorDistricts) {
-      jsonData = store.cacheSupervisorDistricts
-    } else {
-      let resp = await fetch(geoUrl)
-      jsonData = await resp.json()
-      store.cacheSupervisorDistricts = jsonData
-    }
-
-    for (let feature of jsonData.features) {
-      let id = feature.properties.DISTRICT
-
-      _districtLayers[id] = L.geoJSON(feature)
-
-      let holeArray = 0
-      if (id === '3') holeArray = 14
-      if (id === '6') holeArray = 2
-
-      // draw a giant box around all of SF as first array entry
-      let invertGeometry = [
-        [[[-120, 30], [-130, 30], [-130, 40], [-120, 40], [-120, 30]]],
-        feature.geometry.coordinates[holeArray],
-      ]
-      if (id === '6') invertGeometry[2] = feature.geometry.coordinates[1]
-
-      feature.geometry.coordinates = invertGeometry
-      _districtLayersInverted[id] = feature
-    }
-    if (store.filterDistrict > -1) showDistrictOverlay(store.filterDistrict)
-  } catch (error) {
-    if (BigStore.debug) console.log('map error: ' + error)
+  // try {
+  let jsonData
+  if (store.cacheSupervisorDistricts) {
+    jsonData = store.cacheSupervisorDistricts
+  } else {
+    let resp = await fetch(geoUrl)
+    jsonData = await resp.json()
+    store.cacheSupervisorDistricts = jsonData
   }
+
+  for (let feature of jsonData.features) {
+    let id = feature.properties.DISTRICT || feature.properties.ID
+
+    _districtLayers[id] = L.geoJSON(feature)
+
+    // draw a giant box around all of SF as first array entry
+    let overlayCoords = [[-120, 30], [-130, 30], [-130, 40], [-120, 40], [-120, 30]];
+    let invertGeometry = [
+      feature.geometry.type === 'MultiPolygon' ? [overlayCoords] : overlayCoords,
+      ...feature.geometry.coordinates
+    ]
+
+    feature.geometry.coordinates = invertGeometry
+    _districtLayersInverted[id] = feature
+  }
+  if (store.filterDistrict > -1) showDistrictOverlay(store.filterDistrict)
+  // } catch (error) {
+  //   if (BigStore.debug) console.log('map error: ' + error)
+  // }
 }
 
 // add segments to the map by using metric data to color

@@ -30,7 +30,7 @@ let _extraLayers = [
   {
     tag: 'dists',
     name: 'Supervisorial District Boundaries',
-    geojson: '/static/sup-districts-2022.geo.json',
+    geojson: '/static/sup-districts-2022-v2.geo.json',
     help: 'Includes geographic boundaries of San Francisco Supervisorial districts'
   },
   {

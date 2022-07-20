@@ -631,7 +631,7 @@ async function loadSupervisorDistricts() {
   }
 
   for (let feature of jsonData.features) {
-    let id = feature.properties.DISTRICT || feature.properties.ID
+    let id = feature.properties.DISTRICT;
 
     _districtLayers[id] = L.geoJSON(feature)
 

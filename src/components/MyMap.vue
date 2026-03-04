@@ -86,19 +86,42 @@ async function asyncToggleMapLayer(layer) {
 
 function clickedToggleLayer(e) {}
 
+/*
+ #d06 red
+ #00f purple
+ #2e3 green
+ #fd0 yellow
+ #0ad blue
+*/
+
 let _districtColors = [
-  '#e62',
-  '#fd0',
-  '#e62',
+  '#2e3',
+  '#0ad',
+  '#00f',
   '#fd0',
   '#00f',
-  '#2e3',
-  '#2e3',
   '#fd0',
-  '#e22',
-  '#fd0',
+  '#2e3',
+  '#0ad',
+  '#2e3',
   '#00f',
+  '#fd0',
 ]
+
+/* Red option */
+// let _districtColors = [
+//   '#2e3',
+//   '#d06',
+//   '#00f',
+//   '#fd0',
+//   '#00f',
+//   '#fd0',
+//   '#2e3',
+//   '#d06',
+//   '#2e3',
+//   '#00f',
+//   '#fd0',
+// ]
 
 function synchronizeExtraLayer(tag) {
   let layer = store.extraLayers.filter(z => {
@@ -211,9 +234,10 @@ async function addSupDistrictLayer(extraLayer) {
     style: function(feature) {
       let fill = _districtColors[-1 + parseInt(feature.properties.ID)]
       let style = {
-        color: '#000', // this is the "unselected" color -- same for all projects
-        opacity: 0.0,
-        weight: 0,
+        color: '#777', // Dashed border to distinguish districts
+        opacity: 0.6,
+        weight: 1.5,
+        dashArray: '2 6',
         fillColor: fill,
         fillOpacity: 0.2,
         interactive: false,
